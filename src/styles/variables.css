@@ -1,0 +1,38 @@
+:root {
+  /* Brand Colors */
+  --color-primary: #13525D;
+  --color-primary-dark: #0B3E4A;
+  --color-primary-darker: #083944;
+  --color-primary-light: #1D6C73;
+
+  /* Background Colors */
+  --color-bg-main: #F7FDFB;
+  --color-bg-soft: #EDF7F5;
+  --color-bg-light: #F3FAF9;
+  --color-surface: #FCFEFD;
+  --color-surface-mint: #E3EFEF;
+
+  /* Text Colors */
+  --color-text-primary: #212526;
+  --color-text-secondary: #677B7D;
+  --color-text-muted: #98A19F;
+
+  /* Border Colors */
+  --color-border: #D1DBDD;
+
+  /* Status Colors */
+  --color-success: #159A82;
+  --color-success-bg: #E4F7F1;
+
+  --color-warning: #E6A11A;
+  --color-warning-bg: #FFF4D8;
+
+  --color-danger: #E5484D;
+  --color-danger-bg: #FDE8EA;
+
+  --color-info: #3B82C4;
+  --color-info-bg: #E8F3FC;
+
+  /* UI Colors */
+  --color-white: #FFFFFF;
+}
