@@ -1,0 +1,207 @@
+.pg-button {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: 44px;
+  padding-block: 8px;
+  padding-inline: 16px;
+
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  white-space: normal;
+
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.pg-button--primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.pg-button--outline {
+  background-color: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Dark text on a pale danger surface keeps normal-size labels readable. */
+.pg-button--danger {
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger);
+  color: var(--color-text-primary);
+}
+
+.pg-button--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-primary);
+}
+
+.pg-button--sm {
+  min-block-size: 36px;
+  padding-block: 4px;
+  padding-inline: 12px;
+  font-size: 14px;
+}
+
+.pg-button--md {
+  min-block-size: 44px;
+}
+
+.pg-button--lg {
+  min-block-size: 48px;
+  padding-inline: 24px;
+}
+
+.pg-button--full-width {
+  inline-size: 100%;
+}
+
+.pg-button--icon-only {
+  flex-shrink: 0;
+  inline-size: 44px;
+  min-block-size: 44px;
+  padding: 0;
+}
+
+.pg-button--icon-only.pg-button--lg {
+  inline-size: 48px;
+  min-block-size: 48px;
+}
+
+.pg-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.pg-button__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.pg-button__icon {
+  flex-shrink: 0;
+  inline-size: 1em;
+  block-size: 1em;
+  font-size: 16px;
+}
+
+.pg-button--icon-only .pg-button__icon {
+  font-size: 18px;
+}
+
+/* Hover styles apply only on devices that support hovering. */
+@media (hover: hover) {
+  .pg-button--primary:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+  }
+
+  .pg-button--outline:hover:not(:disabled),
+  .pg-button--ghost:hover:not(:disabled) {
+    background-color: var(--color-surface-mint);
+  }
+
+  .pg-button--danger:hover:not(:disabled) {
+    background-color: var(--color-surface);
+  }
+}
+
+.pg-button--primary:active:not(:disabled) {
+  background-color: var(--color-primary-darker);
+  border-color: var(--color-primary-darker);
+}
+
+.pg-button--outline:active:not(:disabled),
+.pg-button--ghost:active:not(:disabled) {
+  background-color: var(--color-surface-mint);
+  border-color: var(--color-primary);
+  color: var(--color-primary-darker);
+}
+
+.pg-button--danger:active:not(:disabled) {
+  background-color: var(--color-danger-bg);
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+}
+
+.pg-button:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 4px;
+}
+
+.pg-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pg-button--loading:disabled {
+  opacity: 1;
+  cursor: progress;
+}
+
+/* Opacity preserves the label's space and accessible name during loading. */
+.pg-button--loading .pg-button__content {
+  opacity: 0;
+}
+
+.pg-button__loader {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pg-button__spinner {
+  inline-size: 1em;
+  block-size: 1em;
+  font-size: 18px;
+  animation: pg-button-spin 800ms linear infinite;
+}
+
+@keyframes pg-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Compact buttons retain a comfortable touch target on mobile. */
+@media (max-width: 767px) {
+  .pg-button--sm {
+    min-block-size: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-button {
+    transition: none;
+  }
+
+  .pg-button__spinner {
+    animation: none;
+  }
+}
