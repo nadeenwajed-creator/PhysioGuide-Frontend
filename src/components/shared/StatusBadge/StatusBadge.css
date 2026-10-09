@@ -1,0 +1,104 @@
+
+/* PhysioGuide — Compact StatusBadge */
+
+.pg-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  padding-block: 4px;
+  padding-inline: 9px;
+
+  border: none;
+  border-radius: 7px;
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+
+  text-align: center;
+  vertical-align: middle;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Confirmed */
+.pg-status-badge--confirmed {
+  background-color: var(
+    --color-status-confirmed-bg,
+    #E4F7F1
+  );
+
+  color: var(
+    --color-status-confirmed-text,
+    #167C65
+  );
+}
+
+/* Pending */
+.pg-status-badge--pending {
+  background-color: var(
+    --color-status-pending-bg,
+    #FFF3D8
+  );
+
+  color: var(
+    --color-status-pending-text,
+    #93600F
+  );
+}
+
+/* Completed */
+.pg-status-badge--completed {
+  background-color: var(
+    --color-status-completed-bg,
+    #EDE9FB
+  );
+
+  color: var(
+    --color-status-completed-text,
+    #6253A8
+  );
+}
+
+/* Cancelled */
+.pg-status-badge--cancelled {
+  background-color: var(
+    --color-status-cancelled-bg,
+    #FDE8EA
+  );
+
+  color: var(
+    --color-status-cancelled-text,
+    #B83A47
+  );
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 991px) {
+  .pg-status-badge {
+    padding-block: 3px;
+    padding-inline: 7px;
+
+    border-radius: 6px;
+    font-size: 11px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .pg-status-badge {
+    padding-block: 3px;
+    padding-inline: 6px;
+
+    border-radius: 5px;
+    font-size: 10px;
+  }
+}
