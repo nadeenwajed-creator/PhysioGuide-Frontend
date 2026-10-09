@@ -1,0 +1,92 @@
+.pg-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding-block: 32px;
+  padding-inline: clamp(12px, 2.5vw, 32px);
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-bg-light);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pg-footer,
+.pg-footer * {
+  box-sizing: border-box;
+}
+
+.pg-footer__brand {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  min-inline-size: 0;
+  gap: 12px;
+}
+
+.pg-footer__logo {
+  display: block;
+  flex-shrink: 0;
+  inline-size: 48px;
+  block-size: 48px;
+  object-fit: contain;
+}
+
+.pg-footer__text {
+  min-inline-size: 0;
+}
+
+.pg-footer__name {
+  margin: 0;
+  color: var(--color-primary-darker);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pg-footer__name span {
+  color: var(--color-primary-light);
+}
+
+.pg-footer__description {
+  margin-block: 8px 0;
+  overflow-wrap: anywhere;
+}
+
+.pg-footer__copyright {
+  max-inline-size: 50%;
+  margin: 0;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+/* Stack the two sections when the horizontal space becomes limited. */
+@media (max-width: 767px) {
+  .pg-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding-block: 24px;
+  }
+
+  .pg-footer__brand {
+    gap: 8px;
+  }
+
+  .pg-footer__logo {
+    inline-size: 40px;
+    block-size: 40px;
+  }
+
+  .pg-footer__name {
+    font-size: 20px;
+  }
+
+  .pg-footer__copyright {
+    max-inline-size: none;
+    text-align: start;
+  }
+}

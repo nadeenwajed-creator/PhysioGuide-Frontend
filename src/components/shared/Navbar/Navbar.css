@@ -4,6 +4,9 @@
   --nav-text: var(--color-primary-darker);
   --nav-border: var(--color-border);
 
+  position: sticky;
+  top: 0;
+  z-index: 1020;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
