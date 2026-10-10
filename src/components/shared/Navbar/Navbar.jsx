@@ -14,6 +14,7 @@ function Navbar({
   languageSwitcher,
   notifications,
   profileMenu,
+  quickSettings,
   onMenuToggle,
   menuOpen,
   menuId,
@@ -108,16 +109,8 @@ function Navbar({
     }
   }
 
-  // ProfileMenu receives these controls instead of duplicating them.
-  const mobileActions = viewport.mobile ? (
-    <div className="pg-navbar__mobile-preferences">
-      {themeToggle}
-      {languageSwitcher}
-    </div>
-  ) : null;
-
-  const profileContent = typeof profileMenu === 'function'
-    ? profileMenu({ compact: viewport.compact, mobileActions })
+    const profileContent = typeof profileMenu === 'function'
+    ? profileMenu({ compact: viewport.compact })
     : profileMenu;
 
   return (
@@ -182,7 +175,7 @@ function Navbar({
             {languageSwitcher}
           </>
         )}
-
+        {viewport.mobile && quickSettings}
         {notifications}
         <div className="pg-navbar__profile">{profileContent}</div>
       </div>
