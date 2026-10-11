@@ -1,0 +1,36 @@
+/* Light colors remain defined in variables.css. */
+:root:not([data-theme='dark']) {
+  color-scheme: light;
+}
+
+/* Animate colors without replacing drawer or layout transitions. */
+:root[data-theme] body,
+:root[data-theme] .pg-navbar,
+:root[data-theme] .pg-footer,
+:root[data-theme] .pg-notifications__menu.dropdown-menu,
+:root[data-theme] .pg-profile-menu__menu.dropdown-menu,
+:root[data-theme] .pg-quick-settings__menu.dropdown-menu,
+:root[data-theme] .pg-modal,
+:root[data-theme] .pg-status-badge,
+:root[data-theme] .pg-search-bar,
+:root[data-theme] .pg-search-bar__input {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] body,
+  :root[data-theme] .pg-navbar,
+  :root[data-theme] .pg-footer,
+  :root[data-theme] .pg-notifications__menu.dropdown-menu,
+  :root[data-theme] .pg-profile-menu__menu.dropdown-menu,
+  :root[data-theme] .pg-quick-settings__menu.dropdown-menu,
+  :root[data-theme] .pg-modal,
+  :root[data-theme] .pg-status-badge,
+  :root[data-theme] .pg-search-bar,
+  :root[data-theme] .pg-search-bar__input {
+    transition: none;
+  }
+}
