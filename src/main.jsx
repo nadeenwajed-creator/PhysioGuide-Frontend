@@ -12,12 +12,17 @@ import './styles/light.css';
 import './styles/dark.css';
 
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { LanguageProvider } from './context/LanguageContext.jsx';
 import App from './App.jsx';
+
+// Theme and language have separate state and storage.
 
 createRoot(document.getElementById('root')).render(
  <StrictMode>
   <ThemeProvider>
-    <App />
+     <LanguageProvider>
+        <App />
+      </LanguageProvider>
   </ThemeProvider>
 </StrictMode>
 );
