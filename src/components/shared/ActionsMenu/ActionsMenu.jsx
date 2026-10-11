@@ -1,3 +1,4 @@
+
 import { useId, useRef, useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -74,7 +75,6 @@ function ActionsMenu({
       onKeyDown={handleKeyDown}
       align="end"
       focusFirstItemOnShow
-      popperConfig={popperConfig}
     >
       <Dropdown.Toggle
         as="button"
@@ -98,6 +98,7 @@ function ActionsMenu({
         role="menu"
         aria-labelledby={`${id}-toggle`}
         renderOnMount
+        popperConfig={popperConfig}
       >
         {items.map((item, index) => (
           <Dropdown.Item
