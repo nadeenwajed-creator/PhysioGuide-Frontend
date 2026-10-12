@@ -5,7 +5,7 @@
   gap: 24px;
   inline-size: 100%;
   min-inline-size: 0;
-  padding-block: 32px;
+  padding-block: 20px;
   padding-inline: clamp(12px, 2.5vw, 32px);
   border-block-start: 1px solid var(--color-border);
   background: var(--color-bg-light);
@@ -42,7 +42,7 @@
 .pg-footer__name {
   margin: 0;
   color: var(--color-primary-darker);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -52,7 +52,7 @@
 }
 
 .pg-footer__description {
-  margin-block: 8px 0;
+  margin-block: 6px 0;
   overflow-wrap: anywhere;
 }
 

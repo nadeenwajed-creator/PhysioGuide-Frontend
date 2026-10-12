@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  inline-size: 256px;
+  inline-size: 230px;
   block-size: auto;
   align-self: stretch;
   min-inline-size: 0;
@@ -28,7 +28,7 @@
 .pg-sidebar__content {
   flex: 1;
   min-block-size: 0;
-  padding: 16px;
+  padding: 20px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -36,7 +36,7 @@
 .pg-sidebar__account {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-block-end: 24px;
 }
 
@@ -64,19 +64,19 @@
 }
 
 .pg-sidebar__name {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .pg-sidebar__role {
-  margin-block-start: 4px;
+  margin-block-start: 2px;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .pg-sidebar__list {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -85,13 +85,13 @@
 .pg-sidebar__link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-block-size: 44px;
-  padding: 8px 12px;
-  border-inline-start: 3px solid transparent;
+  gap: 10px;
+  min-block-size: 25px;
+  padding: 10px 5px;
+  border-inline-start: 4px solid transparent;
   border-radius: 12px;
   color: var(--color-text-primary);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
   text-decoration: none;
 }
@@ -111,8 +111,8 @@
 
 .pg-sidebar__icon {
   flex-shrink: 0;
-  inline-size: 20px;
-  font-size: 18px;
+  inline-size: 25px;
+  font-size: 16px;
 }
 
 .pg-sidebar__label {
