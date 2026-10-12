@@ -3,7 +3,7 @@ const ar = {
   'languageSwitcher.label': 'اختيار اللغة',
   'languageSwitcher.english': 'English',
   'languageSwitcher.arabic': 'العربية',
-  
+
   // Quick settings menu
   'quickSettings.settings': 'إعدادات سريعة',
   'quickSettings.language': 'اللغة',
@@ -33,6 +33,13 @@ const ar = {
   'chatHeader.available': 'متاح',
   'chatHeader.unavailable': 'غير متاح',
   'chatHeader.informationUnavailable': 'المعلومات غير متاحة',
+
+  // Attachment card
+  'attachmentCard.file': 'ملف',
+  'attachmentCard.remove': 'إزالة المرفق',
+  'attachmentCard.open': 'فتح المرفق',
+  'attachmentCard.download': 'تنزيل المرفق',
+  'attachmentCard.unavailable': 'المرفق غير متاح',
 };
 
 export default ar;

@@ -1,0 +1,140 @@
+/* Shared attachment card */
+.pg-attachment-card {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 8px;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  padding: 8px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+/* File type icon */
+.pg-attachment-card__icon {
+  display: inline-flex;
+  flex: 0 0 36px;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 36px;
+  block-size: 36px;
+
+  border-radius: 8px;
+  background-color: var(--color-bg-soft);
+  color: var(--color-primary);
+
+  font-size: 18px;
+}
+
+/* Filename and metadata */
+.pg-attachment-card__details {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.pg-attachment-card__name {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-attachment-card__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  min-inline-size: 0;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.pg-attachment-card__type,
+.pg-attachment-card__size {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* One action button for both variants */
+.pg-attachment-card__action.pg-button {
+  flex: 0 0 44px;
+
+  inline-size: 44px;
+  min-inline-size: 44px;
+  block-size: 44px;
+  min-block-size: 44px;
+  padding: 0;
+
+  border-radius: 8px;
+  color: var(--color-primary);
+}
+
+.pg-attachment-card__action.pg-button .pg-button__icon {
+  font-size: 15px;
+}
+
+/* Hover and keyboard focus */
+@media (hover: hover) {
+  .pg-attachment-card__action.pg-button:hover:not(:disabled) {
+    background-color: var(--color-surface-mint);
+  }
+}
+
+.pg-attachment-card__action.pg-button:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.pg-attachment-card__action.pg-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Small phones and narrow chat bubbles */
+@media (max-width: 359px) {
+  .pg-attachment-card {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .pg-attachment-card__icon {
+    flex-basis: 32px;
+    inline-size: 32px;
+    block-size: 32px;
+    font-size: 15px;
+  }
+
+  .pg-attachment-card__name {
+    font-size: 12px;
+  }
+
+  .pg-attachment-card__meta {
+    gap: 3px;
+    font-size: 10px;
+  }
+}

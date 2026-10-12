@@ -3,7 +3,7 @@ const en = {
   'languageSwitcher.label': 'Choose language',
   'languageSwitcher.english': 'English',
   'languageSwitcher.arabic': 'العربية',
-  
+
   // Quick settings menu
   'quickSettings.settings': 'Quick settings',
   'quickSettings.language': 'Language',
@@ -33,6 +33,13 @@ const en = {
   'chatHeader.available': 'Available',
   'chatHeader.unavailable': 'Unavailable',
   'chatHeader.informationUnavailable': 'Information unavailable',
+
+  // Attachment card
+  'attachmentCard.file': 'File',
+  'attachmentCard.remove': 'Remove attachment',
+  'attachmentCard.open': 'Open attachment',
+  'attachmentCard.download': 'Download attachment',
+  'attachmentCard.unavailable': 'Attachment unavailable',
 };
 
 export default en;
