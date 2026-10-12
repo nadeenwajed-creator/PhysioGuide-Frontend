@@ -9,7 +9,7 @@ const ar = {
   'quickSettings.language': 'اللغة',
   'quickSettings.theme': 'المظهر',
 
-// Chat header and conversation status
+  // Chat header and conversation status
   'chatHeader.back': 'العودة إلى المحادثات',
   'chatHeader.therapist': 'الأخصائي',
   'chatHeader.online': 'متصل',
@@ -40,6 +40,20 @@ const ar = {
   'attachmentCard.open': 'فتح المرفق',
   'attachmentCard.download': 'تنزيل المرفق',
   'attachmentCard.unavailable': 'المرفق غير متاح',
+
+  // Message input
+  'messageInput.label': 'الرسالة',
+  'messageInput.placeholder': 'اكتب رسالة...',
+  'messageInput.attach': 'إضافة مرفق',
+  'messageInput.send': 'إرسال الرسالة',
+  'messageInput.sending': 'جارٍ إرسال الرسالة',
+  'messageInput.selectedAttachments': 'المرفقات المختارة',
+  'messageInput.attachmentCount': 'عدد المرفقات المختارة: {count}',
+  'messageInput.limitReached': 'وصلت للحد الأقصى وهو 5 مرفقات',
+  'messageInput.tooMany': 'يمكن إرفاق 5 ملفات كحد أقصى لكل رسالة.',
+  'messageInput.tooLarge': 'يجب ألا يتجاوز حجم كل مرفق 10 ميجابايت.',
+  'messageInput.invalidType': 'المسموح فقط: JPG وPNG وPDF وDOC وDOCX.',
+  'messageInput.sendFailed': 'تعذّر إرسال الرسالة. حاول مرة أخرى.',
 };
 
 export default ar;
