@@ -1,6 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
+import AttachmentCard from '../AttachmentCard/AttachmentCard.jsx';
+
 import './MessageBubble.css';
 
 function MessageBubble({
@@ -8,11 +10,26 @@ function MessageBubble({
   sentLabel,
   deliveredLabel,
   className = '',
+  onOpenAttachment,
+  onDownloadAttachment,
 }) {
   const text = typeof message?.text === 'string' ? message.text : '';
+  const hasText = Boolean(text.trim());
 
-  // Attachment-only messages are not supported in this phase.
-  if (!text.trim()) {
+  // AttachmentCard handles file types, sizes, and available actions.
+  const attachments = Array.isArray(message?.attachments)
+    ? message.attachments.filter((attachment) => (
+      attachment !== null
+      && typeof attachment === 'object'
+      && !Array.isArray(attachment)
+      && typeof attachment.name === 'string'
+      && attachment.name.trim().length > 0
+    ))
+    : [];
+
+  const hasAttachments = attachments.length > 0;
+
+  if (!hasText && !hasAttachments) {
     return null;
   }
 
@@ -29,6 +46,7 @@ function MessageBubble({
     isOutgoing
       ? 'pg-message-bubble--outgoing'
       : 'pg-message-bubble--incoming',
+    hasAttachments && 'pg-message-bubble--with-attachments',
     className,
   ]
     .filter(Boolean)
@@ -37,9 +55,31 @@ function MessageBubble({
   return (
     <div className={bubbleClasses}>
       <div className="pg-message-bubble__body">
-        <p className="pg-message-bubble__text" dir="auto">
-          {text}
-        </p>
+        {hasText && (
+          <p className="pg-message-bubble__text" dir="auto">
+            {text}
+          </p>
+        )}
+
+        {hasAttachments && (
+          <ul className="pg-message-bubble__attachments" role="list">
+            {attachments.map((attachment, index) => (
+              <li
+                key={attachment.id != null
+                  ? `id:${attachment.id}`
+                  : `index:${index}`}
+                className="pg-message-bubble__attachment"
+              >
+                <AttachmentCard
+                  variant="sent"
+                  file={attachment}
+                  onOpen={onOpenAttachment}
+                  onDownload={onDownloadAttachment}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div className="pg-message-bubble__meta">
           <bdi className="pg-message-bubble__time">

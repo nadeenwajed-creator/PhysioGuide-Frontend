@@ -36,6 +36,11 @@
   background-color: var(--color-surface-mint);
 }
 
+/* Give attachment cards space without changing text-only bubbles. */
+.pg-message-bubble--with-attachments .pg-message-bubble__body {
+  inline-size: min(85%, 36rem);
+}
+
 /* Preserve line breaks and wrap long text without truncation. */
 .pg-message-bubble__text {
   min-inline-size: 0;
@@ -50,7 +55,30 @@
   overflow-wrap: anywhere;
 }
 
-/* Time and confirmed delivery status remain below the text. */
+/* Keep every attachment inside the existing bubble width. */
+.pg-message-bubble__attachments {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.pg-message-bubble__text + .pg-message-bubble__attachments {
+  margin-block-start: 8px;
+}
+
+.pg-message-bubble__attachment {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* Time and confirmed delivery status follow all message content. */
 .pg-message-bubble__meta {
   display: flex;
   flex-wrap: wrap;
