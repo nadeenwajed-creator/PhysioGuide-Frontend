@@ -1,0 +1,156 @@
+/* PhysioGuide - Shared ActionsMenu */
+
+.pg-actions-menu,
+.pg-actions-menu * {
+  box-sizing: border-box;
+}
+
+.pg-actions-menu {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  font: inherit;
+}
+
+/* Three-dot trigger */
+.pg-actions-menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 44px;
+  block-size: 44px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  background-color: var(--color-surface);
+  color: var(--color-primary-darker);
+
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.pg-actions-menu__toggle::after {
+  display: none;
+}
+
+/* Popper controls the panel position. */
+.pg-actions-menu__menu.dropdown-menu {
+  inline-size: 192px;
+  min-inline-size: 0;
+  max-inline-size: calc(100vw - 24px);
+  max-block-size: calc(100dvh - 24px);
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  padding: 4px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+
+  box-shadow: 0 8px 24px
+    color-mix(
+      in srgb,
+      var(--color-primary-darker) 12%,
+      transparent
+    );
+
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: start;
+}
+
+/* Native action buttons */
+.pg-actions-menu__item.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 44px;
+
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 12px;
+
+  border: 0;
+  border-inline-start: 2px solid transparent;
+  border-radius: 8px;
+
+  background-color: transparent;
+  color: var(--color-text-primary);
+
+  font: inherit;
+  text-align: start;
+  white-space: normal;
+
+  cursor: pointer;
+}
+
+.pg-actions-menu__icon {
+  flex-shrink: 0;
+  inline-size: 16px;
+  block-size: 16px;
+  color: var(--color-primary);
+}
+
+.pg-actions-menu__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Keep dangerous action text readable and mark its edge and icon. */
+.pg-actions-menu__item--danger.dropdown-item {
+  border-inline-start-color: var(--color-danger);
+}
+
+.pg-actions-menu__item--danger .pg-actions-menu__icon {
+  color: var(--color-danger);
+}
+
+/* Soft Teal hover */
+@media (hover: hover) {
+  .pg-actions-menu__toggle:hover,
+  .pg-actions-menu__item.dropdown-item:hover:not(:disabled):not(.disabled) {
+    background-color: var(--color-bg-soft);
+  }
+}
+
+/* Keyboard focus and pressed feedback */
+.pg-actions-menu__toggle:active,
+.pg-actions-menu__item.dropdown-item:focus:not(:disabled):not(.disabled),
+.pg-actions-menu__item.dropdown-item:active:not(:disabled):not(.disabled) {
+  background-color: var(--color-bg-soft);
+  color: var(--color-text-primary);
+}
+
+.pg-actions-menu__toggle:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.pg-actions-menu__item.dropdown-item:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: -2px;
+}
+
+/* Disabled actions */
+.pg-actions-menu__item.dropdown-item:disabled,
+.pg-actions-menu__item.dropdown-item.disabled {
+  background-color: transparent;
+  opacity: 0.5;
+  cursor: not-allowed;
+}

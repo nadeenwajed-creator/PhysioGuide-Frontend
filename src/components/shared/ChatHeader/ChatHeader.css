@@ -1,0 +1,449 @@
+/* Main chat header */
+.pg-chat-header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 16px 16px 0 0;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  text-align: start;
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.pg-chat-header__back.pg-button {
+  grid-column: 1;
+  grid-row: 1;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+/* Back arrow and menu icon size */
+.pg-chat-header__back .pg-button__icon,
+.pg-chat-header__actions .pg-actions-menu__toggle {
+  font-size: 15px;
+}
+
+/* Therapist image and information */
+.pg-chat-header__identity {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pg-chat-header__text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Therapist name */
+.pg-chat-header__name {
+  display: -webkit-box;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* Online and offline status */
+.pg-chat-header__status {
+  margin: 3px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.pg-chat-header__status[data-status='online'] {
+  color: var(--color-primary);
+}
+
+/* Three-dot menu */
+.pg-chat-header__actions {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  min-width: 0;
+}
+
+.pg-chat-header__actions .pg-actions-menu__toggle {
+  width: 35px;
+  height: 35px;
+  border-radius: 7px;
+}
+
+/* Therapist profile popup */
+.pg-chat-header__modal.pg-modal {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+}
+
+.pg-chat-header__modal .pg-modal__header,
+.pg-chat-header__modal .pg-modal__footer {
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.pg-chat-header__modal .pg-modal__title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pg-chat-header__modal .pg-modal__body {
+  padding: 14px;
+}
+
+/* Popup X button */
+.pg-chat-header__modal .pg-modal__close.pg-button {
+  width: 35px;
+  height: 35px;
+  border-radius: 10px;
+}
+
+.pg-chat-header__modal .pg-modal__close .pg-button__icon {
+  font-size: 14px;
+}
+
+.pg-chat-header__close.pg-button {
+  min-height: 35px;
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* Profile content layout */
+.pg-chat-header__profile {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  text-align: start;
+}
+
+/* Therapist image, name and specialization */
+.pg-chat-header__profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pg-chat-header__profile-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Therapist name inside the popup */
+.pg-chat-header__profile-name {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Therapist specialization */
+.pg-chat-header__specialization {
+  margin: 4px 0 0;
+  color: var(--color-primary);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.pg-chat-header__profile-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+}
+
+/* Rating, experience, sessions and price cards */
+.pg-chat-header__profile-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-bg-light);
+}
+
+/* Card labels */
+.pg-chat-header__profile-field dt {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Card values */
+.pg-chat-header__profile-field dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Star rating spacing */
+.pg-chat-header__profile-field .pg-rating-stars {
+  gap: 3px;
+}
+
+.pg-chat-header__profile-field .pg-rating-stars__list {
+  gap: 1px;
+}
+
+.pg-chat-header__profile-field .pg-rating-stars__value {
+  font-size: 12px;
+}
+
+/* Booking availability card */
+.pg-chat-header__profile-field--availability {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.pg-chat-header__profile-field--availability dd {
+  display: flex;
+  align-items: center;
+}
+
+.pg-chat-header__availability {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-bg-soft);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Available and unavailable colors */
+.pg-chat-header__availability[data-availability='available'] {
+  background: var(--color-success-bg);
+  color: var(--color-primary-darker);
+}
+
+.pg-chat-header__availability[data-availability='unavailable'] {
+  background: var(--color-warning-bg);
+  color: var(--color-text-primary);
+}
+
+/* Tablet screen spacing */
+@media (min-width: 768px) and (max-width: 991px) {
+  .pg-chat-header {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+}
+
+/* Mobile layout and smaller text */
+@media (max-width: 767px) {
+  .pg-chat-header {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .pg-chat-header__identity {
+    gap: 8px;
+  }
+
+  .pg-chat-header__name {
+    font-size: 14px;
+  }
+
+  .pg-chat-header__status {
+    font-size: 11px;
+  }
+
+  /* Smaller popup spacing */
+  .pg-chat-header__modal.pg-modal {
+    border-radius: 14px;
+  }
+
+  .pg-chat-header__modal .pg-modal__header,
+  .pg-chat-header__modal .pg-modal__footer {
+    padding: 8px 12px;
+  }
+
+  .pg-chat-header__modal .pg-modal__body {
+    padding: 12px;
+  }
+
+  .pg-chat-header__modal .pg-modal__title {
+    font-size: 16px;
+  }
+
+  /* Smaller therapist information */
+  .pg-chat-header__profile {
+    gap: 12px;
+  }
+
+  .pg-chat-header__profile-identity {
+    gap: 10px;
+  }
+
+  .pg-chat-header__profile-name {
+    font-size: 15px;
+  }
+
+  .pg-chat-header__specialization {
+    font-size: 12px;
+  }
+
+  /* information cards */
+  .pg-chat-header__profile-details {
+    gap: 8px;
+  }
+
+  .pg-chat-header__profile-field {
+    gap: 5px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .pg-chat-header__profile-field dd {
+    font-size: 13px;
+  }
+
+  .pg-chat-header__profile-field--availability {
+    padding: 9px 10px;
+  }
+
+  .pg-chat-header__close.pg-button {
+    font-size: 12px;
+  }
+}
+
+/* Extra spacing adjustments for small phones */
+@media (max-width: 359px) {
+  .pg-chat-header {
+    gap: 5px;
+    padding: 8px;
+  }
+
+  .pg-chat-header__identity {
+    gap: 6px;
+  }
+
+  .pg-chat-header__name {
+    font-size: 13px;
+  }
+
+  .pg-chat-header__modal .pg-modal__body {
+    padding: 10px;
+  }
+
+  /* Keep the cards readable on small screens */
+  .pg-chat-header__profile-details {
+    gap: 6px;
+  }
+
+  .pg-chat-header__profile-field {
+    padding: 8px;
+  }
+
+  .pg-chat-header__profile-field dt,
+  .pg-chat-header__profile-field .pg-rating-stars__value {
+    font-size: 11px;
+  }
+
+  .pg-chat-header__profile-field dd {
+    font-size: 12px;
+  }
+
+  .pg-chat-header__profile-field .pg-rating-stars--sm {
+    font-size: 11px;
+  }
+
+  .pg-chat-header__profile-field .pg-rating-stars__list {
+    gap: 1px;
+  }
+}
+
+/* One-column cards on very narrow screens */
+@media (max-width: 299px) {
+  .pg-chat-header {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .pg-chat-header__identity {
+    gap: 4px;
+  }
+
+  .pg-chat-header__name {
+    font-size: 12px;
+  }
+
+  .pg-chat-header__status {
+    font-size: 10px;
+  }
+
+  .pg-chat-header__modal .pg-modal__header,
+  .pg-chat-header__modal .pg-modal__footer {
+    padding: 6px 8px;
+  }
+
+  .pg-chat-header__modal .pg-modal__body {
+    padding: 8px;
+  }
+
+  .pg-chat-header__profile-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pg-chat-header__profile-field--availability {
+    grid-column: 1;
+  }
+}
+
+/* Disable animation when reduced motion is enabled */
+@media (prefers-reduced-motion: reduce) {
+  .pg-chat-header {
+    transition: none;
+  }
+}

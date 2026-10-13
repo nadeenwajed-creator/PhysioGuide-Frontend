@@ -1,0 +1,60 @@
+/* Match the existing Navbar icon controls. */
+.pg-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 12px;
+
+  background-color: transparent;
+  color: var(--color-primary-darker);
+
+  font: inherit;
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.pg-theme-toggle__icon {
+  display: block;
+  flex-shrink: 0;
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+/* Avoid a persistent hover effect on touch screens. */
+@media (hover: hover) {
+  .pg-theme-toggle:hover:not(:disabled) {
+    background-color: var(--color-bg-light);
+  }
+}
+
+.pg-theme-toggle:active:not(:disabled) {
+  background-color: var(--color-surface-mint);
+}
+
+/* An inset outline stays visible inside compact dropdown controls. */
+.pg-theme-toggle:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: -2px;
+}
+
+.pg-theme-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-theme-toggle {
+    transition: none;
+  }
+}

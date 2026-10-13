@@ -1,0 +1,45 @@
+/* PhysioGuide - Shared FilterSelect */
+
+.pg-filter-select {
+  display: block;
+  box-sizing: border-box;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: 44px;
+
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 12px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+
+  cursor: pointer;
+}
+
+/* Keep the native dropdown arrow and keyboard behavior. */
+@media (hover: hover) {
+  .pg-filter-select:hover:not(:disabled) {
+    background-color: var(--color-bg-light);
+  }
+}
+
+.pg-filter-select:focus-visible {
+  border-color: var(--color-primary-light);
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.pg-filter-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

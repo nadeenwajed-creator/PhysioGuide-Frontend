@@ -1,0 +1,47 @@
+/* Fluid list container */
+.pg-conversation-list {
+  box-sizing: border-box;
+
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+/* Preserve each ConversationItem's own layout and styling. */
+.pg-conversation-list__items {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+
+  box-sizing: border-box;
+  min-inline-size: 0;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.pg-conversation-list__item {
+  box-sizing: border-box;
+  min-inline-size: 0;
+
+  margin: 0;
+  padding: 0;
+}
+
+/* Translated empty-state text supplied by the parent */
+.pg-conversation-list__empty {
+  box-sizing: border-box;
+  min-inline-size: 0;
+
+  margin: 0;
+  padding: 24px 16px;
+
+  color: var(--color-text-secondary);
+  font: inherit;
+  line-height: 1.5;
+  text-align: center;
+
+  overflow-wrap: anywhere;
+}

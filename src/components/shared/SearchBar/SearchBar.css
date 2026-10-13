@@ -1,0 +1,134 @@
+/* PhysioGuide - Shared SearchBar */
+
+.pg-search-bar,
+.pg-search-bar * {
+  box-sizing: border-box;
+}
+
+.pg-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: 44px;
+
+  padding-inline: 12px 4px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  background-color: var(--color-bg-light);
+  color: var(--color-text-primary);
+
+  font: inherit;
+}
+
+.pg-search-bar:focus-within {
+  border-color: var(--color-primary-light);
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+/* Decorative search icon */
+.pg-search-bar__icon {
+  flex-shrink: 0;
+
+  inline-size: 16px;
+  block-size: 16px;
+
+  color: var(--color-text-secondary);
+}
+
+/* Flexible input */
+.pg-search-bar__input {
+  flex: 1;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: 40px;
+
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 0;
+
+  border: 0;
+  border-radius: 0;
+  outline: none;
+
+  background-color: transparent;
+  color: var(--color-text-primary);
+
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+
+  appearance: none;
+}
+
+.pg-search-bar__input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
+}
+
+/* Use the component's accessible clear button. */
+.pg-search-bar__input::-webkit-search-cancel-button,
+.pg-search-bar__input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/* Clear text without closing the Navbar search area. */
+.pg-search-bar__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  inline-size: 40px;
+  block-size: 40px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 999px;
+
+  background-color: transparent;
+  color: var(--color-primary);
+
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .pg-search-bar__clear:hover:not(:disabled) {
+    background-color: var(--color-surface-mint);
+  }
+}
+
+.pg-search-bar__clear:active:not(:disabled) {
+  background-color: var(--color-surface-mint);
+  color: var(--color-primary-darker);
+}
+
+.pg-search-bar__clear:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: -2px;
+}
+
+/* Disabled state */
+.pg-search-bar--disabled {
+  opacity: 0.6;
+}
+
+.pg-search-bar--disabled,
+.pg-search-bar__input:disabled,
+.pg-search-bar__clear:disabled {
+  cursor: not-allowed;
+}

@@ -1,0 +1,106 @@
+/* Global Soft Dark palette. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Brand Colors */
+  --color-primary: #79C5BC;
+  --color-primary-dark: #63B4AA;
+  --color-primary-darker: #BFE5DF;
+  --color-primary-light: #94D8CF;
+
+  /* Background Colors */
+  --color-bg-main: #17212D;
+  --color-bg-soft: #1B2936;
+  --color-bg-light: #243443;
+  --color-surface: #1E2C3A;
+  --color-surface-mint: #243E43;
+
+  /* Text Colors */
+  --color-text-primary: #EDF4F5;
+  --color-text-secondary: #BBC8D0;
+  --color-text-muted: #A1B1BC;
+
+  /* Border Colors */
+  --color-border: #6B8091;
+
+  /* Status Colors */
+  --color-success: #77D0AE;
+  --color-success-bg: #203C35;
+
+  --color-warning: #F0C476;
+  --color-warning-bg: #3C3426;
+
+  --color-danger: #F19AA3;
+  --color-danger-bg: #442D37;
+
+  --color-info: #8EBDED;
+  --color-info-bg: #27394E;
+}
+
+/* Keep unread counts readable against the brighter danger color. */
+:root[data-theme='dark'] .pg-notifications__badge,
+:root[data-theme='dark'] .pg-sidebar__badge {
+  color: var(--color-bg-main);
+}
+
+/* Use dark shadows instead of the brighter brand color. */
+:root[data-theme='dark'] .pg-notifications__menu.dropdown-menu,
+:root[data-theme='dark'] .pg-profile-menu__menu.dropdown-menu,
+:root[data-theme='dark'] .pg-quick-settings__menu.dropdown-menu {
+  box-shadow: 0 8px 24px
+    color-mix(
+      in srgb,
+      var(--color-bg-main) 40%,
+      transparent
+    );
+}
+
+:root[data-theme='dark'] .pg-sidebar-backdrop.offcanvas-backdrop {
+  background-color: var(--color-bg-main);
+}
+
+/* Primary backgrounds already use theme variables in Button.css. */
+:root[data-theme='dark'] .pg-button--primary {
+  color: var(--color-bg-main);
+}
+
+/* Modal surfaces and borders already use the global theme variables. */
+:root[data-theme='dark'] .pg-modal {
+  box-shadow: 0 16px 32px
+    color-mix(
+      in srgb,
+      var(--color-bg-main) 40%,
+      transparent
+    );
+}
+
+:root[data-theme='dark'] .pg-modal__overlay::backdrop {
+  background: color-mix(
+    in srgb,
+    var(--color-bg-main) 72%,
+    transparent
+  );
+}
+
+/* Existing StatusBadge variables, scoped to the component. */
+:root[data-theme='dark'] .pg-status-badge {
+  --color-status-confirmed-bg: var(--color-success-bg);
+  --color-status-confirmed-text: var(--color-success);
+
+  --color-status-pending-bg: var(--color-warning-bg);
+  --color-status-pending-text: var(--color-warning);
+
+  --color-status-completed-bg: #37304E;
+  --color-status-completed-text: #C4B5FD;
+
+  --color-status-cancelled-bg: var(--color-danger-bg);
+  --color-status-cancelled-text: var(--color-danger);
+}
+
+/* Existing Pagination variables, scoped to the component. */
+:root[data-theme='dark'] .pg-pagination {
+  --color-pagination-muted: var(--color-text-secondary);
+  --color-pagination-text-active: var(--color-primary);
+  --color-pagination-accent: var(--color-primary-light);
+  --color-pagination-hover: var(--color-surface-mint);
+}

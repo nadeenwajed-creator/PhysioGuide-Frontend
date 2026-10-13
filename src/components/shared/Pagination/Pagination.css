@@ -1,0 +1,214 @@
+
+/* PhysioGuide — Underline Minimal */
+
+.pg-pagination {
+  box-sizing: border-box;
+  display: block;
+
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+
+  container-type: inline-size;
+  font-family: inherit;
+}
+
+.pg-pagination,
+.pg-pagination * {
+  box-sizing: border-box;
+}
+
+.pg-pagination__controls {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+
+  gap: clamp(4px, 1vw, 8px);
+
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-inline: auto;
+}
+
+/* Shared button styles */
+.pg-pagination__button {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  inline-size: 44px;
+  min-inline-size: 44px;
+  block-size: 44px;
+  min-block-size: 44px;
+
+  padding: 4px;
+  border: 0;
+  border-radius: 10px;
+
+  background-color: transparent;
+  color: var(--color-pagination-muted, #536C70);
+
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.pg-pagination__arrow {
+  color: var(--color-pagination-text-active, #087968);
+}
+
+.pg-pagination__icon {
+  display: block;
+  inline-size: 18px;
+  block-size: 18px;
+  flex-shrink: 0;
+}
+
+.pg-pagination:dir(rtl) .pg-pagination__icon {
+  transform: rotate(180deg);
+}
+
+/* Desktop and tablet numbers */
+.pg-pagination__pages {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+
+  gap: clamp(4px, 1vw, 8px);
+  min-inline-size: 0;
+}
+
+.pg-pagination__page {
+  padding-block: 8px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.pg-pagination__page--active {
+  color: var(--color-pagination-text-active, #087968);
+  font-weight: 600;
+}
+
+/* Center the underline in both writing directions. */
+.pg-pagination__page--active::after {
+  content: '';
+
+  position: absolute;
+  inset-block-end: 5px;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+
+  inline-size: 20px;
+  block-size: 2px;
+
+  margin-inline: auto;
+  border-radius: 999px;
+
+  background-color: var(--color-pagination-accent, #0D9B88);
+}
+
+/* Mobile counter can shrink and wrap without shrinking the arrows. */
+.pg-pagination__mobile {
+  position: relative;
+  display: none;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: center;
+
+  min-block-size: 44px;
+  min-inline-size: 0;
+
+  color: var(--color-pagination-text-active, #087968);
+
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.pg-pagination__counter {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pg-pagination__sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Hover state */
+@media (hover: hover) {
+  .pg-pagination__button:hover:not(:disabled) {
+    background-color: var(--color-pagination-hover, #E4F8F3);
+  }
+}
+
+/* Pressed state */
+.pg-pagination__button:active:not(:disabled) {
+  background-color: var(--color-pagination-hover, #E4F8F3);
+  opacity: 0.8;
+}
+
+/* Keyboard focus */
+.pg-pagination__button:focus-visible {
+  outline: 2px solid var(--color-primary-light, #1D6C73);
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+.pg-pagination__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .pg-pagination__pages {
+    display: none;
+  }
+
+  .pg-pagination__mobile {
+    display: inline-flex;
+  }
+}
+
+/* Narrow containers, including desktop cards */
+@container (max-width: 300px) {
+  .pg-pagination__pages {
+    display: none;
+  }
+
+  .pg-pagination__mobile {
+    display: inline-flex;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pg-pagination__button {
+    transition: none;
+  }
+}
