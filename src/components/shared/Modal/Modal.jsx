@@ -3,7 +3,9 @@ import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 import Button from '../Button/Button.jsx';
+
 import './Modal.css';
 
 function Modal({
@@ -17,23 +19,27 @@ function Modal({
   closeOnOverlay = true,
   closeOnEscape = true,
   showCloseButton = true,
-  closeLabel = 'Close',
+  closeLabel,
   className = '',
 }) {
+  const { t, dir: languageDir } = useLanguage();
+
   const dialogRef = useRef(null);
   const titleRef = useRef(null);
   const overlayPressRef = useRef(false);
   const titleId = useId();
 
+  const resolvedCloseLabel = closeLabel ?? t('modal.close');
+
   const modalSize = ['sm', 'md', 'lg'].includes(size)
     ? size
     : 'md';
 
-  // Inherit document direction unless explicitly overridden.
+  // Use the supplied direction, otherwise use the current language.
   const modalDir =
     dir === 'rtl' || dir === 'ltr'
       ? dir
-      : undefined;
+      : languageDir;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -144,7 +150,7 @@ function Modal({
               icon={faXmark}
               iconOnly
               className="pg-modal__close"
-              aria-label={closeLabel}
+              aria-label={resolvedCloseLabel}
               onClick={() => onClose?.()}
             />
           )}

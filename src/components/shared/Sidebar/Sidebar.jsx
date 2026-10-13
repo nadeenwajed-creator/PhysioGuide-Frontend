@@ -1,8 +1,11 @@
+
 import { useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faXmark } from '@fortawesome/free-solid-svg-icons';
+
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './Sidebar.css';
 
@@ -12,9 +15,17 @@ function Sidebar({
   account,
   isOpen = false,
   onClose,
-  navigationLabel = 'Main navigation',
-  closeLabel = 'Close navigation',
+  navigationLabel,
+  closeLabel,
 }) {
+  const { t } = useLanguage();
+
+  const resolvedNavigationLabel =
+    navigationLabel ?? t('sidebar.navigation');
+
+  const resolvedCloseLabel =
+    closeLabel ?? t('sidebar.close');
+
   const closeButtonRef = useRef(null);
   const onCloseRef = useRef(onClose);
 
@@ -28,7 +39,8 @@ function Sidebar({
     let focusInSidebar = false;
 
     function trackFocus(event) {
-      focusInSidebar = document.getElementById(id)?.contains(event.target) ?? false;
+      focusInSidebar =
+        document.getElementById(id)?.contains(event.target) ?? false;
     }
 
     function handleResize() {
@@ -37,7 +49,9 @@ function Sidebar({
         onCloseRef.current?.();
       } else if (focusInSidebar) {
         // CSS may hide the focused link before the resize event runs.
-        document.querySelector(`[aria-controls="${CSS.escape(id)}"]`)?.focus();
+        document
+          .querySelector(`[aria-controls="${CSS.escape(id)}"]`)
+          ?.focus();
       }
     }
 
@@ -80,17 +94,24 @@ function Sidebar({
       enforceFocus
       restoreFocus
       restoreFocusOptions={{ preventScroll: true }}
-      onEntered={() => closeButtonRef.current?.focus({ preventScroll: true })}
+      onEntered={() =>
+        closeButtonRef.current?.focus({ preventScroll: true })
+      }
     >
       <div className="pg-sidebar__header">
-        <h2 id={`${id}-title`} className="pg-sidebar__title">{navigationLabel}</h2>
+        <h2
+          id={`${id}-title`}
+          className="pg-sidebar__title"
+        >
+          {resolvedNavigationLabel}
+        </h2>
 
         <button
           ref={closeButtonRef}
           type="button"
           className="pg-sidebar__close"
           onClick={onClose}
-          aria-label={closeLabel}
+          aria-label={resolvedCloseLabel}
         >
           <FontAwesomeIcon icon={faXmark} />
         </button>
@@ -100,21 +121,35 @@ function Sidebar({
         {account && (
           <div className="pg-sidebar__account">
             {account.avatar ? (
-              <img className="pg-sidebar__avatar" src={account.avatar} alt="" />
+              <img
+                className="pg-sidebar__avatar"
+                src={account.avatar}
+                alt=""
+              />
             ) : (
-              <span className="pg-sidebar__avatar" aria-hidden="true">
+              <span
+                className="pg-sidebar__avatar"
+                aria-hidden="true"
+              >
                 <FontAwesomeIcon icon={faUser} />
               </span>
             )}
 
             <div className="pg-sidebar__account-text">
-              <p className="pg-sidebar__name">{account.name}</p>
-              {account.role && <p className="pg-sidebar__role">{account.role}</p>}
+              <p className="pg-sidebar__name">
+                {account.name}
+              </p>
+
+              {account.role && (
+                <p className="pg-sidebar__role">
+                  {account.role}
+                </p>
+              )}
             </div>
           </div>
         )}
 
-        <nav aria-label={navigationLabel}>
+        <nav aria-label={resolvedNavigationLabel}>
           <ul className="pg-sidebar__list">
             {items.map((item) => (
               <li key={item.id}>
@@ -123,7 +158,9 @@ function Sidebar({
                   end={item.end ?? false}
                   onClick={handleNavigation}
                   className={({ isActive }) => (
-                    `pg-sidebar__link${isActive ? ' pg-sidebar__link--active' : ''}`
+                    `pg-sidebar__link${
+                      isActive ? ' pg-sidebar__link--active' : ''
+                    }`
                   )}
                 >
                   <FontAwesomeIcon
@@ -131,9 +168,15 @@ function Sidebar({
                     className="pg-sidebar__icon"
                     aria-hidden="true"
                   />
-                  <span className="pg-sidebar__label">{item.label}</span>
+
+                  <span className="pg-sidebar__label">
+                    {item.label}
+                  </span>
+
                   {item.badge > 0 && (
-                    <span className="pg-sidebar__badge">{item.badge}</span>
+                    <span className="pg-sidebar__badge">
+                      {item.badge}
+                    </span>
                   )}
                 </NavLink>
               </li>

@@ -1,10 +1,13 @@
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCheck,
   faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 import Avatar from '../Avatar/Avatar';
+
 import './ConversationItem.css';
 
 function ConversationItem({
@@ -20,12 +23,22 @@ function ConversationItem({
   unreadLabel,
   messageStatusLabel,
 }) {
+  const { t } = useLanguage();
+
   const hasUnread = Number.isSafeInteger(unreadCount) && unreadCount > 0;
+
   const hasMessageStatus = ['sent', 'delivered', 'read'].includes(
     messageStatus
   );
 
   const showMessageStatus = hasMessageStatus && !hasUnread;
+
+  const resolvedUnreadLabel = unreadLabel ??
+    t('conversationItem.unreadCount', { count: unreadCount });
+
+  const resolvedMessageStatusLabel = hasMessageStatus
+    ? messageStatusLabel ?? t(`conversationItem.${messageStatus}`)
+    : undefined;
 
   const itemClasses = [
     'pg-conversation-item',
@@ -79,7 +92,7 @@ function ConversationItem({
                 </bdi>
 
                 <span className="pg-conversation-item__sr-only">
-                  {unreadLabel || unreadCount}
+                  {resolvedUnreadLabel}
                 </span>
               </span>
             )}
@@ -108,11 +121,9 @@ function ConversationItem({
                   )}
                 </span>
 
-                {messageStatusLabel && (
-                  <span className="pg-conversation-item__sr-only">
-                    {messageStatusLabel}
-                  </span>
-                )}
+                <span className="pg-conversation-item__sr-only">
+                  {resolvedMessageStatusLabel}
+                </span>
               </span>
             )}
           </span>

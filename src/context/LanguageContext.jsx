@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useContext,
@@ -35,14 +36,14 @@ export function LanguageProvider({ children }) {
   const dir = language === 'ar' ? 'rtl' : 'ltr';
 
   useLayoutEffect(() => {
-    // This provider is the only owner of the page language and direction.
+    // This provider controls the page language and direction.
     document.documentElement.lang = language;
     document.documentElement.dir = dir;
 
     try {
       window.localStorage.setItem(storageKey, language);
     } catch {
-      // Switching still works when the browser blocks storage.
+      // Language switching works even when storage is unavailable.
     }
   }, [language, dir]);
 
@@ -54,17 +55,31 @@ export function LanguageProvider({ children }) {
     setLanguage(nextLanguage);
   }
 
-  function t(key) {
+  function t(key, variables = {}) {
     const translatedText = translations[language][key];
-
-    if (typeof translatedText === 'string') {
-      return translatedText;
-    }
-
-    // Fall back to English, then show the missing key.
     const englishText = translations.en[key];
 
-    return typeof englishText === 'string' ? englishText : key;
+    let text;
+
+    if (typeof translatedText === 'string') {
+      text = translatedText;
+    } else if (typeof englishText === 'string') {
+      text = englishText;
+    } else {
+      return key;
+    }
+
+    return text.replace(/\{(\w+)\}/g, (match, name) => {
+      if (
+        Object.prototype.hasOwnProperty.call(variables, name) &&
+        variables[name] !== null &&
+        variables[name] !== undefined
+      ) {
+        return String(variables[name]);
+      }
+
+      return match;
+    });
   }
 
   return (
@@ -81,7 +96,7 @@ export function LanguageProvider({ children }) {
   );
 }
 
-// Keep the provider and its small hook in the same context file.
+// Keep the provider and hook in the same context file.
 // eslint-disable-next-line react-refresh/only-export-components
 export function useLanguage() {
   const context = useContext(LanguageContext);

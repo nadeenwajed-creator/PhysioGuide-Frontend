@@ -1,8 +1,15 @@
+
 import { useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faRightFromBracket, faUser } from '@fortawesome/free-solid-svg-icons';
+import {
+  faChevronDown,
+  faRightFromBracket,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons';
+
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './ProfileMenu.css';
 
@@ -14,13 +21,19 @@ function ProfileMenu({
   onRequestLogout,
   labels = {},
 }) {
+  const { t, dir: languageDir } = useLanguage();
+
+  const resolvedDir = dir ?? languageDir;
+
   const [open, setOpen] = useState(false);
   const toggleRef = useRef(null);
   const id = useId();
+
+  // Use translated defaults while allowing custom labels.
   const text = {
-    accountMenu: 'Account menu',
-    profile: 'My Profile',
-    logout: 'Log out',
+    accountMenu: t('profileMenu.accountMenu'),
+    profile: t('profileMenu.profile'),
+    logout: t('profileMenu.logout'),
     ...labels,
   };
 
@@ -36,8 +49,10 @@ function ProfileMenu({
 
   function requestLogout() {
     setOpen(false);
+
     // Restore focus before handing control to the confirmation dialog.
     toggleRef.current?.focus({ preventScroll: true });
+
     onRequestLogout?.();
   }
 
@@ -47,8 +62,8 @@ function ProfileMenu({
       show={open}
       onToggle={setOpen}
       onKeyDown={handleKeyDown}
-      align={dir === 'rtl' ? 'start' : 'end'}
-      dir={dir}
+      align={resolvedDir === 'rtl' ? 'start' : 'end'}
+      dir={resolvedDir}
       focusFirstItemOnShow
     >
       <Dropdown.Toggle
@@ -57,20 +72,34 @@ function ProfileMenu({
         id={`${id}-toggle`}
         type="button"
         className="pg-profile-menu__trigger"
-        aria-label={user.name ? `${text.accountMenu}: ${user.name}` : text.accountMenu}
+        aria-label={
+          user.name
+            ? `${text.accountMenu}: ${user.name}`
+            : text.accountMenu
+        }
         aria-controls={`${id}-menu`}
       >
         {user.avatar ? (
-          <img className="pg-profile-menu__avatar" src={user.avatar} alt="" />
+          <img
+            className="pg-profile-menu__avatar"
+            src={user.avatar}
+            alt=""
+          />
         ) : (
-          <span className="pg-profile-menu__avatar" aria-hidden="true">
+          <span
+            className="pg-profile-menu__avatar"
+            aria-hidden="true"
+          >
             <FontAwesomeIcon icon={faUser} />
           </span>
         )}
 
         {!compact && (
           <>
-            <span className="pg-profile-menu__name">{user.name}</span>
+            <span className="pg-profile-menu__name">
+              {user.name}
+            </span>
+
             <FontAwesomeIcon
               icon={faChevronDown}
               className="pg-profile-menu__chevron"
@@ -88,12 +117,22 @@ function ProfileMenu({
         popperConfig={{
           strategy: 'fixed',
           modifiers: [
-            { name: 'offset', options: { offset: [0, 8] } },
+            {
+              name: 'offset',
+              options: { offset: [0, 8] },
+            },
             {
               name: 'preventOverflow',
-              options: { padding: 12, altAxis: true, tether: false },
+              options: {
+                padding: 12,
+                altAxis: true,
+                tether: false,
+              },
             },
-            { name: 'flip', options: { padding: 12 } },
+            {
+              name: 'flip',
+              options: { padding: 12 },
+            },
           ],
         }}
       >
@@ -104,7 +143,11 @@ function ProfileMenu({
           className="pg-profile-menu__item"
           role="menuitem"
         >
-          <FontAwesomeIcon icon={faUser} aria-hidden="true" />
+          <FontAwesomeIcon
+            icon={faUser}
+            aria-hidden="true"
+          />
+
           <span>{text.profile}</span>
         </Dropdown.Item>
 
@@ -116,7 +159,11 @@ function ProfileMenu({
           disabled={!onRequestLogout}
           role="menuitem"
         >
-          <FontAwesomeIcon icon={faRightFromBracket} aria-hidden="true" />
+          <FontAwesomeIcon
+            icon={faRightFromBracket}
+            aria-hidden="true"
+          />
+
           <span>{text.logout}</span>
         </Dropdown.Item>
       </Dropdown.Menu>

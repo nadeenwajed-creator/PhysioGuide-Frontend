@@ -6,6 +6,8 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
+
 import './SearchBar.css';
 
 function SearchBar({
@@ -13,15 +15,28 @@ function SearchBar({
   defaultValue = '',
   onChange,
   onSearch,
-  placeholder = 'Search...',
-  ariaLabel = 'Search',
-  clearLabel = 'Clear search',
+  placeholder,
+  ariaLabel,
+  clearLabel,
   disabled = false,
   dir,
   className = '',
 }) {
+  const { t, dir: languageDir } = useLanguage();
+
   const inputRef = useRef(null);
   const [internalValue, setInternalValue] = useState(defaultValue);
+
+  const resolvedPlaceholder =
+    placeholder ?? t('searchBar.placeholder');
+
+  const resolvedAriaLabel =
+    ariaLabel ?? t('searchBar.ariaLabel');
+
+  const resolvedClearLabel =
+    clearLabel ?? t('searchBar.clearLabel');
+
+  const resolvedDir = dir ?? languageDir;
 
   const isControlled = value !== undefined;
   const searchValue = (isControlled ? value : internalValue) ?? '';
@@ -67,7 +82,7 @@ function SearchBar({
   }
 
   return (
-    <div className={searchClasses} dir={dir}>
+    <div className={searchClasses} dir={resolvedDir}>
       <FontAwesomeIcon
         icon={faMagnifyingGlass}
         className="pg-search-bar__icon"
@@ -81,8 +96,8 @@ function SearchBar({
         value={searchValue}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        aria-label={ariaLabel}
+        placeholder={resolvedPlaceholder}
+        aria-label={resolvedAriaLabel}
         disabled={disabled}
         enterKeyHint="search"
       />
@@ -92,7 +107,7 @@ function SearchBar({
           type="button"
           className="pg-search-bar__clear"
           onClick={handleClear}
-          aria-label={clearLabel}
+          aria-label={resolvedClearLabel}
           disabled={disabled}
         >
           <FontAwesomeIcon

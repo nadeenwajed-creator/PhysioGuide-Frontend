@@ -1,18 +1,32 @@
+
 import { useId, useRef, useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
+
 import './QuickSettings.css';
 
-function QuickSettings({ languageSwitcher, themeToggle, dir, labels = {} }) {
+function QuickSettings({
+  languageSwitcher,
+  themeToggle,
+  dir,
+  labels = {},
+}) {
+  const { t, dir: languageDir } = useLanguage();
+
+  const resolvedDir = dir ?? languageDir;
+
   const [open, setOpen] = useState(false);
   const toggleRef = useRef(null);
   const id = useId();
+
+  // Use translated defaults while allowing custom labels.
   const text = {
-    settings: 'Quick settings',
-    language: 'Language',
-    theme: 'Theme',
+    settings: t('quickSettings.settings'),
+    language: t('quickSettings.language'),
+    theme: t('quickSettings.theme'),
     ...labels,
   };
 
@@ -32,8 +46,8 @@ function QuickSettings({ languageSwitcher, themeToggle, dir, labels = {} }) {
       show={open}
       onToggle={setOpen}
       onKeyDown={handleKeyDown}
-      align={dir === 'rtl' ? 'start' : 'end'}
-      dir={dir}
+      align={resolvedDir === 'rtl' ? 'start' : 'end'}
+      dir={resolvedDir}
       autoClose="outside"
       focusFirstItemOnShow={false}
     >
@@ -46,7 +60,10 @@ function QuickSettings({ languageSwitcher, themeToggle, dir, labels = {} }) {
         aria-label={text.settings}
         aria-controls={`${id}-panel`}
       >
-        <FontAwesomeIcon icon={faGear} aria-hidden="true" />
+        <FontAwesomeIcon
+          icon={faGear}
+          aria-hidden="true"
+        />
       </Dropdown.Toggle>
 
       <Dropdown.Menu
@@ -58,23 +75,39 @@ function QuickSettings({ languageSwitcher, themeToggle, dir, labels = {} }) {
         popperConfig={{
           strategy: 'fixed',
           modifiers: [
-            { name: 'offset', options: { offset: [0, 8] } },
+            {
+              name: 'offset',
+              options: { offset: [0, 8] },
+            },
             {
               name: 'preventOverflow',
-              options: { padding: 12, altAxis: true, tether: false },
+              options: {
+                padding: 12,
+                altAxis: true,
+                tether: false,
+              },
             },
-            { name: 'flip', options: { padding: 12 } },
+            {
+              name: 'flip',
+              options: { padding: 12 },
+            },
           ],
         }}
       >
         <div className="pg-quick-settings__row">
           <span>{text.language}</span>
-          <div className="pg-quick-settings__control">{languageSwitcher}</div>
+
+          <div className="pg-quick-settings__control">
+            {languageSwitcher}
+          </div>
         </div>
 
         <div className="pg-quick-settings__row">
           <span>{text.theme}</span>
-          <div className="pg-quick-settings__control">{themeToggle}</div>
+
+          <div className="pg-quick-settings__control">
+            {themeToggle}
+          </div>
         </div>
       </Dropdown.Menu>
     </Dropdown>

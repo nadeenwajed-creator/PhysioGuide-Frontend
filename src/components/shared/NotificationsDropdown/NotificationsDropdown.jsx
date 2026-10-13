@@ -3,9 +3,17 @@ import { useId, useRef, useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBell, faBuilding, faCalendarDays, faChevronRight,
-  faChevronUp, faGear, faStar, faUserDoctor,
+  faBell,
+  faBuilding,
+  faCalendarDays,
+  faChevronRight,
+  faChevronUp,
+  faGear,
+  faStar,
+  faUserDoctor,
 } from '@fortawesome/free-solid-svg-icons';
+
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './NotificationsDropdown.css';
 
@@ -23,7 +31,14 @@ const popperConfig = {
   strategy: 'fixed',
   modifiers: [
     { name: 'offset', options: { offset: [0, 12] } },
-    { name: 'preventOverflow', options: { padding: 12, altAxis: true, tether: false } },
+    {
+      name: 'preventOverflow',
+      options: {
+        padding: 12,
+        altAxis: true,
+        tether: false,
+      },
+    },
     { name: 'flip', options: { padding: 12 } },
   ],
 };
@@ -34,8 +49,14 @@ function NotificationsDropdown({
   onMarkAsRead,
   onMarkAllAsRead,
   labels = {},
-  locale = 'en',
+  locale,
 }) {
+  const { t, language } = useLanguage();
+
+  const resolvedLocale = locale ?? (
+    language === 'ar' ? 'ar' : 'en'
+  );
+
   // Store whether the dropdown is open and whether all notifications are shown.
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -44,25 +65,30 @@ function NotificationsDropdown({
   const toggleRef = useRef(null);
   const id = useId();
 
-  // Default English labels can be replaced by translated labels from the parent.
+  // Translated defaults can be overridden by the parent.
   const text = {
-    title: 'Notifications',
-    markAll: 'Mark all as read',
-    viewAll: 'View all notifications',
-    showLess: 'Show less',
-    empty: 'No notifications yet',
-    unread: 'unread',
-    read: 'Read',
+    title: t('notifications.title'),
+    markAll: t('notifications.markAll'),
+    viewAll: t('notifications.viewAll'),
+    showLess: t('notifications.showLess'),
+    empty: t('notifications.empty'),
+    unread: t('notifications.unread'),
+    read: t('notifications.read'),
     ...labels,
   };
 
   // Count only unread notifications to update the number on the bell.
-  const unreadCount = notifications.filter((item) => item.isRead === false).length;
-  const countLabel = `${text.title}: ${unreadCount} ${text.unread}`;
+  const unreadCount = notifications.filter(
+    (item) => item.isRead === false
+  ).length;
+
+  const countLabel =
+    `${text.title}: ${unreadCount} ${text.unread}`;
 
   // Sort notifications from newest to oldest without changing the original array.
   const sortedNotifications = [...notifications].sort(
-    (first, second) => new Date(second.createdAt) - new Date(first.createdAt)
+    (first, second) =>
+      new Date(second.createdAt) - new Date(first.createdAt)
   );
 
   // Show the latest five notifications, or all of them when expanded.
@@ -73,7 +99,10 @@ function NotificationsDropdown({
   // Open or close the dropdown and reset the expanded view when closing.
   function handleToggle(nextOpen) {
     setOpen(nextOpen);
-    if (!nextOpen) setExpanded(false);
+
+    if (!nextOpen) {
+      setExpanded(false);
+    }
   }
 
   // Close the dropdown with Escape and return focus to the bell button.
@@ -88,7 +117,6 @@ function NotificationsDropdown({
   }
 
   return (
-    // React Bootstrap handles the dropdown and outside-click behavior.
     <Dropdown
       className="pg-notifications"
       show={open}
@@ -110,18 +138,22 @@ function NotificationsDropdown({
       >
         <FontAwesomeIcon icon={faBell} aria-hidden="true" />
 
-        {/* Show the unread count only when there are unread notifications. */}
         {unreadCount > 0 && (
-          <span className="pg-notifications__badge" aria-hidden="true">
+          <span
+            className="pg-notifications__badge"
+            aria-hidden="true"
+          >
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </Dropdown.Toggle>
 
       {/* Announce the unread count to screen readers. */}
-      <span className="visually-hidden" role="status">{countLabel}</span>
+      <span className="visually-hidden" role="status">
+        {countLabel}
+      </span>
 
-      {/* Dropdown panel containing the header, notification list, and footer. */}
+      {/* Dropdown panel containing the header, list, and footer. */}
       <Dropdown.Menu
         id={`${id}-panel`}
         className="pg-notifications__menu"
@@ -130,91 +162,119 @@ function NotificationsDropdown({
         popperConfig={popperConfig}
         renderOnMount
       >
-        {/* Header with the title and Mark all as read button. */}
         <div className="pg-notifications__header">
-          <h2 id={`${id}-title`}>{text.title}</h2>
+          <h2 id={`${id}-title`}>
+            {text.title}
+          </h2>
 
-          {/* Mark all notifications as read without deleting them. */}
           <button
             type="button"
             className="dropdown-item pg-notifications__action"
             aria-disabled={unreadCount === 0}
             onClick={() => {
-              if (unreadCount > 0) onMarkAllAsRead?.();
+              if (unreadCount > 0) {
+                onMarkAllAsRead?.();
+              }
             }}
           >
             {text.markAll}
           </button>
         </div>
 
-        {/* Display the notifications or an empty message if the list is empty. */}
-        <ul id={`${id}-list`} className="pg-notifications__list">
+        <ul
+          id={`${id}-list`}
+          className="pg-notifications__list"
+        >
           {visibleNotifications.length === 0 ? (
-            <li className="pg-notifications__empty">{text.empty}</li>
-          ) : visibleNotifications.map((item) => {
-            // Choose the notification icon and check whether it is unread.
-            const appearance = notificationTypes[item.type] || { icon: faBell, tone: 'info' };
-            const unread = item.isRead === false;
+            <li className="pg-notifications__empty">
+              {text.empty}
+            </li>
+          ) : (
+            visibleNotifications.map((item) => {
+              const appearance = notificationTypes[item.type] || {
+                icon: faBell,
+                tone: 'info',
+              };
 
-            return (
-              <li key={item.id}>
-                {/* Clicking a notification marks it as read without opening another page. */}
-                <Dropdown.Item
-                  as="button"
-                  type="button"
-                  className="pg-notifications__item"
-                  onClick={() => {
-                    if (unread) onMarkAsRead?.(item.id);
-                  }}
-                >
-                  {/* Icon and background color based on the notification type. */}
-                  <span
-                    className={`pg-notifications__icon pg-notifications__icon--${appearance.tone}`}
-                    aria-hidden="true"
+              const unread = item.isRead === false;
+
+              return (
+                <li key={item.id}>
+                  <Dropdown.Item
+                    as="button"
+                    type="button"
+                    className="pg-notifications__item"
+                    onClick={() => {
+                      if (unread) {
+                        onMarkAsRead?.(item.id);
+                      }
+                    }}
                   >
-                    <FontAwesomeIcon icon={appearance.icon} />
-                  </span>
+                    <span
+                      className={
+                        `pg-notifications__icon ` +
+                        `pg-notifications__icon--${appearance.tone}`
+                      }
+                      aria-hidden="true"
+                    >
+                      <FontAwesomeIcon icon={appearance.icon} />
+                    </span>
 
-                  {/* Notification title, message, date, and read status. */}
-                  <span className="pg-notifications__text">
-                    <strong>{item.title}</strong>
-                    <span>{item.message}</span>
+                    <span className="pg-notifications__text">
+                      <strong>{item.title}</strong>
+                      <span>{item.message}</span>
 
-                    {/* Use a custom time label if available, otherwise format the date. */}
-                    <time dateTime={item.createdAt}>
-                      {item.timeLabel || new Date(item.createdAt).toLocaleString(locale)}
-                    </time>
+                      <time dateTime={item.createdAt}>
+                        {item.timeLabel ||
+                          new Date(item.createdAt).toLocaleString(
+                            resolvedLocale
+                          )}
+                      </time>
 
-                    {/* Read status for screen readers only. */}
-                    <span className="visually-hidden">{unread ? text.unread : text.read}</span>
-                  </span>
+                      <span className="visually-hidden">
+                        {unread ? text.unread : text.read}
+                      </span>
+                    </span>
 
-                  {/* Green dot appears only for unread notifications. */}
-                  {unread && <span className="pg-notifications__dot" aria-hidden="true" />}
-                </Dropdown.Item>
-              </li>
-            );
-          })}
+                    {unread && (
+                      <span
+                        className="pg-notifications__dot"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </Dropdown.Item>
+                </li>
+              );
+            })
+          )}
         </ul>
 
-        {/* Show the expand button only when there are more than five notifications. */}
         {notifications.length > 5 && (
           <div className="pg-notifications__footer">
             <Dropdown.Item
               as="button"
               type="button"
-              className="pg-notifications__action pg-notifications__expand"
-              onClick={() => setExpanded((value) => !value)}
+              className={
+                'pg-notifications__action ' +
+                'pg-notifications__expand'
+              }
+              onClick={() =>
+                setExpanded((value) => !value)
+              }
               aria-expanded={expanded}
               aria-controls={`${id}-list`}
             >
-              {/* Switch between showing all notifications and the first five. */}
               {expanded ? text.showLess : text.viewAll}
 
-              {/* Change the arrow icon depending on the expanded state. */}
               <FontAwesomeIcon
-                icon={expanded ? faChevronUp : faChevronRight}
-                className={expanded ? undefined : 'pg-notifications__arrow'}
+                icon={
+                  expanded ? faChevronUp : faChevronRight
+                }
+                className={
+                  expanded
+                    ? undefined
+                    : 'pg-notifications__arrow'
+                }
                 aria-hidden="true"
               />
             </Dropdown.Item>

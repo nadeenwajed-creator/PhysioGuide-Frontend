@@ -120,7 +120,7 @@ function MessageInput({ onSend, disabled = false, className = '' }) {
         <div className="pg-message-input__previews">
           <div className="pg-message-input__previews-heading">
             <span>{t('messageInput.selectedAttachments')}</span>
-            <span aria-label={t('messageInput.attachmentCount').replace('{count}', String(attachments.length))}>
+            <span aria-label={t('messageInput.attachmentCount', { count: attachments.length })}>
               {attachments.length}/{MAX_ATTACHMENTS}
             </span>
           </div>

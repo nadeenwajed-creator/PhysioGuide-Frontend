@@ -1,4 +1,7 @@
+
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 import ConversationItem from '../ConversationItem/ConversationItem';
+
 import './ConversationList.css';
 
 function ConversationList({
@@ -8,6 +11,11 @@ function ConversationList({
   emptyMessage,
   className = '',
 }) {
+  const { t } = useLanguage();
+
+  const resolvedEmptyMessage =
+    emptyMessage ?? t('conversationList.emptyMessage');
+
   const listClasses = [
     'pg-conversation-list',
     className,
@@ -18,9 +26,9 @@ function ConversationList({
   return (
     <div className={listClasses}>
       {conversations.length === 0 ? (
-        emptyMessage && (
+        resolvedEmptyMessage && (
           <p className="pg-conversation-list__empty">
-            {emptyMessage}
+            {resolvedEmptyMessage}
           </p>
         )
       ) : (

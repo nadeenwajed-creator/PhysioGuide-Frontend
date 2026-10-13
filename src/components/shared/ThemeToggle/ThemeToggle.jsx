@@ -1,12 +1,15 @@
+
 import { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 import ThemeContext from '../../../context/ThemeContext.jsx';
 
 import './ThemeToggle.css';
 
 function ThemeToggle({ labels = {}, disabled = false }) {
+  const { t } = useLanguage();
   const themeContext = useContext(ThemeContext);
 
   // Report an integration error instead of creating another theme state.
@@ -16,15 +19,18 @@ function ThemeToggle({ labels = {}, disabled = false }) {
 
   const { theme, toggleTheme } = themeContext;
 
-  // The parent can provide Arabic labels without a new translation system.
+  // Use translated defaults while allowing custom labels.
   const text = {
-    switchToDark: 'Switch to dark mode',
-    switchToLight: 'Switch to light mode',
+    switchToDark: t('themeToggle.switchToDark'),
+    switchToLight: t('themeToggle.switchToLight'),
     ...labels,
   };
 
   const isDark = theme === 'dark';
-  const actionLabel = isDark ? text.switchToLight : text.switchToDark;
+
+  const actionLabel = isDark
+    ? text.switchToLight
+    : text.switchToDark;
 
   return (
     <button

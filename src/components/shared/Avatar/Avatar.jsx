@@ -1,6 +1,9 @@
+
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
+
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './Avatar.css';
 
@@ -13,6 +16,8 @@ function Avatar({
   statusLabel,
   className = '',
 }) {
+  const { t } = useLanguage();
+
   const [imageState, setImageState] = useState({
     src,
     failed: false,
@@ -30,6 +35,10 @@ function Avatar({
   const accessibleLabel = alt === undefined ? displayName : alt;
   const avatarSize = ['sm', 'md', 'lg'].includes(size) ? size : 'md';
   const hasStatus = status === 'online' || status === 'offline';
+
+  const resolvedStatusLabel = hasStatus
+    ? statusLabel ?? t(`avatar.${status}`)
+    : undefined;
 
   const showImage = Boolean(src) &&
     !(imageState.src === src && imageState.failed);
@@ -99,9 +108,9 @@ function Avatar({
       {hasStatus && (
         <span
           className={`pg-avatar__status pg-avatar__status--${status}`}
-          role={statusLabel ? 'img' : undefined}
-          aria-label={statusLabel || undefined}
-          aria-hidden={statusLabel ? undefined : true}
+          role={resolvedStatusLabel ? 'img' : undefined}
+          aria-label={resolvedStatusLabel || undefined}
+          aria-hidden={resolvedStatusLabel ? undefined : true}
         />
       )}
     </span>

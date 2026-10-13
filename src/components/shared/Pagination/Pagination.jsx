@@ -1,4 +1,6 @@
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
+
 import './Pagination.css';
 
 function Pagination({
@@ -7,12 +9,31 @@ function Pagination({
   onPageChange,
   className = '',
   dir,
-  'aria-label': ariaLabel = 'Pagination',
-  previousLabel = 'Previous page',
-  nextLabel = 'Next page',
-  getPageLabel = (page) => `Page ${page}`,
-  getMobileLabel = (page, total) => `Page ${page} of ${total}`,
+  'aria-label': ariaLabel,
+  previousLabel,
+  nextLabel,
+  getPageLabel,
+  getMobileLabel,
 }) {
+  const { t, dir: languageDir } = useLanguage();
+
+  const resolvedDir = dir ?? languageDir;
+  const resolvedAriaLabel = ariaLabel ?? t('pagination.label');
+  const resolvedPreviousLabel =
+    previousLabel ?? t('pagination.previousPage');
+  const resolvedNextLabel =
+    nextLabel ?? t('pagination.nextPage');
+
+  const resolvedGetPageLabel =
+    getPageLabel ?? ((page) => t('pagination.page', { page }));
+
+  const resolvedGetMobileLabel =
+    getMobileLabel ??
+    ((page, total) => t('pagination.mobileLabel', {
+      page,
+      total,
+    }));
+
   if (!Number.isSafeInteger(totalPages) || totalPages <= 1) {
     return null;
   }
@@ -58,14 +79,14 @@ function Pagination({
         'pg-pagination',
         className,
       ].filter(Boolean).join(' ')}
-      dir={dir}
-      aria-label={ariaLabel}
+      dir={resolvedDir}
+      aria-label={resolvedAriaLabel}
     >
       <div className="pg-pagination__controls">
         <button
           type="button"
           className="pg-pagination__button pg-pagination__arrow"
-          aria-label={previousLabel}
+          aria-label={resolvedPreviousLabel}
           disabled={!canGoPrevious}
           onClick={() => changePage(activePage - 1)}
         >
@@ -97,7 +118,7 @@ function Pagination({
                   'pg-pagination__page',
                   isCurrent && 'pg-pagination__page--active',
                 ].filter(Boolean).join(' ')}
-                aria-label={getPageLabel(page)}
+                aria-label={resolvedGetPageLabel(page)}
                 aria-current={isCurrent ? 'page' : undefined}
                 onClick={() => changePage(page)}
               >
@@ -122,14 +143,14 @@ function Pagination({
 
           {/* Announce translated text instead of the visual fraction. */}
           <span className="pg-pagination__sr-only">
-            {getMobileLabel(activePage, totalPages)}
+            {resolvedGetMobileLabel(activePage, totalPages)}
           </span>
         </span>
 
         <button
           type="button"
           className="pg-pagination__button pg-pagination__arrow"
-          aria-label={nextLabel}
+          aria-label={resolvedNextLabel}
           disabled={!canGoNext}
           onClick={() => changePage(activePage + 1)}
         >

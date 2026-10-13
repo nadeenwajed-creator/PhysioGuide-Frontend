@@ -1,6 +1,8 @@
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 import AttachmentCard from '../AttachmentCard/AttachmentCard.jsx';
 
 import './MessageBubble.css';
@@ -13,6 +15,8 @@ function MessageBubble({
   onOpenAttachment,
   onDownloadAttachment,
 }) {
+  const { t } = useLanguage();
+
   const text = typeof message?.text === 'string' ? message.text : '';
   const hasText = Boolean(text.trim());
 
@@ -34,12 +38,13 @@ function MessageBubble({
   }
 
   const isOutgoing = message.direction === 'outgoing';
+
   const showStatus = isOutgoing &&
     ['sent', 'delivered'].includes(message.status);
 
   const statusLabel = message.status === 'sent'
-    ? sentLabel
-    : deliveredLabel;
+    ? sentLabel ?? t('messageBubble.sent')
+    : deliveredLabel ?? t('messageBubble.delivered');
 
   const bubbleClasses = [
     'pg-message-bubble',

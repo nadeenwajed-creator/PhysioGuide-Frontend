@@ -1,4 +1,6 @@
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
+
 import './StatusBadge.css';
 
 function StatusBadge({
@@ -7,6 +9,8 @@ function StatusBadge({
   className = '',
   dir,
 }) {
+  const { t, dir: languageDir } = useLanguage();
+
   const allowedStatuses = [
     'confirmed',
     'pending',
@@ -18,6 +22,11 @@ function StatusBadge({
     ? status
     : 'pending';
 
+  const resolvedDir = dir ?? languageDir;
+
+  const resolvedLabel =
+    children ?? t(`statusBadge.${badgeStatus}`);
+
   const classes = [
     'pg-status-badge',
     `pg-status-badge--${badgeStatus}`,
@@ -27,8 +36,8 @@ function StatusBadge({
     .join(' ');
 
   return (
-    <span className={classes} dir={dir}>
-      {children}
+    <span className={classes} dir={resolvedDir}>
+      {resolvedLabel}
     </span>
   );
 }

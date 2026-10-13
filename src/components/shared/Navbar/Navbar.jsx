@@ -1,7 +1,14 @@
+
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBars,
+  faMagnifyingGlass,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
+
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './Navbar.css';
 
@@ -18,12 +25,22 @@ function Navbar({
   onMenuToggle,
   menuOpen,
   menuId,
-  menuLabel = 'Toggle navigation',
-  homeLabel = 'PhysioGuide home',
-  openSearchLabel = 'Open search',
-  closeSearchLabel = 'Close search',
+  menuLabel,
+  homeLabel,
+  openSearchLabel,
+  closeSearchLabel,
 }) {
+  const { t } = useLanguage();
+
+  const resolvedMenuLabel = menuLabel ?? t('navbar.menu');
+  const resolvedHomeLabel = homeLabel ?? t('navbar.home');
+  const resolvedOpenSearchLabel =
+    openSearchLabel ?? t('navbar.openSearch');
+  const resolvedCloseSearchLabel =
+    closeSearchLabel ?? t('navbar.closeSearch');
+
   const [searchOpen, setSearchOpen] = useState(false);
+
   const [viewport, setViewport] = useState(() => ({
     mobile: window.matchMedia('(max-width: 767px)').matches,
     compact: window.matchMedia('(max-width: 991px)').matches,
@@ -33,7 +50,9 @@ function Navbar({
   const searchRef = useRef(null);
   const searchButtonRef = useRef(null);
   const focusAfterResize = useRef(false);
-  const hasSidebar = Boolean(menuId) && typeof menuOpen === 'boolean';
+
+  const hasSidebar =
+    Boolean(menuId) && typeof menuOpen === 'boolean';
 
   // These queries match the CSS breakpoints.
   useEffect(() => {
@@ -71,7 +90,10 @@ function Navbar({
 
   // Wait for the new layout before moving focus.
   useEffect(() => {
-    if (!focusAfterResize.current && !(viewport.mobile && searchOpen)) {
+    if (
+      !focusAfterResize.current &&
+      !(viewport.mobile && searchOpen)
+    ) {
       return;
     }
 
@@ -109,28 +131,45 @@ function Navbar({
     }
   }
 
-    const profileContent = typeof profileMenu === 'function'
+  const profileContent = typeof profileMenu === 'function'
     ? profileMenu({ compact: viewport.compact })
     : profileMenu;
 
   return (
-    <header className="pg-navbar" data-theme={theme} onKeyDown={handleKeyDown}>
+    <header
+      className="pg-navbar"
+      data-theme={theme}
+      onKeyDown={handleKeyDown}
+    >
       <div className="pg-navbar__brand">
         <button
           type="button"
           className="pg-navbar__icon-button"
           onClick={onMenuToggle}
           disabled={!onMenuToggle}
-          aria-label={menuLabel}
+          aria-label={resolvedMenuLabel}
           aria-expanded={hasSidebar ? menuOpen : undefined}
           aria-controls={hasSidebar ? menuId : undefined}
         >
           <FontAwesomeIcon icon={faBars} />
         </button>
 
-        <Link className="pg-navbar__logo" to={homePath} aria-label={homeLabel}>
-          {logoSrc && <img className="pg-navbar__logo-icon" src={logoSrc} alt="" />}
-          <span className="pg-navbar__logo-text">PhysioGuide</span>
+        <Link
+          className="pg-navbar__logo"
+          to={homePath}
+          aria-label={resolvedHomeLabel}
+        >
+          {logoSrc && (
+            <img
+              className="pg-navbar__logo-icon"
+              src={logoSrc}
+              alt=""
+            />
+          )}
+
+          <span className="pg-navbar__logo-text">
+            PhysioGuide
+          </span>
         </Link>
       </div>
 
@@ -140,7 +179,11 @@ function Navbar({
           type="button"
           className="pg-navbar__icon-button pg-navbar__search-toggle"
           onClick={toggleSearch}
-          aria-label={searchOpen ? closeSearchLabel : openSearchLabel}
+          aria-label={
+            searchOpen
+              ? resolvedCloseSearchLabel
+              : resolvedOpenSearchLabel
+          }
           aria-expanded={searchOpen}
           aria-controls={searchId}
         >
@@ -154,14 +197,16 @@ function Navbar({
         className="pg-navbar__search"
         hidden={viewport.mobile && !searchOpen}
       >
-        <div className="pg-navbar__search-content">{search}</div>
+        <div className="pg-navbar__search-content">
+          {search}
+        </div>
 
         {viewport.mobile && (
           <button
             type="button"
             className="pg-navbar__icon-button"
             onClick={closeSearch}
-            aria-label={closeSearchLabel}
+            aria-label={resolvedCloseSearchLabel}
           >
             <FontAwesomeIcon icon={faXmark} />
           </button>
@@ -175,9 +220,14 @@ function Navbar({
             {languageSwitcher}
           </>
         )}
+
         {viewport.mobile && quickSettings}
+
         {notifications}
-        <div className="pg-navbar__profile">{profileContent}</div>
+
+        <div className="pg-navbar__profile">
+          {profileContent}
+        </div>
       </div>
     </header>
   );

@@ -4,6 +4,8 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
 
+import { useLanguage } from '../../../context/LanguageContext.jsx';
+
 import './ActionsMenu.css';
 
 const popperConfig = {
@@ -30,12 +32,16 @@ const popperConfig = {
 
 function ActionsMenu({
   items = [],
-  ariaLabel = 'Actions',
+  ariaLabel,
   className = '',
 }) {
+  const { t, dir } = useLanguage();
+
   const [open, setOpen] = useState(false);
   const toggleRef = useRef(null);
   const id = useId();
+
+  const resolvedAriaLabel = ariaLabel ?? t('actionsMenu.label');
 
   const menuClasses = [
     'pg-actions-menu',
@@ -73,7 +79,8 @@ function ActionsMenu({
       show={open}
       onToggle={setOpen}
       onKeyDown={handleKeyDown}
-      align="end"
+      align={dir === 'rtl' ? 'start' : 'end'}
+      dir={dir}
       focusFirstItemOnShow
     >
       <Dropdown.Toggle
@@ -82,7 +89,7 @@ function ActionsMenu({
         id={`${id}-toggle`}
         type="button"
         className="pg-actions-menu__toggle"
-        aria-label={ariaLabel}
+        aria-label={resolvedAriaLabel}
         aria-haspopup="menu"
         aria-controls={`${id}-menu`}
       >

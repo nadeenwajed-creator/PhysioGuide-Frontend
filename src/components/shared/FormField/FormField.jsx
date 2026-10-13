@@ -1,9 +1,12 @@
+
 import { useId, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEye,
   faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
+
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './FormField.css';
 
@@ -28,11 +31,19 @@ function FormField({
   className = '',
   autoComplete,
   showPasswordToggle = false,
-  showPasswordLabel = 'Show password',
-  hidePasswordLabel = 'Hide password',
+  showPasswordLabel,
+  hidePasswordLabel,
 }) {
+  const { t } = useLanguage();
+
   const generatedId = useId();
   const [passwordVisible, setPasswordVisible] = useState(false);
+
+  const resolvedShowPasswordLabel =
+    showPasswordLabel ?? t('formField.showPassword');
+
+  const resolvedHidePasswordLabel =
+    hidePasswordLabel ?? t('formField.hidePassword');
 
   const fieldId = id ?? generatedId;
   const helperId = `${fieldId}-helper`;
@@ -137,8 +148,8 @@ function FormField({
                 className="pg-form-field__password-toggle"
                 aria-label={
                   passwordVisible
-                    ? hidePasswordLabel
-                    : showPasswordLabel
+                    ? resolvedHidePasswordLabel
+                    : resolvedShowPasswordLabel
                 }
                 aria-controls={fieldId}
                 disabled={disabled}
