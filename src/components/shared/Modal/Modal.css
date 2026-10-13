@@ -1,0 +1,298 @@
+
+/* =========================================
+   PhysioGuide - Shared Modal
+   Responsive Design
+========================================= */
+
+/* Overlay */
+.pg-modal__overlay {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+
+  inline-size: 100%;
+  block-size: 100vh;
+  block-size: 100dvh;
+
+  max-inline-size: none;
+  max-block-size: none;
+
+  margin: 0;
+  padding: 24px;
+
+  border: 0;
+  background: transparent;
+
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+/* Center modal */
+.pg-modal__overlay[open] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+}
+
+/* Backdrop */
+.pg-modal__overlay::backdrop {
+  background: color-mix(
+    in srgb,
+    var(--color-primary-darker) 40%,
+    transparent
+  );
+}
+
+/* Box sizing */
+.pg-modal,
+.pg-modal * {
+  box-sizing: border-box;
+}
+
+/* =========================================
+   Modal Container
+========================================= */
+
+.pg-modal {
+  display: flex;
+  flex-direction: column;
+
+  inline-size: 100%;
+  max-inline-size: 640px;
+  max-block-size: 100%;
+
+  min-inline-size: 0;
+  min-block-size: 0;
+
+  /* Keep header and footer visible. */
+  overflow: hidden;
+
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+
+  font-family: inherit;
+  overflow-wrap: anywhere;
+
+  box-shadow: 0 16px 32px
+    color-mix(
+      in srgb,
+      var(--color-primary-darker) 12%,
+      transparent
+    );
+}
+
+/* =========================================
+   Modal Sizes
+========================================= */
+
+.pg-modal--sm {
+  max-inline-size: 400px;
+}
+
+.pg-modal--md {
+  max-inline-size: 640px;
+}
+
+.pg-modal--lg {
+  max-inline-size: 880px;
+}
+
+/* =========================================
+   Fixed Header and Footer
+========================================= */
+
+.pg-modal__header,
+.pg-modal__footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+
+  min-inline-size: 0;
+  gap: 12px;
+  padding: 16px 24px;
+}
+
+.pg-modal__header {
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* =========================================
+   Modal Title
+========================================= */
+
+.pg-modal__title {
+  flex: 1;
+  min-inline-size: 0;
+
+  margin: 0;
+
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pg-modal__title:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* =========================================
+   Close Button
+========================================= */
+
+.pg-modal__close.pg-button {
+  flex-shrink: 0;
+
+  inline-size: 44px;
+  min-inline-size: 44px;
+
+  block-size: 44px;
+  min-block-size: 44px;
+
+  padding: 0;
+  border-radius: 10px;
+}
+
+.pg-modal__close .pg-button__icon {
+  font-size: 16px;
+}
+
+/* =========================================
+   Scrollable Modal Body
+========================================= */
+
+.pg-modal__body {
+  flex: 1 1 auto;
+
+  min-inline-size: 0;
+  min-block-size: 0;
+
+  padding: 24px;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* =========================================
+   Fixed Modal Footer
+========================================= */
+
+.pg-modal__footer {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  border-top: 1px solid var(--color-border);
+}
+
+.pg-modal__footer > * {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* =========================================
+   Tablet - 768px to 991px
+========================================= */
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .pg-modal__overlay {
+    padding: 16px;
+  }
+
+  .pg-modal {
+    border-radius: 16px;
+  }
+
+  .pg-modal__header,
+  .pg-modal__footer {
+    gap: 10px;
+    padding: 14px 18px;
+  }
+
+  .pg-modal__title {
+    font-size: 20px;
+  }
+
+  .pg-modal__body {
+    padding: 18px;
+  }
+}
+
+/* =========================================
+   Mobile - up to 767px
+========================================= */
+
+@media (max-width: 767px) {
+  .pg-modal__overlay {
+    padding: 16px;
+  }
+
+  .pg-modal {
+    max-inline-size: 340px;
+    border-radius: 10px;
+  }
+
+  .pg-modal__header,
+  .pg-modal__footer {
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .pg-modal__title {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .pg-modal__body {
+    padding: 10px;
+  }
+
+  .pg-modal__close .pg-button__icon {
+    font-size: 14px;
+  }
+}
+
+/* =========================================
+   Small Mobile - below 480px
+========================================= */
+
+@media (max-width: 479px) {
+  .pg-modal__overlay {
+    padding: 12px;
+  }
+}
+
+/* =========================================
+   Very Short Viewports
+========================================= */
+
+/*
+  Allow the whole panel to scroll only when
+  the viewport is too short for fixed sections.
+*/
+
+@media (max-height: 320px) {
+  .pg-modal {
+    overflow-y: auto;
+  }
+
+  .pg-modal__body {
+    flex: 0 0 auto;
+    overflow-y: visible;
+  }
+}
+
+/* =========================================
+   Reduced Motion
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-modal {
+    scroll-behavior: auto;
+  }
+}

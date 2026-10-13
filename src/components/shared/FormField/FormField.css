@@ -1,0 +1,225 @@
+/* PhysioGuide - Shared FormField */
+
+.pg-form-field,
+.pg-form-field * {
+  box-sizing: border-box;
+}
+
+.pg-form-field {
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  container-name: pg-form-field;
+  container-type: inline-size;
+
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+/* Label and field layout */
+.pg-form-field__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+
+  min-inline-size: 0;
+}
+
+.pg-form-field--horizontal > .pg-form-field__layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  column-gap: 16px;
+}
+
+.pg-form-field__label {
+  min-inline-size: 0;
+  margin: 0;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+
+  overflow-wrap: anywhere;
+}
+
+.pg-form-field--horizontal
+  > .pg-form-field__layout
+  > .pg-form-field__label {
+  padding-block-start: 12px;
+}
+
+.pg-form-field__required {
+  margin-inline-start: 4px;
+  color: var(--color-text-primary);
+}
+
+.pg-form-field__content {
+  display: grid;
+  gap: 4px;
+
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.pg-form-field__input-wrap {
+  position: relative;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+/* Native input and textarea */
+.pg-form-field__control {
+  display: block;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: 44px;
+
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 12px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.pg-form-field__control::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
+}
+
+.pg-form-field__control--textarea {
+  resize: vertical;
+  overflow-wrap: anywhere;
+}
+
+/* Reserve space for the password button. */
+.pg-form-field__control--password {
+  padding-inline-end: 56px;
+}
+
+/* Hover does not change field dimensions. */
+@media (hover: hover) {
+  .pg-form-field__control:hover:not(:disabled):not(:read-only) {
+    background-color: var(--color-bg-light);
+  }
+
+  .pg-form-field__password-toggle:hover:not(:disabled) {
+    background-color: var(--color-surface-mint);
+  }
+}
+
+/* Keyboard and editing focus */
+.pg-form-field__control:focus {
+  border-color: var(--color-primary-light);
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+/* Keep the error border visible while retaining the focus outline. */
+.pg-form-field__control[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+/* Read-only fields remain focusable and selectable. */
+.pg-form-field__control[readonly] {
+  background-color: var(--color-bg-soft);
+}
+
+.pg-form-field__control:disabled {
+  background-color: var(--color-bg-soft);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Password visibility */
+.pg-form-field__password-toggle {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 1px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 44px;
+  block-size: 44px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 8px;
+
+  background-color: transparent;
+  color: var(--color-primary);
+
+  font: inherit;
+
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.pg-form-field__password-icon {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.pg-form-field__password-toggle:active:not(:disabled) {
+  background-color: var(--color-surface-mint);
+  color: var(--color-primary-darker);
+}
+
+.pg-form-field__password-toggle:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: -3px;
+}
+
+.pg-form-field__password-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Supporting messages follow the surrounding page direction. */
+.pg-form-field__helper,
+.pg-form-field__error {
+  min-inline-size: 0;
+  margin: 0;
+
+  font-size: 14px;
+  line-height: 1.5;
+
+  overflow-wrap: anywhere;
+}
+
+.pg-form-field__helper {
+  color: var(--color-text-secondary);
+}
+
+.pg-form-field__error {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* Respond to this component's width, not the viewport width. */
+@container pg-form-field (max-width: 24rem) {
+  .pg-form-field--horizontal > .pg-form-field__layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .pg-form-field--horizontal
+    > .pg-form-field__layout
+    > .pg-form-field__label {
+    padding-block-start: 0;
+  }
+}

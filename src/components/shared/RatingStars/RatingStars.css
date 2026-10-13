@@ -1,0 +1,143 @@
+.pg-rating-stars {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  vertical-align: middle;
+
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Desktop and laptop sizes */
+.pg-rating-stars--sm {
+  font-size: 16px;
+}
+
+.pg-rating-stars--md {
+  font-size: 20px;
+}
+
+.pg-rating-stars__list {
+  display: inline-flex;
+  flex-shrink: 0;
+  direction: ltr;
+  gap: 4px;
+
+  color: var(--color-warning);
+}
+
+.pg-rating-stars__star {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+
+  inline-size: 1em;
+  block-size: 1em;
+}
+
+/* Keep SVG dimensions independent of the partial-fill container. */
+.pg-rating-stars__icon {
+  display: block;
+
+  inline-size: 1em;
+  min-inline-size: 1em;
+  max-inline-size: none;
+
+  block-size: 1em;
+  min-block-size: 1em;
+  max-block-size: none;
+}
+
+/* Only this clipping window changes width, not the star itself. */
+.pg-rating-stars__fill {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+
+  block-size: 100%;
+  overflow: hidden;
+}
+
+.pg-rating-stars__fill .pg-rating-stars__icon {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+}
+
+.pg-rating-stars__value {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  color: var(--color-text-primary);
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+
+  overflow-wrap: anywhere;
+}
+
+.pg-rating-stars--md .pg-rating-stars__value {
+  font-size: 16px;
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 991px) {
+  .pg-rating-stars {
+    gap: 6px;
+  }
+
+  .pg-rating-stars--sm {
+    font-size: 14px;
+  }
+
+  .pg-rating-stars--md {
+    font-size: 17px;
+  }
+
+  .pg-rating-stars__list {
+    gap: 3px;
+  }
+
+  .pg-rating-stars__value {
+    font-size: 13px;
+  }
+
+  .pg-rating-stars--md .pg-rating-stars__value {
+    font-size: 14px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .pg-rating-stars {
+    gap: 4px;
+  }
+
+  .pg-rating-stars--sm {
+    font-size: 12px;
+  }
+
+  .pg-rating-stars--md {
+    font-size: 14px;
+  }
+
+  .pg-rating-stars__list {
+    gap: 2px;
+  }
+
+  .pg-rating-stars__value {
+    font-size: 12px;
+  }
+
+  .pg-rating-stars--md .pg-rating-stars__value {
+    font-size: 12px;
+  }
+}

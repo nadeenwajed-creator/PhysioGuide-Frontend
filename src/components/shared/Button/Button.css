@@ -1,0 +1,326 @@
+.pg-button {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  min-block-size: 46px;
+  padding-block: 8px;
+  padding-inline: 18px;
+
+  border: 1px solid transparent;
+  border-radius: 12px;
+
+  background-color: var(--color-primary);
+  color: var(--color-white);
+
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  white-space: normal;
+
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+/* Variants */
+.pg-button--primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.pg-button--outline {
+  background-color: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pg-button--danger {
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger);
+  color: var(--color-text-primary);
+}
+
+.pg-button--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-primary);
+}
+
+/* Desktop and laptop sizes */
+.pg-button--sm {
+  min-block-size: 38px;
+  padding-block: 5px;
+  padding-inline: 12px;
+  font-size: 14px;
+}
+
+.pg-button--md {
+  min-block-size: 46px;
+}
+
+.pg-button--lg {
+  min-block-size: 50px;
+  padding-inline: 24px;
+  font-size: 17px;
+}
+
+.pg-button--full-width {
+  inline-size: 100%;
+}
+
+.pg-button--icon-only {
+  flex-shrink: 0;
+  inline-size: 46px;
+  min-block-size: 46px;
+  padding: 0;
+}
+
+.pg-button--icon-only.pg-button--sm {
+  inline-size: 38px;
+  min-block-size: 38px;
+}
+
+.pg-button--icon-only.pg-button--lg {
+  inline-size: 50px;
+  min-block-size: 50px;
+}
+
+/* Content */
+.pg-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.pg-button__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Hidden text still names an icon-only button for screen readers. */
+.pg-button__label--visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pg-button__icon {
+  flex-shrink: 0;
+  inline-size: 1em;
+  block-size: 1em;
+  font-size: 16px;
+}
+
+.pg-button--icon-only .pg-button__icon {
+  font-size: 18px;
+}
+
+/* Hover */
+@media (hover: hover) {
+  .pg-button--primary:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+  }
+
+  .pg-button--outline:hover:not(:disabled),
+  .pg-button--ghost:hover:not(:disabled) {
+    background-color: var(--color-surface-mint);
+  }
+
+  .pg-button--danger:hover:not(:disabled) {
+    background-color: var(--color-surface);
+  }
+}
+
+/* Pressed */
+.pg-button--primary:active:not(:disabled) {
+  background-color: var(--color-primary-darker);
+  border-color: var(--color-primary-darker);
+}
+
+.pg-button--outline:active:not(:disabled),
+.pg-button--ghost:active:not(:disabled) {
+  background-color: var(--color-surface-mint);
+  border-color: var(--color-primary);
+  color: var(--color-primary-darker);
+}
+
+.pg-button--danger:active:not(:disabled) {
+  background-color: var(--color-danger-bg);
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+}
+
+.pg-button:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 3px;
+}
+
+/* Disabled and loading */
+.pg-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pg-button--loading:disabled {
+  opacity: 1;
+  cursor: progress;
+}
+
+.pg-button--loading .pg-button__content {
+  opacity: 0;
+}
+
+.pg-button__loader {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pg-button__spinner {
+  inline-size: 1em;
+  block-size: 1em;
+  font-size: 18px;
+  animation: pg-button-spin 800ms linear infinite;
+}
+
+@keyframes pg-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 991px) {
+  .pg-button {
+    min-block-size: 40px;
+    padding-block: 6px;
+    padding-inline: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+
+  .pg-button--sm {
+    min-block-size: 40px;
+    padding-block: 4px;
+    padding-inline: 9px;
+    font-size: 12px;
+  }
+
+  .pg-button--md {
+    min-block-size: 40px;
+  }
+
+  .pg-button--lg {
+    min-block-size: 44px;
+    padding-inline: 18px;
+    font-size: 15px;
+  }
+
+  .pg-button__content {
+    gap: 6px;
+  }
+
+  .pg-button__icon {
+    font-size: 14px;
+  }
+
+  .pg-button--icon-only,
+  .pg-button--icon-only.pg-button--sm,
+  .pg-button--icon-only.pg-button--lg {
+    inline-size: 44px;
+    min-block-size: 44px;
+    padding: 0;
+  }
+
+  .pg-button--icon-only .pg-button__icon {
+    font-size: 16px;
+  }
+}
+
+/* Mobile: actual button space grows without overlapping nearby controls. */
+@media (max-width: 767px) {
+  .pg-button {
+    min-inline-size: 40px;
+    min-block-size: 40px;
+    padding-block: 5px;
+    padding-inline: 8px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  .pg-button--sm {
+    min-block-size: 40px;
+    padding-block: 4px;
+    padding-inline: 7px;
+    font-size: 11px;
+  }
+
+  .pg-button--md {
+    min-block-size: 40px;
+  }
+
+  .pg-button--lg {
+    min-block-size: 44px;
+    padding-inline: 12px;
+    font-size: 14px;
+  }
+
+  .pg-button__content {
+    gap: 5px;
+  }
+
+  .pg-button__icon {
+    font-size: 12px;
+  }
+
+  .pg-button--icon-only,
+  .pg-button--icon-only.pg-button--sm,
+  .pg-button--icon-only.pg-button--lg {
+    inline-size: 44px;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    padding: 0;
+  }
+
+  .pg-button--icon-only .pg-button__icon {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-button {
+    transition: none;
+  }
+
+  .pg-button__spinner {
+    animation: none;
+  }
+}
