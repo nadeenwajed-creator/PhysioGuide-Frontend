@@ -65,5 +65,4 @@ export function ThemeProvider({ children }) {
 }
 
 // Keep the context and its provider in the single approved context file.
-// eslint-disable-next-line react-refresh/only-export-components
 export default ThemeContext;
