@@ -1,9 +1,7 @@
+import AppRoutes from './routes/AppRoutes.jsx';
+
 function App() {
-  return (
-    <div>
-      <h1>PhysioGuide</h1>
-    </div>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
