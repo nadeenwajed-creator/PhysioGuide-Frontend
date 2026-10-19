@@ -1,0 +1,235 @@
+
+/* Main card and panel positions. */
+.auth-shell {
+  --auth-form-shift: -20px;
+  --auth-mobile-shift: 12px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  inline-size: min(980px, calc(100% - 40px));
+  margin: 12px auto;
+  min-block-size: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 20px 48px color-mix(in srgb, var(--color-primary-darker) 9%, transparent);
+}
+.auth-shell--signup { --auth-form-shift: 20px; }
+.auth-shell:dir(rtl) { --auth-form-shift: 20px; --auth-mobile-shift: -12px; }
+.auth-shell--signup:dir(rtl) { --auth-form-shift: -20px; }
+
+.auth-shell__back {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: 16px;
+  inset-inline-start: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  max-inline-size: calc(100% - 32px);
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+.auth-shell__back:hover { color: var(--color-primary); background: var(--color-bg-light); }
+.auth-shell a:focus-visible { outline: 3px solid var(--color-primary-light); outline-offset: 4px; }
+
+.auth-shell__panel {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: 50%;
+  display: flex;
+  align-items: center;
+  padding: 80px 40px 32px 64px;
+  border-start-end-radius: 20px;
+  border-end-end-radius: 20px;
+  background: var(--color-primary-darker);
+  color: var(--color-white);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 12% 100%);
+  transform: translate3d(0, 0, 0);
+  transition: transform 850ms cubic-bezier(.76, 0, .24, 1),
+    clip-path 850ms cubic-bezier(.76, 0, .24, 1),
+    border-radius 850ms cubic-bezier(.76, 0, .24, 1);
+  backface-visibility: hidden;
+}
+.auth-shell--signup .auth-shell__panel {
+  transform: translateX(-100%);
+  border-radius: 20px 0 0 20px;
+  clip-path: polygon(0 0, 88% 0, 100% 100%, 0 100%);
+}
+.auth-shell__story { inline-size: 100%; min-inline-size: 0; }
+.auth-shell__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 44px;
+  max-inline-size: 100%;
+  color: inherit;
+  text-decoration: none;
+  font-size: 24px;
+  font-weight: 700;
+  margin-block-end: 24px;
+}
+
+/* Makes only the Auth icon white while keeping its transparent shape. */
+.auth-shell__logo { flex-shrink: 0; inline-size: 40px; block-size: 40px; object-fit: contain; filter: brightness(0) invert(1); }
+.auth-shell__eyebrow { font-size: 12px; letter-spacing: .12em; font-weight: 600; text-transform: uppercase; }
+.auth-shell__story h2 { font-size: clamp(30px, 3vw, 42px); font-weight: 600; line-height: 1.2; margin-block: 12px 20px; }
+.auth-shell__story h2 span { display: block; color: var(--color-surface-mint); }
+.auth-shell__description { line-height: 1.75; color: var(--color-bg-soft); margin: 0; }
+.auth-shell__form-area { grid-column: 1; min-inline-size: 0; padding: 76px 40px 28px; align-self: center; }
+.auth-shell--signup .auth-shell__form-area { grid-column: 2; }
+
+.auth-shell__form-entry {
+  animation: auth-form-enter 700ms cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes auth-form-enter {
+  0% { opacity: 0; transform: translate3d(var(--auth-form-shift), 0, 0); }
+  35% { opacity: 0; }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.auth-shell:dir(rtl) .auth-shell__panel { padding: 80px 64px 32px 40px; clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%); }
+.auth-shell--signup:dir(rtl) .auth-shell__panel { transform: translateX(100%); border-radius: 0 20px 20px 0; clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%); }
+:root[data-theme='dark'] .auth-shell__panel { background: var(--color-surface-mint); color: var(--color-text-primary); }
+:root[data-theme='dark'] .auth-shell__story h2 span { color: var(--color-primary); }
+:root[data-theme='dark'] .auth-shell__description { color: var(--color-text-primary); }
+.auth-shell__eyebrow:lang(ar) { letter-spacing: normal; }
+.auth-shell__story h2:lang(ar) { line-height: 1.5; }
+
+/* Keeps the compact brand header on mobile and tablets. */
+@media (max-width: 959px) {
+  .auth-shell { display: flex; flex-direction: column; inline-size: min(640px, calc(100% - 24px)); margin-block: 4px 24px; border-radius: 18px; }
+  .auth-shell__back { inset-block-start: 12px; inset-inline-start: auto; inset-inline-end: 12px; inline-size: 44px; min-block-size: 44px; padding: 0; justify-content: center; background: transparent; color: var(--color-primary-darker); }
+  .auth-shell__back-label { display: none; }
+  .auth-shell__panel,
+  .auth-shell:dir(rtl) .auth-shell__panel,
+  .auth-shell--signup .auth-shell__panel,
+  .auth-shell--signup:dir(rtl) .auth-shell__panel {
+    position: relative;
+    inset: auto;
+    inline-size: 100%;
+    padding: 12px 16px 16px;
+    border-block-end: 1px solid var(--color-border);
+    border-radius: 18px 18px 0 0;
+    background: var(--color-surface-mint);
+    color: var(--color-primary-darker);
+    clip-path: none;
+    transform: none;
+    transition: none;
+    animation: auth-panel-compact-login 360ms cubic-bezier(.22, .7, .2, 1) both;
+  }
+  
+  .auth-shell--signup .auth-shell__panel,
+  .auth-shell--signup:dir(rtl) .auth-shell__panel { animation-name: auth-panel-compact-signup; }
+  .auth-shell__brand { min-block-size: 44px; max-inline-size: calc(100% - 48px); margin: 0; gap: 8px; font-size: 20px; color: var(--color-primary-darker); }
+  .auth-shell__logo { inline-size: 32px; block-size: 32px; }
+  .auth-shell__eyebrow { font-size: 10px; line-height: 1.4; letter-spacing: .06em; margin-block: 4px; }
+  .auth-shell__story h2, .auth-shell__story h2:lang(ar) { font-size: 19px; line-height: 1.4; margin: 0; }
+  .auth-shell__story h2 span { display: inline; color: var(--color-primary-dark); }
+  .auth-shell__description { font-size: 12px; line-height: 1.6; color: var(--color-text-primary); margin-block-start: 8px; }
+  .auth-shell__form-area { inline-size: 100%; padding: 20px 24px 24px; }
+  .auth-shell__form-entry { animation: auth-form-compact-login 360ms cubic-bezier(.22, .7, .2, 1) both; }
+  .auth-shell--signup .auth-shell__form-entry { animation-name: auth-form-compact-signup; }
+}
+
+@media (max-width: 599px) {
+  .auth-shell__description { display: none; }
+  .auth-shell__form-area { padding: 16px 16px 20px; }
+}
+
+/* Compact transitions follow the current reading direction. */
+@keyframes auth-panel-compact-login {
+  from { opacity: .6; transform: translateX(calc(-1 * var(--auth-mobile-shift))); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes auth-panel-compact-signup {
+  from { opacity: .6; transform: translateX(var(--auth-mobile-shift)); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes auth-form-compact-login {
+  from { opacity: .4; transform: translateX(var(--auth-mobile-shift)); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes auth-form-compact-signup {
+  from { opacity: .4; transform: translateX(calc(-1 * var(--auth-mobile-shift))); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell .auth-shell__panel,
+  .auth-shell:dir(rtl) .auth-shell__panel,
+  .auth-shell .auth-shell__form-entry { animation: none; transition: none; }
+}
+
+@media (max-width: 959px) {
+  .auth-shell { margin-block: 10px; }
+  .auth-shell__panel, .auth-shell:dir(rtl) .auth-shell__panel { padding-block: 10px; }
+  .auth-shell__eyebrow, .auth-shell__description { display: none; }
+  .auth-shell__story h2 { font-size: 16px; }
+  .auth-shell__form-area { padding: 16px 20px; }
+}
+
+/* Compact header and footer spacing applies only to Auth pages. */
+.public-layout:has(.auth-shell) .public-layout__main { display: flex; flex-direction: column; justify-content: center; }
+.public-layout:has(.auth-shell) .public-header__inner { min-block-size: 52px; padding-block: 4px; }
+.public-layout:has(.auth-shell) > .pg-footer { padding-block: 10px; gap: 12px; font-size: 11px; }
+.public-layout:has(.auth-shell) .pg-footer__brand { align-items: center; gap: 8px; }
+.public-layout:has(.auth-shell) .pg-footer__logo { inline-size: 28px; block-size: 28px; }
+.public-layout:has(.auth-shell) .pg-footer__name { font-size: 16px; }
+@media (max-width: 767px) {
+  .public-layout:has(.auth-shell) > .pg-footer { flex-direction: row; align-items: center; gap: 8px; }
+  .public-layout:has(.auth-shell) .pg-footer__copyright { max-inline-size: 48%; text-align: end; font-size: 10px; }
+  .public-layout:has(.auth-shell) .pg-footer__name { font-size: 13px; }
+}
+
+/* Desktop panels share the card evenly and leave room for longer forms. */
+@media (min-width: 960px) {
+  .auth-shell { inline-size: min(900px, calc(100% - 48px)); min-block-size: 510px; margin-block: 28px; isolation: isolate; }
+  .auth-shell__form-area, .auth-shell--signup .auth-shell__form-area { grid-column: 1; padding: 58px 30px 30px; align-self: center; }
+  .auth-shell .auth-shell__form-area--signup { grid-column: 2; }
+  .auth-shell__form-entry { animation: none; }
+  .auth-shell__back { inset-block-start: 12px; inset-inline-start: 16px; padding: 6px 10px; font-size: 12px; }
+  .auth-shell__panel, .auth-shell:dir(rtl) .auth-shell__panel { padding: 64px 38px; padding-inline-start: 54px; background: #0b5754; color: #f5fffd; transition: transform 800ms cubic-bezier(.65, 0, .25, 1), clip-path 800ms cubic-bezier(.65, 0, .25, 1), border-radius 800ms; }
+  .auth-shell__story { max-inline-size: 300px; margin-inline: auto; }
+  .auth-shell__brand { font-size: 23px; gap: 9px; margin-block-end: 28px; }
+  .auth-shell__logo { inline-size: 36px; block-size: 36px; }
+  .auth-shell__eyebrow { margin: 0 0 12px; font-size: 10px; line-height: 1.6; letter-spacing: .1em; color: #c2e4de; }
+  .auth-shell__story h2 { font-size: 29px; line-height: 1.3; margin: 0 0 18px; text-wrap: balance; }
+  .auth-shell__story h2:lang(ar) { font-size: 27px; line-height: 1.65; }
+  .auth-shell__story h2 span { color: #b9e8dd; }
+  .auth-shell__description { font-size: 13px; line-height: 1.85; color: #d2e8e3; }
+}
+
+/* Auth colors give dark forms clear borders and a deeper teal panel. */
+:root[data-theme='dark'] .auth-shell {
+  --color-surface: #152629;
+  --color-bg-light: #1d3538;
+  --color-bg-soft: #1d3538;
+  --color-text-primary: #e7f2ef;
+  --color-text-secondary: #b8ceca;
+  --color-border: #496266;
+  --color-primary: #78d8c5;
+  --color-primary-dark: #a0e8d9;
+  --color-primary-darker: #effaf6;
+  --color-primary-light: #91e3d2;
+  --color-surface-mint: #203e3f;
+  --color-white: #0a2929;
+  --color-info-bg: #1c383b;
+  --color-danger-bg: #3d282e;
+  background: var(--color-surface);
+  box-shadow: 0 20px 48px #0005;
+}
+:root[data-theme='dark'] .auth-shell__panel { background: #103f3e; color: #f0faf6; }
+:root[data-theme='dark'] .auth-shell__brand { color: #effaf6; }
+:root[data-theme='dark'] .auth-shell__story h2 span { color: #a3e2d2; }
+:root[data-theme='dark'] .auth-shell__description { color: #d2e5df; }
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell .auth-shell__panel,
+  .auth-shell:dir(rtl) .auth-shell__panel { transition: none; }
+}
