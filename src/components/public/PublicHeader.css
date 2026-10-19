@@ -1,0 +1,203 @@
+/* Desktop navigation layout. */
+.public-header {
+  background: var(--color-surface);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.public-header__inner {
+  inline-size: min(1280px, calc(100% - 48px));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-block-size: 76px;
+  flex-wrap: nowrap;
+  padding-block: 8px;
+}
+
+.public-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  text-decoration: none;
+  color: var(--color-primary-darker);
+  font-size: 23px;
+  font-weight: 750;
+  letter-spacing: -.8px;
+}
+
+.public-header__brand img {
+  flex-shrink: 0;
+  inline-size: 44px;
+  block-size: 44px;
+  object-fit: contain;
+}
+
+.public-header__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 20px;
+  flex-wrap: nowrap;
+}
+
+.public-header__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  border-block-end: 2px solid transparent;
+}
+
+.public-header__nav a:hover,
+.public-header__nav a[aria-current="location"] {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.public-header__actions, .public-header__desktop-settings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.public-header__actions {
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+
+.public-header__mobile-settings, .public-header__mobile-menu {
+  display: none;
+}
+
+.public-header__home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.public-header--compact {
+  background: transparent;
+  border: 0;
+}
+
+.public-header--compact .public-header__inner {
+  min-block-size: 64px;
+}
+
+.public-header a:focus-visible, .public-header button:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 4px;
+}
+
+/* Adjusts navigation spacing on laptops. */
+@media (min-width: 1100px) and (max-width: 1279px) {
+  .public-header__inner, .public-header__nav { gap: 12px; }
+  .public-header__brand { font-size: 21px; gap: 6px; }
+  .public-header__brand img { inline-size: 40px; block-size: 40px; }
+  .public-header .public-header__login { padding: 10px 16px; min-block-size: 44px; font-size: 14px; }
+}
+
+/* Shows the menu and compact settings on smaller screens. */
+@media (max-width: 1099px) {
+  .public-header__inner {
+    inline-size: calc(100% - 32px);
+    gap: 8px;
+    min-block-size: 68px;
+  }
+  .public-header__brand {
+    font-size: 20px;
+    letter-spacing: -.7px;
+    gap: 4px;
+  }
+  .public-header__brand img {
+    inline-size: 36px;
+    block-size: 36px;
+  }
+  .public-header__desktop-settings, .public-header__nav, .public-header .public-header__login {
+    display: none;
+  }
+  .public-header__mobile-settings, .public-header__mobile-menu {
+    display: block;
+  }
+  .public-header__actions {
+    gap: 4px;
+  }
+  .public-header__menu-toggle {
+    display: grid;
+    place-items: center;
+    inline-size: 44px;
+    block-size: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--color-primary);
+  }
+  .public-header__menu-toggle::after {
+    display: none;
+  }
+  .public-header__menu-toggle:hover {
+    background: var(--color-bg-light);
+  }
+  .public-header__menu {
+    min-inline-size: 0;
+    inline-size: min(232px, calc(100vw - 32px));
+    padding: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text-primary) 12%, transparent);
+  }
+  .public-header__menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    min-block-size: 44px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    white-space: normal;
+    color: var(--color-text-primary);
+    text-align: start;
+    overflow-wrap: anywhere;
+  }
+  .public-header__menu .dropdown-item:hover, .public-header__menu .dropdown-item:focus,
+  .public-header__menu .dropdown-item[aria-current='location'] {
+    background: var(--color-bg-light);
+    color: var(--color-primary);
+  }
+  .public-header__home {
+    max-inline-size: calc(100% - 56px);
+  }
+}
+
+@media (max-width: 359px) {
+  .public-header__brand {
+    font-size: 18px;
+  }
+  .public-header__brand img {
+    inline-size: 32px;
+    block-size: 32px;
+  }
+}
+
+/* Keeps the landing navigation visible while scrolling. */
+.public-header:not(.public-header--compact) {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1020;
+}
+.public-header__brand { flex-shrink: 0; white-space: nowrap; }
+.public-header__menu .dropdown-item[aria-current='location'] {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+}
