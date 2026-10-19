@@ -1,6 +1,8 @@
 
 /* Main card and panel positions. */
 .auth-shell {
+  --auth-brand-background: #0b5754;
+  --auth-brand-text: #f5fffd;
   --auth-form-shift: -20px;
   --auth-mobile-shift: 12px;
   position: relative;
@@ -105,7 +107,7 @@
 /* Keeps the compact brand header on mobile and tablets. */
 @media (max-width: 959px) {
   .auth-shell { display: flex; flex-direction: column; inline-size: min(640px, calc(100% - 24px)); margin-block: 4px 24px; border-radius: 18px; }
-  .auth-shell__back { inset-block-start: 12px; inset-inline-start: auto; inset-inline-end: 12px; inline-size: 44px; min-block-size: 44px; padding: 0; justify-content: center; background: transparent; color: var(--color-primary-darker); }
+  .auth-shell__back { inset-block-start: 12px; inset-inline-start: auto; inset-inline-end: 12px; inline-size: 44px; min-block-size: 44px; padding: 0; justify-content: center; background: transparent; color: var(--auth-brand-text); }
   .auth-shell__back-label { display: none; }
   .auth-shell__panel,
   .auth-shell:dir(rtl) .auth-shell__panel,
@@ -117,8 +119,8 @@
     padding: 12px 16px 16px;
     border-block-end: 1px solid var(--color-border);
     border-radius: 18px 18px 0 0;
-    background: var(--color-surface-mint);
-    color: var(--color-primary-darker);
+    background: var(--auth-brand-background);
+    color: var(--auth-brand-text);
     clip-path: none;
     transform: none;
     transition: none;
@@ -127,12 +129,12 @@
   
   .auth-shell--signup .auth-shell__panel,
   .auth-shell--signup:dir(rtl) .auth-shell__panel { animation-name: auth-panel-compact-signup; }
-  .auth-shell__brand { min-block-size: 44px; max-inline-size: calc(100% - 48px); margin: 0; gap: 8px; font-size: 20px; color: var(--color-primary-darker); }
+  .auth-shell__brand { min-block-size: 44px; max-inline-size: calc(100% - 48px); margin: 0; gap: 8px; font-size: 20px; color: var(--auth-brand-text); }
   .auth-shell__logo { inline-size: 32px; block-size: 32px; }
   .auth-shell__eyebrow { font-size: 10px; line-height: 1.4; letter-spacing: .06em; margin-block: 4px; }
   .auth-shell__story h2, .auth-shell__story h2:lang(ar) { font-size: 19px; line-height: 1.4; margin: 0; }
-  .auth-shell__story h2 span { display: inline; color: var(--color-primary-dark); }
-  .auth-shell__description { font-size: 12px; line-height: 1.6; color: var(--color-text-primary); margin-block-start: 8px; }
+  .auth-shell__story h2 span { display: inline; color: var(--auth-brand-text); }
+  .auth-shell__description { font-size: 12px; line-height: 1.6; color: var(--auth-brand-text); margin-block-start: 8px; }
   .auth-shell__form-area { inline-size: 100%; padding: 20px 24px 24px; }
   .auth-shell__form-entry { animation: auth-form-compact-login 360ms cubic-bezier(.22, .7, .2, 1) both; }
   .auth-shell--signup .auth-shell__form-entry { animation-name: auth-form-compact-signup; }
@@ -195,7 +197,7 @@
   .auth-shell .auth-shell__form-area--signup { grid-column: 2; }
   .auth-shell__form-entry { animation: none; }
   .auth-shell__back { inset-block-start: 12px; inset-inline-start: 16px; padding: 6px 10px; font-size: 12px; }
-  .auth-shell__panel, .auth-shell:dir(rtl) .auth-shell__panel { padding: 64px 38px; padding-inline-start: 54px; background: #0b5754; color: #f5fffd; transition: transform 800ms cubic-bezier(.65, 0, .25, 1), clip-path 800ms cubic-bezier(.65, 0, .25, 1), border-radius 800ms; }
+  .auth-shell__panel, .auth-shell:dir(rtl) .auth-shell__panel { padding: 64px 38px; padding-inline-start: 54px; background: var(--auth-brand-background); color: var(--auth-brand-text); transition: transform 800ms cubic-bezier(.65, 0, .25, 1), clip-path 800ms cubic-bezier(.65, 0, .25, 1), border-radius 800ms; }
   .auth-shell__story { max-inline-size: 300px; margin-inline: auto; }
   .auth-shell__brand { font-size: 23px; gap: 9px; margin-block-end: 28px; }
   .auth-shell__logo { inline-size: 36px; block-size: 36px; }
@@ -208,6 +210,8 @@
 
 /* Auth colors give dark forms clear borders and a deeper teal panel. */
 :root[data-theme='dark'] .auth-shell {
+  --auth-brand-background: #103f3e;
+  --auth-brand-text: #f0faf6;
   --color-surface: #152629;
   --color-bg-light: #1d3538;
   --color-bg-soft: #1d3538;
@@ -225,7 +229,7 @@
   background: var(--color-surface);
   box-shadow: 0 20px 48px #0005;
 }
-:root[data-theme='dark'] .auth-shell__panel { background: #103f3e; color: #f0faf6; }
+:root[data-theme='dark'] .auth-shell__panel { background: var(--auth-brand-background); color: var(--auth-brand-text); }
 :root[data-theme='dark'] .auth-shell__brand { color: #effaf6; }
 :root[data-theme='dark'] .auth-shell__story h2 span { color: #a3e2d2; }
 :root[data-theme='dark'] .auth-shell__description { color: #d2e5df; }
