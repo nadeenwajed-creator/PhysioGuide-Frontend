@@ -1,4 +1,3 @@
-
 const ar = {
   // Language switcher
   'languageSwitcher.label': 'اختيار اللغة',
@@ -430,6 +429,19 @@ const ar = {
   "center.deleteNamed": "حذف {name}",
   "center.deleteService": "حذف الخدمة",
   "center.deleteServiceHelp": "حذف {name}؟ يجب الاحتفاظ بالخدمات المرتبطة بالمواعيد للحفاظ على السجل.",
+  "center.reviewsTitle": "الآراء والتقييمات",
+  "center.reviewsDescription": "اطّلع على آراء المرضى حول مركزك.",
+  "center.overallRating": "التقييم العام",
+  "center.basedOnReviews": "بناءً على {count} تقييمات",
+  "center.ratingDistribution": "توزيع التقييمات",
+  "center.stars": "{count} نجوم",
+  "center.ratingPercent": "{rating} نجوم: {percentage}%",
+  "center.recentReviews": "أحدث التقييمات",
+  "center.remaining.patient": "مريض",
+  "center.noReviews": "لا توجد تقييمات بعد.",
+  "center.yourReply": "ردك",
+  "center.editReply": "تعديل الرد",
+  "center.reply": "رد",
 };
 
 export default ar;

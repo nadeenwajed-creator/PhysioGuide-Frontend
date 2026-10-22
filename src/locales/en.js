@@ -1,4 +1,3 @@
-
 const en = {
   // Language switcher
   'languageSwitcher.label': 'Choose language',
@@ -430,6 +429,19 @@ const en = {
   "center.deleteNamed": "Delete {name}",
   "center.deleteService": "Delete service",
   "center.deleteServiceHelp": "Delete {name}? Services linked to appointments must be kept to preserve the appointment history.",
+  "center.reviewsTitle": "Reviews & Ratings",
+  "center.reviewsDescription": "See what patients say about your center.",
+  "center.overallRating": "Overall Rating",
+  "center.basedOnReviews": "Based on {count} reviews",
+  "center.ratingDistribution": "Rating Distribution",
+  "center.stars": "{count} stars",
+  "center.ratingPercent": "{rating} stars: {percentage}%",
+  "center.recentReviews": "Recent Reviews",
+  "center.remaining.patient": "Patient",
+  "center.noReviews": "No reviews yet.",
+  "center.yourReply": "Your reply",
+  "center.editReply": "Edit reply",
+  "center.reply": "Reply",
 };
 
 export default en;
