@@ -1,5 +1,4 @@
 
-/* PhysioGuide — Underline Minimal */
 
 .pg-pagination {
   box-sizing: border-box;
@@ -31,7 +30,6 @@
   margin-inline: auto;
 }
 
-/* Shared button styles */
 .pg-pagination__button {
   position: relative;
 
@@ -80,7 +78,6 @@
   transform: rotate(180deg);
 }
 
-/* Desktop and tablet numbers */
 .pg-pagination__pages {
   display: inline-flex;
   flex-wrap: nowrap;
@@ -102,7 +99,6 @@
   font-weight: 600;
 }
 
-/* Center the underline in both writing directions. */
 .pg-pagination__page--active::after {
   content: '';
 
@@ -120,7 +116,6 @@
   background-color: var(--color-pagination-accent, #0D9B88);
 }
 
-/* Mobile counter can shrink and wrap without shrinking the arrows. */
 .pg-pagination__mobile {
   position: relative;
   display: none;
@@ -159,32 +154,27 @@
   white-space: nowrap;
 }
 
-/* Hover state */
 @media (hover: hover) {
   .pg-pagination__button:hover:not(:disabled) {
     background-color: var(--color-pagination-hover, #E4F8F3);
   }
 }
 
-/* Pressed state */
 .pg-pagination__button:active:not(:disabled) {
   background-color: var(--color-pagination-hover, #E4F8F3);
   opacity: 0.8;
 }
 
-/* Keyboard focus */
 .pg-pagination__button:focus-visible {
   outline: 2px solid var(--color-primary-light, #1D6C73);
   outline-offset: 2px;
 }
 
-/* Disabled state */
 .pg-pagination__button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* Mobile */
 @media (max-width: 767px) {
   .pg-pagination__pages {
     display: none;
@@ -206,7 +196,6 @@
   }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .pg-pagination__button {
     transition: none;

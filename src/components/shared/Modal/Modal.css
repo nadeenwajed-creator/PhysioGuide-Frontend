@@ -1,10 +1,5 @@
 
-/* =========================================
-   PhysioGuide - Shared Modal
-   Responsive Design
-========================================= */
 
-/* Overlay */
 .pg-modal__overlay {
   position: fixed;
   inset: 0;
@@ -27,7 +22,6 @@
   font: inherit;
 }
 
-/* Center modal */
 .pg-modal__overlay[open] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -35,7 +29,6 @@
   place-items: center;
 }
 
-/* Backdrop */
 .pg-modal__overlay::backdrop {
   background: color-mix(
     in srgb,
@@ -44,15 +37,10 @@
   );
 }
 
-/* Box sizing */
 .pg-modal,
 .pg-modal * {
   box-sizing: border-box;
 }
-
-/* =========================================
-   Modal Container
-========================================= */
 
 .pg-modal {
   display: flex;
@@ -85,10 +73,6 @@
     );
 }
 
-/* =========================================
-   Modal Sizes
-========================================= */
-
 .pg-modal--sm {
   max-inline-size: 400px;
 }
@@ -100,10 +84,6 @@
 .pg-modal--lg {
   max-inline-size: 880px;
 }
-
-/* =========================================
-   Fixed Header and Footer
-========================================= */
 
 .pg-modal__header,
 .pg-modal__footer {
@@ -119,10 +99,6 @@
 .pg-modal__header {
   border-bottom: 1px solid var(--color-border);
 }
-
-/* =========================================
-   Modal Title
-========================================= */
 
 .pg-modal__title {
   flex: 1;
@@ -142,10 +118,6 @@
   border-radius: 8px;
 }
 
-/* =========================================
-   Close Button
-========================================= */
-
 .pg-modal__close.pg-button {
   flex-shrink: 0;
 
@@ -163,10 +135,6 @@
   font-size: 16px;
 }
 
-/* =========================================
-   Scrollable Modal Body
-========================================= */
-
 .pg-modal__body {
   flex: 1 1 auto;
 
@@ -179,10 +147,6 @@
   overscroll-behavior: contain;
 }
 
-/* =========================================
-   Fixed Modal Footer
-========================================= */
-
 .pg-modal__footer {
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -194,10 +158,6 @@
   min-inline-size: 0;
   max-inline-size: 100%;
 }
-
-/* =========================================
-   Tablet - 768px to 991px
-========================================= */
 
 @media (min-width: 768px) and (max-width: 991px) {
   .pg-modal__overlay {
@@ -222,10 +182,6 @@
     padding: 18px;
   }
 }
-
-/* =========================================
-   Mobile - up to 767px
-========================================= */
 
 @media (max-width: 767px) {
   .pg-modal__overlay {
@@ -257,24 +213,13 @@
   }
 }
 
-/* =========================================
-   Small Mobile - below 480px
-========================================= */
-
 @media (max-width: 479px) {
   .pg-modal__overlay {
     padding: 12px;
   }
 }
 
-/* =========================================
-   Very Short Viewports
-========================================= */
-
-/*
-  Allow the whole panel to scroll only when
-  the viewport is too short for fixed sections.
-*/
+/* Short viewports need the whole panel to scroll. */
 
 @media (max-height: 320px) {
   .pg-modal {
@@ -286,10 +231,6 @@
     overflow-y: visible;
   }
 }
-
-/* =========================================
-   Reduced Motion
-========================================= */
 
 @media (prefers-reduced-motion: reduce) {
   .pg-modal {

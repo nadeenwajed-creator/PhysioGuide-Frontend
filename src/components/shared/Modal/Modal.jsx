@@ -35,7 +35,6 @@ function Modal({
     ? size
     : 'md';
 
-  // Use the supplied direction, otherwise use the current language.
   const modalDir =
     dir === 'rtl' || dir === 'ltr'
       ? dir
@@ -132,7 +131,6 @@ function Modal({
           .filter(Boolean)
           .join(' ')}
       >
-        {/* Fixed header */}
         <header className="pg-modal__header">
           <h2
             ref={titleRef}
@@ -156,12 +154,10 @@ function Modal({
           )}
         </header>
 
-        {/* Scrollable body */}
         <div className="pg-modal__body">
           {children}
         </div>
 
-        {/* Fixed footer */}
         {footer != null && (
           <footer className="pg-modal__footer">
             {footer}
