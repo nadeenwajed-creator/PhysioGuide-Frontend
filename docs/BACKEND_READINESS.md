@@ -97,7 +97,7 @@ Patient Overview shows the total number of appointment records, including cancel
 
 ## Remaining Center pages: service foundation
 
-The service foundation is implemented; the five remaining page routes are not integrated yet.
+The service foundation and Physiotherapists route are integrated. Services, Reviews, Center Profile and Settings routes remain pending. Physiotherapists uses the existing staff save operation, provisioned mock identities, and 10/20/50 pagination; it does not introduce a separate therapist portal.
 
 - The remaining-page facade delegates replies to existing `updateReview(actor, id, { reply })`, deletion to `deleteCenterService`, and preferences to `saveCenterNotificationPreferences`. Reply editing replaces one string. No report action is exposed by this facade. Appointment-linked service deletion continues to reject with `linkedService`.
 - Preferences accept boolean updates for `appointments`, `appointmentChanges`, `patients`, and `reviews`. Omitted and unknown stored keys are preserved. The existing patient-event mapping remains in place; new event-category wiring belongs to page integration. Preferences do not create or deliver notifications.

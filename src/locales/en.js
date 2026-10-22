@@ -423,6 +423,8 @@ const en = {
   "center.lastVisit": "Last Visit",
   "center.noPreviousVisits": "No previous visits",
   "auth.error.accountRejected": "Your center application was not approved. Please contact support for more information.",
+  "center.therapistsDescription": "Manage your physiotherapy team.",
+  "center.searchTherapists": "Search physiotherapists...",
 };
 
 export default en;

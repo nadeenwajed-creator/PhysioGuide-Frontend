@@ -3,6 +3,7 @@ import CenterLayout from '../layouts/CenterLayout.jsx';
 import Dashboard from '../pages/center/Dashboard.jsx';
 import Appointments from '../pages/center/Appointments.jsx';
 import Patients from '../pages/center/Patients.jsx';
+import Physiotherapists from '../pages/center/Physiotherapists.jsx';
 import RequireRole from './RequireRole.jsx';
 import AccountDestination from '../components/auth/AccountDestination.jsx';
 
@@ -15,6 +16,7 @@ const centerRoutes = (
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="appointments" element={<Appointments />} />
     <Route path="patients" element={<Patients />} />
+    <Route path="physiotherapists" element={<Physiotherapists />} />
   </Route>
   </Route>
   <Route element={<RequireRole roles={['physiotherapist']} />}>

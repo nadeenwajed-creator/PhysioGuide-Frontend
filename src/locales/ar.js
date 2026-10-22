@@ -423,6 +423,8 @@ const ar = {
   "center.lastVisit": "آخر زيارة",
   "center.noPreviousVisits": "لا توجد زيارات سابقة",
   "auth.error.accountRejected": "لم تتم الموافقة على طلب مركزك. يرجى التواصل مع الدعم لمزيد من المعلومات.",
+  "center.therapistsDescription": "إدارة فريق العلاج الطبيعي.",
+  "center.searchTherapists": "البحث عن المعالجين...",
 };
 
 export default ar;

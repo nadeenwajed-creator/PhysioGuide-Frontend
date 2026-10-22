@@ -1,0 +1,23 @@
+/* Scoped to the five remaining pages; approved core pages keep their own styles. */
+.center-remaining { container: remaining / inline-size; }
+.center-remaining :is(h2,h3,p,dd,a,button) { overflow-wrap: anywhere; }
+.center-remaining .center-panel { box-shadow: 0 3px 14px color-mix(in srgb, var(--color-text-primary) 3%, transparent); }
+.center-remaining .center-panel__heading h2 { color: var(--color-primary-darker); }
+.center-remaining :is(.center-panel,article) { min-inline-size: 0; }
+.center-remaining a { color: var(--color-primary); }
+.center-remaining .center-pagination { padding-block-start: 14px; border-block-start: 1px solid var(--color-border); }
+.center-remaining .center-pagination__range { white-space: normal; }
+.center-remaining :is(button,a,input):focus-visible { outline: 2px solid var(--color-primary-light); outline-offset: 3px; }
+@container remaining (max-width: 600px) {
+  .center-remaining .center-filter-bar { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .center-remaining .center-filter-bar > :first-child { grid-column: 1 / -1; }
+  .center-remaining .center-form-grid { grid-template-columns: minmax(0,1fr); gap: 14px; }
+}
+@container remaining (max-width: 360px) {
+  .center-remaining .center-filter-bar { grid-template-columns: minmax(0,1fr); }
+  .center-remaining .center-pagination { display: flex; flex-wrap: wrap; }
+  .center-remaining .center-pagination__size { inline-size: 100%; justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .center-remaining *, .center-remaining *::before { transition: none !important; animation: none !important; }
+}
