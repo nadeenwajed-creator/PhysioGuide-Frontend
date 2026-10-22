@@ -1,0 +1,24 @@
+.center-table--patients th:first-child {
+  inline-size: 25%;
+}
+
+.center-table--patients th:nth-child(2) {
+  inline-size: 30%;
+}
+
+.center-table--patients th:last-child {
+  inline-size: 12%;
+}
+
+.center-table--patients th:nth-child(3) { inline-size: 19%; }
+.center-table--patients th:nth-child(4) { inline-size: 14%; }
+
+@container center-records (max-width: 850px) {
+  .center-table--patients .center-table__contact { padding-inline-start: 50px; }
+  .center-table--patients .center-contact { font-size: 13px; }
+  .center-table--patients td:nth-child(3) { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+}
+
+@container center-records (max-width: 360px) {
+  .center-table--patients .center-table__contact { padding-inline-start: 0; }
+}
