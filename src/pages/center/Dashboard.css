@@ -1,0 +1,268 @@
+.center-dashboard__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  align-items: stretch;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-bg-soft);
+  margin-block-end: 16px;
+  overflow: hidden;
+}
+
+.center-dashboard__hero-copy {
+  padding: 24px;
+  min-inline-size: 0;
+  align-self: center;
+}
+
+.center-dashboard__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 8px;
+}
+
+.center-dashboard__eyebrow:lang(ar) {
+  letter-spacing: normal;
+}
+
+.center-dashboard__hero h2 {
+  font-size: 21px;
+  line-height: 1.4;
+  color: var(--color-primary-darker);
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.center-dashboard__hero p:not(.center-dashboard__eyebrow) {
+  font-size: 13px;
+  margin: 0 0 12px;
+  line-height: 1.6;
+}
+
+.center-dashboard__hero-media {
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+  aspect-ratio: 3 / 2;
+}
+
+.center-dashboard__hero img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.center-dashboard__more { margin: 12px 0 0; color: var(--color-text-secondary); font-size: 13px; }
+
+.center-dashboard__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-block-end: 16px;
+}
+
+.center-dashboard__stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  min-inline-size: 0;
+}
+
+.center-dashboard__stat-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 999px;
+  background: var(--color-surface-mint);
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+.center-dashboard__stat > div {
+  min-inline-size: 0;
+}
+
+.center-dashboard__stat > div > span {
+  font-size: 12px;
+}
+
+.center-dashboard__stat strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-block-start: 4px;
+}
+
+.center-dashboard__lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.center-dashboard__schedule {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.center-dashboard__schedule li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-block: 12px;
+  border-block-start: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.center-dashboard__schedule time {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.center-dashboard__patient {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.center-dashboard__patient span, .center-dashboard__patient small {
+  display: block;
+  margin-block-start: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.center-dashboard__side {
+  display: grid;
+  gap: 16px;
+}
+
+.center-dashboard__quick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.center-dashboard__quick > button {
+  background: var(--color-bg-light);
+  justify-content: start;
+  text-align: start;
+  min-block-size: 52px;
+  font-size: 13px;
+}
+
+.center-dashboard__upcoming {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.center-dashboard__upcoming strong, .center-dashboard__upcoming small {
+  display: block;
+  font-size: 13px;
+}
+
+.center-dashboard__upcoming small {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 1199px) {
+  .center-dashboard__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .center-dashboard__lower {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .center-dashboard__side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .center-dashboard__hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .center-dashboard__hero-copy {
+    padding: 16px;
+  }
+  .center-dashboard__hero h2 {
+    font-size: 18px;
+  }
+  .center-dashboard__hero-media {
+    max-block-size: 210px;
+  }
+  .center-dashboard__side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 479px) {
+  .center-dashboard__quick {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .center-dashboard__stat {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+  .center-dashboard__stat > div { display: contents; }
+  .center-dashboard__stat > div > span {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    line-height: 1.5;
+    overflow-wrap: normal;
+  }
+  .center-dashboard__stat strong { grid-column: 2; grid-row: 2; margin: 0; }
+  .center-dashboard__stat-icon {
+    grid-column: 1;
+    grid-row: 2;
+    inline-size: 30px;
+    block-size: 30px;
+    font-size: 16px;
+  }
+  .center-dashboard__schedule li {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) auto;
+    grid-template-areas: 'time time status' 'avatar patient action';
+    column-gap: 12px;
+    row-gap: 4px;
+    padding-block: 10px;
+  }
+  .center-dashboard__schedule time {
+    grid-area: time;
+  }
+  .center-dashboard__schedule .pg-avatar { grid-area: avatar; align-self: start; }
+  .center-dashboard__patient {
+    grid-area: patient;
+    align-self: start;
+  }
+  .center-dashboard__patient :is(span, small) { margin-block-start: 2px; line-height: 1.5; }
+  .center-dashboard__schedule .pg-status-badge { grid-area: status; justify-self: end; }
+  .center-dashboard__schedule li > button { grid-area: action; justify-self: end; }
+  .center-dashboard__lower > .center-panel > .center-panel__heading { gap: 6px; }
+  .center-dashboard__lower > .center-panel > .center-panel__heading .center-link { font-size: 13px; }
+}
+
+.center-dashboard__hero h2:lang(ar) {
+  line-height: 1.6;
+}
+
