@@ -14,7 +14,6 @@ import { centerLocationService } from '../../services/auth/centerLocation.js';
 import { createAuthRequest, validateAuthForm } from '../../utils/authValidation.js';
 import './AuthForm.css';
 
-// Selects the authentication service for each form.
 const operations = {
   patient: { login: loginPatient, signup: registerPatient },
   center: { login: loginCenter, signup: registerCenter },
@@ -24,7 +23,7 @@ const initialValues = {
   name: '', email: '', phone: '', location: '', password: '', confirmPassword: '',
 };
 const knownFieldErrors = ['required', 'email', 'phone', 'passwordLength', 'passwordMismatch', 'invalid'];
-const knownErrors = ['invalidCredentials', 'network', 'rateLimited', 'validation', 'unavailable', 'unexpected', 'accountPending', 'unsupportedRole'];
+const knownErrors = ['invalidCredentials', 'network', 'rateLimited', 'validation', 'unavailable', 'unexpected', 'accountPending', 'accountRejected', 'unsupportedRole', 'duplicateEmail', 'storageUnavailable'];
 
 // Passwords stay in memory and are never saved to browser storage.
 function AuthForm({ role, mode }) {
@@ -67,7 +66,6 @@ function AuthForm({ role, mode }) {
     }
   }
 
-  // Moves focus to the first field that needs attention.
   function focusError(fieldErrors) {
     requestAnimationFrame(() => {
       const field = Object.keys(fieldErrors)[0];
@@ -76,7 +74,6 @@ function AuthForm({ role, mode }) {
     });
   }
 
-  // Checks the fields before sending one request at a time.
   async function handleSubmit(event) {
     event.preventDefault();
     if (submittingRef.current) return;
@@ -95,15 +92,12 @@ function AuthForm({ role, mode }) {
       const result = await operations[role][mode](createAuthRequest(values, { role, mode }, coordinates));
       if (requestId !== requestRef.current) return;
 
-      if (result.mode === 'live' && result.status === 'authenticated' && !registering) {
-        // Only a confirmed live session can open the account dashboard.
+      if (result.status === 'authenticated' && !registering) {
         navigate(getAuthenticatedDestination(result.role), { replace: true });
         return;
       }
 
-      if (result.mode === 'demo') {
-        setFeedback({ kind: 'info', key: registering ? 'auth.demoRegistration' : 'auth.demoLogin' });
-      } else if (result.mode === 'live' && registering && ['registered', 'pending-review'].includes(result.status)) {
+      if (registering && ['registered', 'pending-review'].includes(result.status)) {
         setFeedback({ kind: 'info', key: result.status === 'pending-review' ? 'auth.pendingReview' : 'auth.registered' });
       } else {
         throw new Error('Unexpected authentication response');
@@ -130,7 +124,6 @@ function AuthForm({ role, mode }) {
     }
   }
 
-  // Gets coordinates after permission and fills the address when lookup is available.
   async function useCurrentLocation() {
     lookupRef.current?.abort();
     const controller = new AbortController();
@@ -163,7 +156,6 @@ function AuthForm({ role, mode }) {
     }
   }
 
-  // Reuses shared fields, including password visibility and accessible errors.
   function field(name, label, type = 'text', autoComplete = name) {
     return (
       <FormField
