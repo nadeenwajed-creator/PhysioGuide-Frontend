@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { faHouse, faCalendarDays, faUsers, faUserDoctor } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faCalendarDays, faUsers, faUserDoctor, faBriefcaseMedical } from '@fortawesome/free-solid-svg-icons';
 import Navbar from '../components/shared/Navbar/Navbar.jsx';
 import Sidebar from '../components/shared/Sidebar/Sidebar.jsx';
 import Footer from '../components/shared/Footer/Footer.jsx';
@@ -26,6 +26,7 @@ const centerNavigation = [
   ['appointments', faCalendarDays],
   ['patients', faUsers],
   ['physiotherapists', faUserDoctor],
+  ['services', faBriefcaseMedical],
 ];
 const notificationPreferences = { appointment: 'appointments', review: 'reviews', patient: 'patients' };
 

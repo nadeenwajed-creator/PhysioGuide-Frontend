@@ -425,6 +425,11 @@ const ar = {
   "auth.error.accountRejected": "لم تتم الموافقة على طلب مركزك. يرجى التواصل مع الدعم لمزيد من المعلومات.",
   "center.therapistsDescription": "إدارة فريق العلاج الطبيعي.",
   "center.searchTherapists": "البحث عن المعالجين...",
+  "center.servicesDescription": "إدارة الخدمات المتاحة في المركز.",
+  "center.searchServices": "البحث عن الخدمات...",
+  "center.deleteNamed": "حذف {name}",
+  "center.deleteService": "حذف الخدمة",
+  "center.deleteServiceHelp": "حذف {name}؟ يجب الاحتفاظ بالخدمات المرتبطة بالمواعيد للحفاظ على السجل.",
 };
 
 export default ar;

@@ -4,6 +4,7 @@ import Dashboard from '../pages/center/Dashboard.jsx';
 import Appointments from '../pages/center/Appointments.jsx';
 import Patients from '../pages/center/Patients.jsx';
 import Physiotherapists from '../pages/center/Physiotherapists.jsx';
+import Services from '../pages/center/Services.jsx';
 import RequireRole from './RequireRole.jsx';
 import AccountDestination from '../components/auth/AccountDestination.jsx';
 
@@ -17,6 +18,7 @@ const centerRoutes = (
     <Route path="appointments" element={<Appointments />} />
     <Route path="patients" element={<Patients />} />
     <Route path="physiotherapists" element={<Physiotherapists />} />
+    <Route path="services" element={<Services />} />
   </Route>
   </Route>
   <Route element={<RequireRole roles={['physiotherapist']} />}>

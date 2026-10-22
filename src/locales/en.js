@@ -425,6 +425,11 @@ const en = {
   "auth.error.accountRejected": "Your center application was not approved. Please contact support for more information.",
   "center.therapistsDescription": "Manage your physiotherapy team.",
   "center.searchTherapists": "Search physiotherapists...",
+  "center.servicesDescription": "Manage the services offered at your center.",
+  "center.searchServices": "Search services...",
+  "center.deleteNamed": "Delete {name}",
+  "center.deleteService": "Delete service",
+  "center.deleteServiceHelp": "Delete {name}? Services linked to appointments must be kept to preserve the appointment history.",
 };
 
 export default en;
