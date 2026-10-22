@@ -31,10 +31,14 @@ test('login does not apply the signup password length rule', () => {
   assert.deepEqual(validateAuthForm({ email: 'a@example.com', password: 'short' }, { role: 'patient', mode: 'login' }), {});
 });
 
-test('mock authentication cannot return a real authenticated session', async () => {
+test('mock authentication identifies its source and verifies fixture credentials', async () => {
   const adapter = createMockAuthAdapter({ delay: 0 });
-  assert.deepEqual(await adapter.loginPatient(values), { mode: 'demo', status: 'validated', role: 'patient' });
-  assert.deepEqual(await adapter.registerCenter(values), { mode: 'demo', status: 'not-created', role: 'center' });
+  await assert.rejects(adapter.loginPatient(values), { code: 'invalidCredentials' });
+  const result = await adapter.loginPatient({ email: 'patient@example.com', password: 'PhysioGuide123!' });
+  assert.equal(result.mode, 'mock');
+  assert.equal(result.status, 'authenticated');
+  assert.equal(result.session.role, 'patient');
+  assert.equal('password' in result.session, false);
 });
 
 test('location captures coordinates and leaves lookup unavailable without a provider', async () => {

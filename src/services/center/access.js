@@ -1,7 +1,7 @@
 import { ServiceError } from '../api/serviceError.js';
 
 const permissions = {
-  center: ['getWorkspace', 'prepareImage', 'savePatient', 'saveTherapist', 'saveService', 'saveAppointment', 'updateAppointmentStatus', 'addPatientNote', 'saveCenter', 'markNotificationsRead'],
+  center: ['getWorkspace', 'prepareImage', 'savePatient', 'saveTherapist', 'saveService', 'deleteService', 'saveAppointment', 'updateAppointmentStatus', 'addPatientNote', 'updateReview', 'saveCenter', 'saveNotificationPreferences', 'markNotificationsRead', 'changeCenterPassword'],
   physiotherapist: ['getWorkspace'],
   patient: ['requestAppointment'],
 };

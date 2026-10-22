@@ -1,5 +1,6 @@
 import { dateKey } from '../../utils/centerFormat.js';
 import { overlapsBooking } from './appointmentRules.js';
+import { createRemainingOperations, normalizeCenterExtras } from './remainingOperations.js';
 
 // Domain rules are enforced here as well as in the UI. A real server must enforce them atomically.
 export function createMockCenterAdapter(seed, { store, now = () => new Date(), reservedEmails = () => [] } = {}) {
@@ -75,6 +76,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
     if (overlapsBooking({ ...values, durationMinutes: service.duration }, state.appointments, state.services, id)) fail('conflict');
   }
   return {
+    ...createRemainingOperations({ requireCenter, fail }),
     mode: 'mock',
     subscribe(listener) {
       listeners.add(listener);
@@ -190,6 +192,13 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(record);
     },
+    async deleteService(actor, id) {
+      requireCenter(actor);
+      find('services', id);
+      if (state.appointments.some(item => item.serviceId === id)) fail('linkedService');
+      state.services = state.services.filter(item => item.id !== id);
+      emit();
+    },
     async saveAppointment(actor, values, id) {
       requireCenter(actor);
       const previous = id ? find('appointments', id) : {
@@ -252,6 +261,15 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       });
       emit();
     },
+    async updateReview(actor, id, values) {
+      requireCenter(actor);
+      const review = find('reviews', id);
+      if ('reply' in values) {
+        if (!clean(values.reply)) fail('required');
+        review.reply = clean(values.reply);
+      }
+      emit();
+    },
     async saveCenter(actor, values) {
       requireCenter(actor);
       validatePerson({
@@ -261,16 +279,18 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       if (!clean(values.address)) fail('validation', {
         address: 'required'
       });
-      const hours = values.hours;
-      if (hours && (!['weekStart', 'weekEnd', 'fridayStart', 'fridayEnd'].every(key => /^([01]\d|2[0-3]):[0-5]\d$/.test(hours[key])) || hours.weekStart >= hours.weekEnd || hours.fridayStart >= hours.fridayEnd)) fail('hours');
+      const extras = normalizeCenterExtras(values, fail);
+      const hours = Object.hasOwn(values, 'hours') ? values.hours : state.center.hours;
+      if (hours !== null && hours !== undefined && (typeof hours !== 'object' || !['weekStart', 'weekEnd', 'fridayStart', 'fridayEnd'].every(key => /^([01]\d|2[0-3]):[0-5]\d$/.test(hours[key])) || hours.weekStart >= hours.weekEnd || hours.fridayStart >= hours.fridayEnd)) fail('hours');
       state.center = {
         ...state.center,
+        ...extras,
         name: pair(values.name, values.nameAr),
         email: clean(values.email),
         phone: clean(values.phone),
         address: pair(values.address, values.addressAr),
         about: pair(values.about, values.aboutAr),
-        hours: hours || state.center.hours,
+        hours,
         imageUrl: values.imageUrl || state.center.imageUrl
       };
       emit();
@@ -286,6 +306,18 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       const url = URL.createObjectURL(file);
       objectUrls.add(url);
       return url;
+    },
+    async saveNotificationPreferences(actor, values) {
+      requireCenter(actor);
+      const keys = ['appointments', 'appointmentChanges', 'patients', 'reviews'];
+      if (!values || typeof values !== 'object' || Array.isArray(values)) fail('validation');
+      const provided = keys.filter(key => Object.hasOwn(values, key));
+      if (!provided.length || provided.some(key => typeof values[key] !== 'boolean')) fail('validation');
+      state.notificationPreferences = {
+        ...state.notificationPreferences,
+        ...Object.fromEntries(provided.map(key => [key, values[key]])),
+      };
+      emit();
     },
     async markNotificationsRead(actor, id) {
       requireCenter(actor);
