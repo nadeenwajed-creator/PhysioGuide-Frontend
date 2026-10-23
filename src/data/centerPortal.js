@@ -1,5 +1,7 @@
 import { dateKey } from '../utils/centerFormat.js';
 import room from '../assets/images/center/center-treatment-room.webp';
+import gym from '../assets/images/center/center-gym.webp';
+import reception from '../assets/images/center/center-reception.webp';
 import manual from '../assets/images/landing/physiotherapy-hero.webp';
 import sports from '../assets/images/center/sports-rehabilitation.webp';
 import back from '../assets/images/center/back-pain.webp';
@@ -96,7 +98,7 @@ export function createCenterPortalData(now = new Date()) {
       address: bilingual('Nablus, Palestine', 'نابلس، فلسطين'),
       about: bilingual('A physiotherapy center providing personal care for musculoskeletal, neurological and sports rehabilitation.', 'مركز علاج طبيعي يقدم رعاية فردية لتأهيل العضلات والأعصاب والإصابات الرياضية.'),
       imageUrl: room,
-      gallery: [],
+      gallery: [room, gym, reception, manual],
       hours: {
         weekStart: '09:00',
         weekEnd: '20:00',

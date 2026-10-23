@@ -72,7 +72,7 @@ The unintegrated messaging adapter still contains temporary attachment object-UR
 
 ## Verification
 
-Run `npm.cmd run lint`, `npm.cmd run build`, and `node --test src/tests/public-auth/auth.test.js src/tests/integration/services.test.js src/tests/integration/refinements.test.js`.
+Run `npm.cmd run lint`, `npm.cmd run build`, and `node --test src/tests/public-auth/auth.test.js src/tests/integration/services.test.js src/tests/integration/refinements.test.js src/tests/integration/remaining-center.test.js`.
 
 Unit coverage includes transport/mapping errors, cancellation, role restrictions, pending accounts, signup metadata, expiry/logout, provisioning, appointment origin/transitions, creation/edit conflicts, persistence and rollback. Actual Chrome validation covers core page interactions, role navigation, filters, uploaded images, storage errors, English/Arabic, themes and the requested viewport sizes. Detailed run results and full-page/viewport screenshots are kept in the external review directory rather than committed into application source. Lint/build/overflow checks do not substitute for the user's visual approval.
 
@@ -95,15 +95,23 @@ Appointments and Patients use the same bottom pagination wrapper and shared Pagi
 Patient Overview shows the total number of appointment records, including cancelled records, and the latest completed or confirmed booking whose local date/time is not in the future. Pending/cancelled bookings are not visits. With no previous visit, the translated empty value is shown. Full history appears only in the Appointments tab. Confirm the backend's attendance and timezone semantics when its contract is available.
 
 
-## Remaining Center pages: service foundation
+## Remaining Center pages integration
 
-The service foundation, Physiotherapists, Services and Reviews routes are integrated. Center Profile and Settings routes remain pending. Reviews calculates ratings from the full workspace collection and exposes Reply/Edit Reply only. Services reuses the existing save/delete operations; deletion of appointment-linked services reports `linkedService` and leaves history intact. Physiotherapists uses the existing staff save operation, provisioned mock identities, and 10/20/50 pagination; it does not introduce a separate therapist portal.
+All eight Center routes are integrated, including Profile and Settings. Profile links directly to Settings information; the shared account menu opens Profile. Settings uses the existing saveCenter contract (successful completion returns no record; the workspace subscription refreshes the UI). Reviews calculates ratings from the full workspace collection and exposes Reply/Edit Reply only. Services reuses the existing save/delete operations; deletion of appointment-linked services reports `linkedService` and leaves history intact. Physiotherapists uses the existing staff save operation, provisioned mock identities, and 10/20/50 pagination; it does not introduce a separate therapist portal.
 
 - The remaining-page facade delegates replies to existing `updateReview(actor, id, { reply })`, deletion to `deleteCenterService`, and preferences to `saveCenterNotificationPreferences`. Reply editing replaces one string. No report action is exposed by this facade. Appointment-linked service deletion continues to reject with `linkedService`.
-- Preferences accept boolean updates for `appointments`, `appointmentChanges`, `patients`, and `reviews`. Omitted and unknown stored keys are preserved. The existing patient-event mapping remains in place; new event-category wiring belongs to page integration. Preferences do not create or deliver notifications.
+- Preferences accept boolean updates for `appointments`, `appointmentChanges`, `patients`, and `reviews`. Omitted and unknown stored keys are preserved. The Navbar retains the patient-event mapping and includes request/change categories. Preferences do not create or deliver notifications.
 - `saveCenter` remains an acknowledged mutation returning no record in mock mode. Consumers refresh through the existing workspace subscription. Omitted hours retain their value; explicit `null` clears them. Optional gallery entries are validated and deduplicated. Coordinates require explicit confirmation; omitted coordinates remain unchanged and `null` removes the pin. Storage failure rolls back before publishing an update.
 - `changeCenterPassword` is Center-only and always rejects with `passwordUnavailable` in mock mode. It neither stores credentials nor simulates a successful password change. A future backend operation must verify the current credential and apply the real security policy.
-- `centerLocationService` reuses registration's geolocation/Geoapify boundary, retaining device accuracy. It constructs map links without requesting location, calling Geoapify, or loading map tiles automatically. The Settings UI must confirm coordinates and the Profile UI must require that confirmation before showing a map.
+- `centerLocationService` reuses registration's geolocation/Geoapify boundary, retaining device accuracy. It constructs map links without requesting location, calling Geoapify, or loading map tiles automatically. Settings requires coordinate confirmation and Profile shows a map only for a confirmed saved pin.
 - `getReviewStatistics` derives the count, average and distribution from the full current review collection. Paged backend responses need a whole-center aggregate contract.
 
 No endpoint paths or authentication contracts were added. Configure operation mappings in the existing `centerOperations` boundary when backend specifications are available. The underlying dormant reporting/messaging code remains outside this integration's user-facing scope.
+
+### Profile and Settings integration
+
+Profile and Settings share the current workspace identity, hours, images, gallery and confirmed coordinates. Profile loads the external map only on request. Settings preserves unconfirmed legacy pins during unrelated saves, requires explicit confirmation after coordinate edits, and supports clearing hours and coordinates. Gallery/image uploads use the existing validated mock image operation. Contact email edits do not change login credentials.
+
+Notification preferences preserve omitted legacy `patients` and unknown keys. The Navbar maps `appointment`/`appointmentRequest` to `appointments`, `appointmentChange` to `appointmentChanges`, `review` to `reviews`, and `patient` to `patients`. These controls filter stored notifications; no real delivery is implied. Password changes remain unavailable until a real backend operation is configured, and no passwords are persisted.
+
+The sample Center gallery reuses the existing room, gym, reception and therapy images. These fixtures initialize only new mock storage; existing saved galleries are preserved. Deferred conversation/attachment fixtures remain outside the committed Center integration.
