@@ -30,7 +30,7 @@ export default function SecurityForm() {
   return <form onSubmit={submit} noValidate className="remaining-security-form">
     <p className="remaining-help">{tr('remaining.securityHelp')}</p>
     {Object.keys(values).map(key => <FormField key={key} id={`security-${key}`} label={tr(key)} type="password" showPasswordToggle required autoComplete={key === 'currentPassword' ? 'current-password' : 'new-password'} value={values[key]} disabled={busy} error={errors[key] && tr(`error.${errors[key]}`)} onChange={value => setValues(current => ({ ...current, [key]: value }))} />)}
-    <Feedback error={feedback?.error}>{feedback?.text}</Feedback>
+    <Feedback error={feedback?.error} resetKey={feedback}>{feedback?.text}</Feedback>
     <Button type="submit" loading={busy}>{tr('remaining.changePassword')}</Button>
   </form>;
 }

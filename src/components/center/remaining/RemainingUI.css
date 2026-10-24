@@ -17,17 +17,10 @@
 .remaining-check { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.7; margin-block: 14px; }
 .remaining-check input { flex: 0 0 auto; margin-block-start: 5px; inline-size: 20px; block-size: 20px; accent-color: var(--color-primary); }
 .remaining-address-suggestion { padding: 12px; border-radius: 10px; background: var(--color-bg-light); border: 1px solid var(--color-border); }
-.remaining-profile-upload { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin-block-end: 16px; }
-.remaining-profile-upload .center-record-image { inline-size: 112px; aspect-ratio: 1; }
-.remaining-profile-upload label { flex: 1; min-inline-size: min(100%,200px); }
-.remaining-gallery-edit { display: grid; grid-template-columns: repeat(auto-fill,minmax(110px,1fr)); gap: 10px; margin-block-end: 16px; }
-.remaining-gallery-edit .center-record-image { aspect-ratio: 4/3; }
-.remaining-gallery-edit > div { min-inline-size: 0; border: 1px solid var(--color-border); padding: 6px; border-radius: 12px; }
 .remaining-gallery-preview { display: block; max-inline-size: 100%; inline-size: 100%; max-block-size: 65dvh; object-fit: contain; border-radius: 8px; }
 .remaining-location p { font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; }
 .remaining-location iframe { display: block; inline-size: 100%; block-size: 200px; border: 1px solid var(--color-border); border-radius: 12px; margin-block: 12px; background: var(--color-bg-light); }
 .remaining-location small { display: block; font-size: 12px; color: var(--color-text-secondary); }
-.remaining-coordinates { font-variant-numeric: tabular-nums; }
 .remaining-information-form > .pg-button { margin-block-start: 20px; }
 .remaining-security-form { max-inline-size: 520px; display: grid; gap: 16px; }
 .remaining-security-form > .pg-button { justify-self: start; }
@@ -60,3 +53,8 @@
 .remaining-file-control input { position: absolute; inset: 0; opacity: 0; inline-size: 100%; block-size: 100%; cursor: pointer; }
 .remaining-file-control:focus-within { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 .remaining-file-control:has(input:disabled) { opacity: .6; cursor: wait; }
+
+.remaining-address-results { display: grid; gap: 8px; margin-block: 14px; }
+.remaining-address-results .pg-button { justify-content: flex-start; text-align: start; }
+
+.remaining-form-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-block-start: 20px; }

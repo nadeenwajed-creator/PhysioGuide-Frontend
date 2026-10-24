@@ -23,7 +23,7 @@ export default function NotificationPreferences() {
       <span><strong>{tr(`remaining.notifications.${key}`)}</strong><small>{tr(`remaining.notifications.${key}Help`)}</small></span>
       <input type="checkbox" role="switch" checked={values[key]} disabled={busy} onChange={event => { setValues(current => ({ ...current, [key]: event.target.checked })); setFeedback(null); }} />
     </label>)}</div>
-    <Feedback error={feedback?.error}>{feedback?.text}</Feedback>
+    <Feedback error={feedback?.error} resetKey={feedback}>{feedback?.text}</Feedback>
     <Button type="submit" loading={busy}>{tr('saveChanges')}</Button>
   </form>;
 }

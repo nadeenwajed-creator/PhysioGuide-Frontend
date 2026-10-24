@@ -8,22 +8,45 @@ import NotificationPreferences from '../../components/center/remaining/Notificat
 import useCenter from '../../components/center/useCenter.js';
 import '../../components/center/remaining/RemainingUI.css';
 import './Settings.css';
-const sections = [['information', faBuilding], ['security', faLock], ['notifications', faBell]];
+const sections = [
+  ['information', faBuilding],
+  ['security', faLock],
+  ['notifications', faBell],
+];
 
 export default function Settings() {
   const { tr, actor } = useCenter();
   const [params, setParams] = useSearchParams();
   const requested = params.get('section');
   const section = sections.some(([id]) => id === requested) ? requested : 'information';
-  return <div className="center-remaining center-settings">
-    <PageHeader title={tr('settings')} description={tr('settingsDescription')} />
-    <div className="center-settings__layout">
-      <nav className="center-settings__navigation" aria-label={tr('settings')}>{sections.map(([id, icon]) => <button key={id} type="button" aria-current={id === section ? 'page' : undefined} onClick={() => setParams({ section: id })}><FontAwesomeIcon icon={icon} aria-hidden="true" /><span>{tr(`remaining.section.${id}`)}</span></button>)}</nav>
-      <Panel title={tr(`remaining.section.${section}`)} className="center-settings__content">
-        {section === 'information' && <CenterInformationForm key={actor.centerId} />}
-        {section === 'security' && <SecurityForm />}
-        {section === 'notifications' && <NotificationPreferences />}
-      </Panel>
+  return (
+    <div className="center-remaining center-settings">
+      {/* Heading and primary page action. */}
+      <PageHeader title={tr('settings')} description={tr('settingsDescription')} />
+      {/* Section navigation and the active settings form. */}
+      <div className="center-settings__layout">
+        <nav className="center-settings__navigation" aria-label={tr('settings')}>
+          {sections.map(([id, icon]) => (
+            <button
+              key={id}
+              type="button"
+              aria-current={id === section ? 'page' : undefined}
+              onClick={() => setParams({ section: id })}
+            >
+              <FontAwesomeIcon icon={icon} aria-hidden="true" />
+              <span>{tr(`remaining.section.${id}`)}</span>
+            </button>
+          ))}
+        </nav>
+        <Panel
+          title={tr(`remaining.section.${section}`)}
+          className="center-settings__content"
+        >
+          {section === 'information' && <CenterInformationForm key={actor.centerId} />}
+          {section === 'security' && <SecurityForm />}
+          {section === 'notifications' && <NotificationPreferences />}
+        </Panel>
+      </div>
     </div>
-  </div>;
+  );
 }
