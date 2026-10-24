@@ -1,65 +1,101 @@
+/* The gradient blends the greeting into the photograph without a dividing edge. */
 .center-dashboard__hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
-  align-items: stretch;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-block-size: 270px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  background: var(--color-bg-soft);
+  background: var(--color-bg-light);
   margin-block-end: 16px;
   overflow: hidden;
 }
 
 .center-dashboard__hero-copy {
-  padding: 24px;
+  position: relative;
+  z-index: 1;
+  inline-size: 55%;
+  padding: 28px 32px;
   min-inline-size: 0;
-  align-self: center;
 }
 
-.center-dashboard__eyebrow {
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  font-size: 10px;
+.center-dashboard__hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(24px, 2.3vw, 32px);
+  line-height: 1.3;
   font-weight: 600;
-  color: var(--color-primary);
-  margin: 0 0 8px;
-}
-
-.center-dashboard__eyebrow:lang(ar) {
-  letter-spacing: normal;
-}
-
-.center-dashboard__hero h2 {
-  font-size: 21px;
-  line-height: 1.4;
   color: var(--color-primary-darker);
-  font-weight: 600;
-  margin: 0 0 8px;
+  overflow-wrap: anywhere;
 }
 
-.center-dashboard__hero p:not(.center-dashboard__eyebrow) {
-  font-size: 13px;
-  margin: 0 0 12px;
+.center-dashboard__hero p {
+  margin: 0 0 18px;
+  font-size: 14px;
   line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.center-dashboard__hero .pg-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .center-dashboard__hero-media {
-  position: relative;
-  inline-size: 100%;
-  min-inline-size: 0;
-  aspect-ratio: 3 / 2;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
 }
 
 .center-dashboard__hero img {
-  position: absolute;
-  inset: 0;
   display: block;
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: right center;
 }
 
-.center-dashboard__more { margin: 12px 0 0; color: var(--color-text-secondary); font-size: 13px; }
+.center-dashboard__hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-light) 0%,
+    var(--color-bg-light) 28%,
+    color-mix(in srgb, var(--color-bg-light) 88%, transparent) 42%,
+    transparent 70%
+  );
+}
+
+/* Mirror placement for Arabic while keeping the original photograph unflipped. */
+[dir='rtl'] .center-dashboard__hero-media {
+  right: 42%;
+}
+
+[dir='rtl'] .center-dashboard__hero img {
+  object-position: right center;
+}
+
+[dir='rtl'] .center-dashboard__hero-media::after {
+  background: linear-gradient(
+    270deg,
+    var(--color-bg-light) 0%,
+    color-mix(in srgb, var(--color-bg-light) 88%, transparent) 12%,
+    transparent 50%
+  );
+}
+
+:root[data-theme='dark'] .center-dashboard__hero img {
+  filter: brightness(0.7);
+}
+
+.center-dashboard__more {
+  margin: 12px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
 
 .center-dashboard__stats {
   display: grid;
@@ -112,7 +148,7 @@
 .center-dashboard__lower {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  align-items: start;
+  align-items: stretch;
   gap: 16px;
 }
 
@@ -141,7 +177,8 @@
   min-inline-size: 0;
 }
 
-.center-dashboard__patient span, .center-dashboard__patient small {
+.center-dashboard__patient span,
+.center-dashboard__patient small {
   display: block;
   margin-block-start: 4px;
   font-size: 12px;
@@ -150,6 +187,7 @@
 
 .center-dashboard__side {
   display: grid;
+  align-self: start;
   gap: 16px;
 }
 
@@ -174,7 +212,8 @@
   align-items: center;
 }
 
-.center-dashboard__upcoming strong, .center-dashboard__upcoming small {
+.center-dashboard__upcoming strong,
+.center-dashboard__upcoming small {
   display: block;
   font-size: 13px;
 }
@@ -183,6 +222,7 @@
   color: var(--color-text-secondary);
 }
 
+/* Responsive layout adjustments. */
 @media (max-width: 1199px) {
   .center-dashboard__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -196,19 +236,39 @@
 }
 
 @media (max-width: 767px) {
+  /* Stack copy above the image so small-screen text never covers the treatment bed. */
   .center-dashboard__hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
+    display: block;
+    min-block-size: 0;
   }
+
   .center-dashboard__hero-copy {
-    padding: 16px;
+    inline-size: 100%;
+    padding: 22px 18px 12px;
   }
-  .center-dashboard__hero h2 {
-    font-size: 18px;
+
+  .center-dashboard__hero h1 {
+    font-size: 24px;
   }
+
   .center-dashboard__hero-media {
-    max-block-size: 210px;
+    position: relative;
+    block-size: 150px;
   }
+
+  [dir='rtl'] .center-dashboard__hero-media {
+    right: 0;
+  }
+
+  .center-dashboard__hero img {
+    object-position: right center;
+  }
+
+  .center-dashboard__hero-media::after,
+  [dir='rtl'] .center-dashboard__hero-media::after {
+    background: linear-gradient(180deg, var(--color-bg-light), transparent 55%);
+  }
+
   .center-dashboard__side {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -224,14 +284,20 @@
     gap: 8px;
     padding: 10px;
   }
-  .center-dashboard__stat > div { display: contents; }
+  .center-dashboard__stat > div {
+    display: contents;
+  }
   .center-dashboard__stat > div > span {
     grid-column: 1 / -1;
     grid-row: 1;
     line-height: 1.5;
     overflow-wrap: normal;
   }
-  .center-dashboard__stat strong { grid-column: 2; grid-row: 2; margin: 0; }
+  .center-dashboard__stat strong {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+  }
   .center-dashboard__stat-icon {
     grid-column: 1;
     grid-row: 2;
@@ -250,19 +316,34 @@
   .center-dashboard__schedule time {
     grid-area: time;
   }
-  .center-dashboard__schedule .pg-avatar { grid-area: avatar; align-self: start; }
+  .center-dashboard__schedule .pg-avatar {
+    grid-area: avatar;
+    align-self: start;
+  }
   .center-dashboard__patient {
     grid-area: patient;
     align-self: start;
   }
-  .center-dashboard__patient :is(span, small) { margin-block-start: 2px; line-height: 1.5; }
-  .center-dashboard__schedule .pg-status-badge { grid-area: status; justify-self: end; }
-  .center-dashboard__schedule li > button { grid-area: action; justify-self: end; }
-  .center-dashboard__lower > .center-panel > .center-panel__heading { gap: 6px; }
-  .center-dashboard__lower > .center-panel > .center-panel__heading .center-link { font-size: 13px; }
+  .center-dashboard__patient :is(span, small) {
+    margin-block-start: 2px;
+    line-height: 1.5;
+  }
+  .center-dashboard__schedule .pg-status-badge {
+    grid-area: status;
+    justify-self: end;
+  }
+  .center-dashboard__schedule li > button {
+    grid-area: action;
+    justify-self: end;
+  }
+  .center-dashboard__lower > .center-panel > .center-panel__heading {
+    gap: 6px;
+  }
+  .center-dashboard__lower > .center-panel > .center-panel__heading .center-link {
+    font-size: 13px;
+  }
 }
 
-.center-dashboard__hero h2:lang(ar) {
+.center-dashboard__hero h1:lang(ar) {
   line-height: 1.6;
 }
-
