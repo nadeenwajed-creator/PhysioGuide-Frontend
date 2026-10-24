@@ -354,6 +354,21 @@
 .center-modal .pg-modal__title { font-size: 20px; line-height: 1.4; }
 .center-modal :is(.pg-modal__header, .pg-modal__footer) { padding: 12px 20px; }
 .center-modal .pg-modal__body { padding: 20px; }
+
+/* Keep the therapist identity readable beside its fixed-size avatar. */
+.center-modal .center-record-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block-end: 12px;
+  min-inline-size: 0;
+}
+
+.center-modal .center-record-summary strong {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
 .center-modal .center-form-help { margin-block: 0 16px; font-size: 12px; }
 .center-modal .pg-form-field__error { font-size: 12px; }
 .center-modal .center-form-grid { gap: 14px 16px; }

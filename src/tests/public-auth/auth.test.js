@@ -11,15 +11,15 @@ const values = {
 };
 
 test('center requests keep coordinates separate from the readable address', () => {
-  const request = createAuthRequest(values, { role: 'center', mode: 'signup' }, coordinates);
-  assert.deepEqual(request.location, { address: 'Example address', coordinates });
+  const request = createAuthRequest(values, { role: 'center', mode: 'signup' }, coordinates, true);
+  assert.deepEqual(request.location, { address: 'Example address', coordinates, confirmed: true });
   assert.equal(request.password, values.password);
   assert.equal(request.email, 'example@example.com');
   assert.equal('confirmPassword' in request, false);
 });
 
 test('signup validates required fields, address, passwords, and Arabic phone digits', () => {
-  const context = { role: 'center', mode: 'signup' };
+  const context = { role: 'center', mode: 'signup', coordinates, locationConfirmed: true };
   assert.deepEqual(validateAuthForm({ ...values, phone: '٠٥٩٩١٢٣٤٥٦' }, context), {});
   assert.equal(validateAuthForm({ ...values, location: '' }, context).location, 'required');
   assert.equal(validateAuthForm({ ...values, confirmPassword: 'different' }, context).confirmPassword, 'passwordMismatch');
@@ -153,4 +153,16 @@ test('cancellation stops lookup even if the fetch implementation ignores the sig
   controller.abort();
   await assert.rejects(pending, { code: 'cancelled' });
   assert.equal(requestSignal.aborted, true);
+});
+
+
+test('center registration requires a valid confirmed clinic pin', async () => {
+  for (const coordinates of [null, { latitude: 91, longitude: 0 }, { latitude: 32, longitude: '35' }]) {
+    assert.equal(validateAuthForm(values, { role: 'center', mode: 'signup', coordinates, locationConfirmed: true }).location, 'confirmLocation');
+  }
+  assert.equal(validateAuthForm(values, { role: 'center', mode: 'signup', coordinates, locationConfirmed: false }).location, 'confirmLocation');
+  const adapter = createMockAuthAdapter({ delay: 0 });
+  const request = createAuthRequest(values, { role: 'center', mode: 'signup' }, coordinates, false);
+  await assert.rejects(adapter.registerCenter(request), error => error.code === 'validation' && error.fieldErrors.location === 'confirmLocation');
+  await assert.rejects(adapter.registerCenter({ ...request, location: { address: 'Address only' } }), { code: 'validation' });
 });

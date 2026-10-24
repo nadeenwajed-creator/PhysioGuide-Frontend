@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImage, faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -57,9 +57,30 @@ export function EmptyState({
 }
 export function Feedback({
   error,
-  children
+  children,
+  onDismiss,
+  resetKey
 }) {
-  return children ? <p className={`center-feedback${error ? ' center-feedback--error' : ''}`} role={error ? 'alert' : 'status'}>{children}</p> : null;
+  return children ? <FeedbackMessage key={`${Boolean(error)}:${children}`} error={error} onDismiss={onDismiss} resetKey={resetKey}>{children}</FeedbackMessage> : null;
+}
+
+function FeedbackMessage({ error, children, onDismiss, resetKey }) {
+  const token = resetKey ?? children;
+  const [expired, setExpired] = useState(null);
+  const dismissRef = useRef(onDismiss);
+  useEffect(() => {
+    dismissRef.current = onDismiss;
+  }, [onDismiss]);
+  useEffect(() => {
+    // Success notices expire; errors stay visible until the user addresses them.
+    if (error) return;
+    const timer = window.setTimeout(() => {
+      setExpired(token);
+      dismissRef.current?.();
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [error, token]);
+  return error || expired !== token ? <p className={`center-feedback${error ? ' center-feedback--error' : ''}`} role={error ? 'alert' : 'status'}>{children}</p> : null;
 }
 export function RecordStatus({
   value

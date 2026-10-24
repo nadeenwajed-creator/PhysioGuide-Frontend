@@ -31,7 +31,7 @@ function getFileType(file) {
     return 'jpg';
   }
 
-  if (['png', 'pdf', 'doc', 'docx'].includes(extension)) {
+  if (['png', 'pdf', 'doc', 'docx', 'txt'].includes(extension)) {
     return extension;
   }
 
@@ -115,7 +115,7 @@ function AttachmentCard({
       actionIcon = faArrowUpRightFromSquare;
       actionLabel = t('attachmentCard.open');
       actionCallback = onOpen;
-    } else if (isWord) {
+    } else if (isWord || fileType === 'txt') {
       actionIcon = faDownload;
       actionLabel = t('attachmentCard.download');
       actionCallback = onDownload;

@@ -1,3 +1,4 @@
+import { validCoordinates } from './center/remainingOperations.js';
 import { AuthServiceError, normalizeAuthError } from './auth/authErrors.js';
 import { createMockAuthAdapter } from './auth/mockAuthAdapter.js';
 import { createBrowserStore } from './mock/browserStore.js';
@@ -44,7 +45,10 @@ async function login(method, credentials) {
 export const loginPatient = credentials => login('loginPatient', credentials);
 export const loginCenter = credentials => login('loginCenter', credentials);
 export const registerPatient = (data) => callAuth('registerPatient', data);
-export const registerCenter = (data) => callAuth('registerCenter', data);
+export const registerCenter = (data) => {
+  if (!data.location?.address?.trim() || !validCoordinates(data.location?.coordinates) || data.location.confirmed !== true) return Promise.reject(new AuthServiceError('validation', { location: 'confirmLocation' }));
+  return callAuth('registerCenter', data);
+};
 
 async function applicationOperation(method, request = {}) {
   const actor = await callAuth('restoreSession');

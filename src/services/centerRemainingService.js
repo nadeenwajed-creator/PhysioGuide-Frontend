@@ -1,9 +1,9 @@
 import { callCenter } from './centerPortalService.js';
 import { getDashboardSummary } from './centerSummaryService.js';
 
-export { deleteCenterService } from './serviceService.js';
 export { saveCenterNotificationPreferences as saveCenterPreferences } from './notificationService.js';
 
+export const updateCenterImages = (actor, values) => callCenter('updateCenterImages', actor, values);
 export const saveCenterInformation = (actor, values) => callCenter('saveCenter', actor, values);
 export const replyToCenterReview = (actor, id, text) => callCenter('updateReview', actor, id, { reply: text });
 export const changeCenterPassword = (actor, values) => callCenter('changeCenterPassword', actor, values);

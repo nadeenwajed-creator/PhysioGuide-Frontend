@@ -11,6 +11,7 @@ function MessageBubble({
   message,
   sentLabel,
   deliveredLabel,
+  readLabel,
   className = '',
   onOpenAttachment,
   onDownloadAttachment,
@@ -40,11 +41,11 @@ function MessageBubble({
   const isOutgoing = message.direction === 'outgoing';
 
   const showStatus = isOutgoing &&
-    ['sent', 'delivered'].includes(message.status);
+    ['sent', 'delivered', 'read'].includes(message.status);
 
   const statusLabel = message.status === 'sent'
     ? sentLabel ?? t('messageBubble.sent')
-    : deliveredLabel ?? t('messageBubble.delivered');
+    : message.status === 'read' ? readLabel ?? t('conversationItem.read') : deliveredLabel ?? t('messageBubble.delivered');
 
   const bubbleClasses = [
     'pg-message-bubble',
@@ -107,7 +108,7 @@ function MessageBubble({
                   aria-hidden="true"
                 />
 
-                {message.status === 'delivered' && (
+                {message.status !== 'sent' && (
                   <FontAwesomeIcon
                     icon={faCheck}
                     aria-hidden="true"

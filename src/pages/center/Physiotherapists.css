@@ -1,18 +1,93 @@
-.center-physiotherapists__filters { grid-template-columns: minmax(0,1.6fr) repeat(3,minmax(0,1fr)); }
-.center-physiotherapists__grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
-.center-physiotherapists__card { position: relative; border-block-start: 3px solid color-mix(in srgb,var(--color-primary) 35%,var(--color-border)); padding: 16px; }
-.center-physiotherapists__card-head { display: grid; grid-template-columns: 48px minmax(0,1fr) 44px; align-items: start; gap: 10px; }
-.center-physiotherapists__card-head .pg-avatar { inline-size: 48px; block-size: 48px; }
-.center-physiotherapists__card-head h2 { font-size: 15px; line-height: 1.6; margin-block: 0 4px; }
-.center-physiotherapists__card-head p { font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; margin-block: 5px 0; }
-.center-physiotherapists__card-head .pg-rating-stars { flex-wrap: wrap; gap: 3px; font-size: 12px; }
-.center-physiotherapists__card dl { margin-block: 18px 12px; display: grid; gap: 8px; }
-.center-physiotherapists__card dl > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 12px; }
-.center-physiotherapists__card dt { display: flex; align-items: baseline; gap: 8px; color: var(--color-text-secondary); font-weight: 400; }
-.center-physiotherapists__card dt svg { inline-size: 14px; color: var(--color-primary); }
-.center-physiotherapists__card dd { margin: 0; text-align: end; }
-.center-physiotherapists__contact { border-block-start: 1px solid var(--color-border); padding-block: 10px; margin-block-end: 4px; display: grid; gap: 6px; }
-.center-physiotherapists__contact a { font-size: 12px; text-decoration: none; overflow-wrap: anywhere; }
-.center-physiotherapists__contact a:hover { text-decoration: underline; }
-@container remaining (max-width: 1000px) { .center-physiotherapists__grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@container remaining (max-width: 620px) { .center-physiotherapists__grid { grid-template-columns: minmax(0,1fr); gap: 12px; } }
+/* Physiotherapists page layout. */
+.center-physiotherapists__filters {
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+}
+.center-physiotherapists__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.center-physiotherapists__card {
+  position: relative;
+  padding: 16px;
+}
+.center-physiotherapists__card-head {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 10px;
+}
+.center-physiotherapists__card-head .pg-avatar {
+  inline-size: 48px;
+  block-size: 48px;
+}
+.center-physiotherapists__card-head h2 {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-block: 0 4px;
+}
+.center-physiotherapists__card-head p {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-block: 5px 0;
+}
+.center-physiotherapists__card-head .pg-rating-stars {
+  flex-wrap: wrap;
+  gap: 3px;
+  font-size: 12px;
+}
+.center-physiotherapists__card dl {
+  margin-block: 18px 12px;
+  display: grid;
+  gap: 8px;
+}
+.center-physiotherapists__card dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+.center-physiotherapists__card dt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+.center-physiotherapists__card dt svg {
+  inline-size: 14px;
+  color: var(--color-primary);
+}
+.center-physiotherapists__card dd {
+  margin: 0;
+  text-align: end;
+}
+.center-physiotherapists__contact {
+  border-block-start: 1px solid var(--color-border);
+  padding-block: 10px;
+  margin-block-end: 4px;
+  display: grid;
+  gap: 6px;
+}
+.center-physiotherapists__contact a {
+  font-size: 12px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.center-physiotherapists__contact a:hover {
+  text-decoration: underline;
+}
+/* Responsive layout adjustments. */
+@container remaining (max-width: 1000px) {
+  .center-physiotherapists__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container remaining (max-width: 620px) {
+  .center-physiotherapists__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}

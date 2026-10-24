@@ -15,7 +15,7 @@ import logo from '../../assets/logo/physioguide-icon.svg';
 import './AccountDestination.css';
 
 // A signed-in account destination until the separately owned portal pages are integrated.
-export default function AccountDestination() {
+export default function AccountDestination({ embedded = false }) {
   const { session } = useAuth();
   const { t, language, dir } = useLanguage();
   const { theme } = useContext(ThemeContext);
@@ -31,21 +31,26 @@ export default function AccountDestination() {
       navigate(await logout(), { replace: true });
     } catch { setError(t('auth.error.unavailable')); setBusy(false); }
   }
+  const content = <>
+    <h1>{title}</h1>
+    <p>{t('account.welcome', { name })}</p>
+    {session.role === 'patient' && <Link to="/patient/messages">{t('messaging.title')}</Link>}
+    <section className="account-destination__card">
+      <h2>{t('account.title')}</h2>
+      <p><bdi>{session.email}</bdi></p>
+      <p>{t('account.signedIn')}</p>
+      <Button loading={busy} onClick={signOut}>{t('center.logout')}</Button>
+      {error && <p role="alert">{error}</p>}
+    </section>
+    <Link to="/">{t('account.home')}</Link>
+  </>;
+  if (embedded) return <div className="account-destination__main">{content}</div>;
   return <div className="account-destination" dir={dir}>
     <Navbar logoSrc={logo} theme={theme} homePath="/" themeToggle={<ThemeToggle />} languageSwitcher={<LanguageSwitcher />}
       quickSettings={<QuickSettings languageSwitcher={<LanguageSwitcher variant="mobile" />} themeToggle={<ThemeToggle />} />}
       profileMenu={({ compact }) => <ProfileMenu compact={compact} user={{ name }} labels={{ logout: t('center.logout') }} onRequestLogout={signOut} />} />
     <main className="account-destination__main">
-      <h1>{title}</h1>
-      <p>{t('account.welcome', { name })}</p>
-      <section className="account-destination__card">
-        <h2>{t('account.title')}</h2>
-        <p><bdi>{session.email}</bdi></p>
-        <p>{t('account.signedIn')}</p>
-        <Button loading={busy} onClick={signOut}>{t('center.logout')}</Button>
-        {error && <p role="alert">{error}</p>}
-      </section>
-      <Link to="/">{t('account.home')}</Link>
+      {content}
     </main>
     <Footer description="" />
   </div>;

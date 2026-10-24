@@ -1,11 +1,13 @@
 
 import { useId, useRef, useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBell,
   faBuilding,
   faCalendarDays,
+  faComments,
   faChevronRight,
   faChevronUp,
   faGear,
@@ -23,6 +25,7 @@ const notificationTypes = {
   appointment: { icon: faCalendarDays, tone: 'warning' },
   review: { icon: faStar, tone: 'warning' },
   therapist: { icon: faUserDoctor, tone: 'info' },
+  message: { icon: faComments, tone: 'info' },
   system: { icon: faGear, tone: 'info' },
 };
 
@@ -201,13 +204,15 @@ function NotificationsDropdown({
               return (
                 <li key={item.id}>
                   <Dropdown.Item
-                    as="button"
-                    type="button"
+                    as={item.to ? Link : 'button'}
+                    to={item.to}
+                    type={item.to ? undefined : 'button'}
                     className="pg-notifications__item"
                     onClick={() => {
                       if (unread) {
                         onMarkAsRead?.(item.id);
                       }
+                      if (item.to) handleToggle(false);
                     }}
                   >
                     <span

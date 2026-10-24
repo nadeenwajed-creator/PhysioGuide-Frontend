@@ -4,7 +4,7 @@ import { createMockCenterAdapter } from '../../services/center/mockCenterAdapter
 import { authorizeCenterOperation } from '../../services/center/access.js';
 import { createBrowserStore } from '../../services/mock/browserStore.js';
 import { ServiceError } from '../../services/api/serviceError.js';
-import { locateCenterDevice, centerMapLinks } from '../../services/centerLocationService.js';
+import { locateCenterDevice, centerMapLinks, hasSavedCenterLocation, createCenterAddressSearch } from '../../services/centerLocationService.js';
 
 const actor = { id: 'owner', role: 'center', centerId: 'clinic' };
 const hours = { weekStart: '09:00', weekEnd: '18:00', fridayStart: '10:00', fridayEnd: '14:00' };
@@ -28,7 +28,7 @@ function setup() {
 test('remaining mutations enforce Center roles and workspace ownership', async () => {
   const { adapter } = setup();
   const operations = [
-    ['saveTherapist', {}], ['saveService', {}], ['deleteService', 'missing'],
+    ['saveTherapist', {}], ['saveService', {}], ['updateCenterImages', { add: ['/photo.webp'] }],
     ['updateReview', 'r1', { reply: 'Reply' }], ['saveCenter', profile],
     ['saveNotificationPreferences', { reviews: false }], ['changeCenterPassword', {}],
   ];
@@ -44,32 +44,21 @@ test('remaining mutations enforce Center roles and workspace ownership', async (
 
 test('therapist and service edits persist with stable identities', async () => {
   const { adapter, create } = setup();
-  const therapist = { name: 'Therapist', email: 'staff@example.com', phone: '0591234568', specialty: 'Rehabilitation', experience: 3, price: 30, availability: 'available' };
+  const therapist = { name: 'Therapist', email: 'staff@example.com', phone: '0591234568', specialty: 'Rehabilitation', experience: 3, availability: 'available' };
   const saved = await adapter.saveTherapist(actor, therapist);
-  await adapter.saveTherapist(actor, { ...therapist, name: 'Updated therapist' }, saved.id);
+  await adapter.saveTherapist(actor, { specialty: 'Updated specialty', experience: 4, availability: 'unavailable' }, saved.id);
   await assert.rejects(adapter.saveTherapist(actor, therapist), { code: 'duplicateEmail' });
   const service = { name: 'Session', description: 'Physiotherapy', price: 25, duration: 45 };
   const added = await adapter.saveService(actor, service);
   await adapter.saveService(actor, { ...service, duration: 60 }, added.id);
   const data = await create().getWorkspace(actor);
   assert.equal(data.therapists.length, 1);
-  assert.equal(data.therapists[0].name.en, 'Updated therapist');
+  assert.equal(data.therapists[0].name.en, 'Therapist');
+  assert.equal(data.therapists[0].specialty.en, 'Updated specialty');
+  assert.equal(data.therapists[0].experience, 4);
+  assert.equal(data.therapists[0].availability, 'unavailable');
   assert.equal(data.services[0].duration, 60);
   assert.equal(data.services[0].id, added.id);
-});
-
-test('service deletion preserves linkedService for every appointment status', async () => {
-  const { store, create } = setup();
-  for (const status of ['pending', 'confirmed', 'completed', 'cancelled']) {
-    const data = store.read();
-    data.services = [{ id: 'linked' }, { id: 'unused' }];
-    data.appointments = [{ id: 'a1', serviceId: 'linked', status }];
-    store.write(data);
-    const adapter = create();
-    await assert.rejects(adapter.deleteService(actor, 'linked'), { code: 'linkedService' });
-    await adapter.deleteService(actor, 'unused');
-    assert.deepEqual(store.read().services, [{ id: 'linked' }]);
-  }
 });
 
 test('reply editing replaces one persisted response without changing ratings', async () => {
@@ -173,4 +162,57 @@ test('location wrapper preserves accuracy and errors; maps use supplied coordina
   const links = centerMapLinks(coordinates);
   assert.equal(new URL(links.page).searchParams.get('mlat'), '32.2');
   assert.equal(new URL(links.embed).searchParams.get('marker'), '32.2,35.2');
+});
+
+
+test('profile image actions persist independently and preserve other profile fields', async () => {
+  const { adapter, create, store } = setup();
+  await adapter.updateCenterImages(actor, { add: ['/one.webp', '/one.webp'], imageUrl: '/cover.webp' });
+  await create().updateCenterImages(actor, { add: ['/two.webp'] });
+  await create().updateCenterImages(actor, { remove: '/one.webp' });
+  await create().saveCenter(actor, profile);
+  assert.deepEqual(store.read().center.gallery, ['/two.webp']);
+  assert.equal(store.read().center.imageUrl, '/cover.webp');
+  assert.deepEqual(store.read().center.hours, hours);
+  for (const values of [{}, { imageUrl: '' }, { add: [null] }, { remove: '/missing.webp' }]) {
+    await assert.rejects(create().updateCenterImages(actor, values));
+  }
+  assert.deepEqual(store.read().center.gallery, ['/two.webp']);
+  assert.equal(typeof adapter.deleteService, 'undefined');
+  assert.throws(() => authorizeCenterOperation(actor, 'deleteService'), { code: 'forbidden' });
+});
+
+test('image writes roll back on storage failure', async () => {
+  const { adapter, failWrites } = setup();
+  const before = await adapter.getWorkspace(actor);
+  failWrites();
+  await assert.rejects(adapter.updateCenterImages(actor, { add: ['/photo.webp'] }), ServiceError);
+  assert.deepEqual(await adapter.getWorkspace(actor), before);
+});
+
+test('legacy registration pins display while missing, invalid or explicitly unconfirmed pins do not', () => {
+  const coordinates = { latitude: 32.22, longitude: 35.26 };
+  assert(hasSavedCenterLocation({ coordinates }));
+  assert(hasSavedCenterLocation({ coordinates, locationConfirmed: true }));
+  assert(!hasSavedCenterLocation({ coordinates, locationConfirmed: false }));
+  assert(!hasSavedCenterLocation({ coordinates: null }));
+  assert(!hasSavedCenterLocation({ coordinates: { latitude: 95, longitude: 35 } }));
+});
+
+test('address search maps provider results, rejects broad/invalid pins and normalizes errors', async () => {
+  let requested;
+  const search = createCenterAddressSearch({ apiKey: 'synthetic-test-key', fetcher: async url => {
+    requested = new URL(url);
+    return { ok: true, json: async () => ({ results: [
+      { formatted: 'Clinic street', lat: 32.2, lon: 35.2, result_type: 'amenity' },
+      { formatted: 'Country', lat: 32, lon: 35, result_type: 'country' },
+      { formatted: 'Invalid', lat: 99, lon: 0 },
+    ] }) };
+  } });
+  assert.deepEqual(await search('Clinic', { language: 'ar' }), [{ address: 'Clinic street', coordinates: { latitude: 32.2, longitude: 35.2 } }]);
+  assert.equal(requested.searchParams.get('lang'), 'ar');
+  assert.equal(requested.searchParams.get('text'), 'Clinic');
+  await assert.rejects(createCenterAddressSearch()('Clinic'), { code: 'lookupUnavailable' });
+  await assert.rejects(createCenterAddressSearch({ apiKey: 'test', fetcher: async () => ({ ok: false, status: 429 }) })('Clinic'), { code: 'lookupUnavailable' });
+  await assert.rejects(createCenterAddressSearch({ apiKey: 'test', fetcher: async () => { throw new Error('private URL'); } })('Clinic'), error => error.code === 'lookupFailed' && !error.message.includes('private'));
 });

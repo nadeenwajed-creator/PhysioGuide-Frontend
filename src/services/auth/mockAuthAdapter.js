@@ -1,3 +1,4 @@
+import { validCoordinates } from '../center/remainingOperations.js';
 import { AuthServiceError } from './authErrors.js';
 import { MOCK_PASSWORD, MOCK_CENTER_ID, mockAccounts } from './mockAccounts.js';
 
@@ -19,7 +20,8 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
   }
   function identity(account) {
     const { id, role, centerId, therapistId, patientId, name, email } = account;
-    const profile = role === 'center' && centerId ? getCenter(centerId) : null;
+    const profile = role === 'center' && centerId ? getCenter(centerId)
+      : role === 'physiotherapist' ? getTherapists().find(person => person.id === therapistId && (person.centerId || MOCK_CENTER_ID) === centerId) : null;
     return { id, role, centerId, therapistId, patientId, name: profile?.name || name, email };
   }
   async function login(credentials, roles) {
@@ -45,10 +47,10 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     if (role === 'center') {
       if (!values.phone?.trim() || !values.location?.address?.trim()) throw new AuthServiceError('validation');
       const coordinates = values.location.coordinates;
-      if (coordinates && (!Number.isFinite(coordinates.latitude) || Math.abs(coordinates.latitude) > 90 || !Number.isFinite(coordinates.longitude) || Math.abs(coordinates.longitude) > 180)) throw new AuthServiceError('validation');
+      if (!validCoordinates(coordinates) || values.location.confirmed !== true) throw new AuthServiceError('validation', { location: 'confirmLocation' });
       Object.assign(account, {
         centerId: `center-${id}`, approvalStatus: 'pending', submittedAt: new Date(now()).toISOString(),
-        phone: values.phone.trim(), location: { address: values.location.address.trim(), coordinates: coordinates ? { latitude: coordinates.latitude, longitude: coordinates.longitude } : null },
+        phone: values.phone.trim(), location: { address: values.location.address.trim(), coordinates: coordinates ? { latitude: coordinates.latitude, longitude: coordinates.longitude } : null, confirmed: true },
       });
     }
     const next = [...readAccounts(), account];

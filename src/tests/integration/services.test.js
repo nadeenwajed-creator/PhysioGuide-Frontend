@@ -107,7 +107,7 @@ test('mock role login rejects invalid, wrong-portal and pending accounts', async
 test('signup persists metadata, keeps Center pending, and stores no passwords or tokens', async () => {
   const memory = storage(); const accountStore = createBrowserStore('accounts', { storage: () => memory });
   const adapter = createMockAuthAdapter({ delay: 0, accountStore });
-  assert.equal((await adapter.registerCenter({ ...credentials('new-center@example.com'), centerName: 'New Center', phone: '0591234567', location: { address: 'Nablus' } })).status, 'pending-review');
+  assert.equal((await adapter.registerCenter({ ...credentials('new-center@example.com'), centerName: 'New Center', phone: '0591234567', location: { address: 'Nablus', coordinates: { latitude: 32.22, longitude: 35.26 }, confirmed: true } })).status, 'pending-review');
   await assert.rejects(adapter.loginCenter(credentials('new-center@example.com')), { code: 'accountPending' });
   await adapter.registerPatient({ ...credentials('new-patient@example.com'), fullName: 'New Patient' });
   const restored = createMockAuthAdapter({ delay: 0, accountStore });
@@ -138,7 +138,7 @@ test('center creation confirms, patient request pends, and origin cannot be supp
   const adapter = createMockCenterAdapter(seed(), { now: clock });
   const created = await adapter.saveAppointment(center, booking({ origin: 'patient', status: 'pending' }));
   assert.equal(created.origin, 'center'); assert.equal(created.status, 'confirmed'); assert(!appointmentActions(created).includes('confirm'));
-  const request = await adapter.requestAppointment({ role: 'patient', patientId: 'p2' }, booking({ patientId: 'p2', time: '10:00' }));
+  const request = await adapter.requestAppointment({ role: 'patient', centerId: center.centerId, patientId: 'p2' }, booking({ patientId: 'p2', time: '10:00' }));
   assert.equal(request.origin, 'patient'); assert.equal(request.status, 'pending'); assert(appointmentActions(request).includes('confirm'));
   const confirmed = await adapter.updateAppointmentStatus(center, request.id, 'confirmed'); assert(!appointmentActions(confirmed).includes('confirm'));
   await assert.rejects(adapter.updateAppointmentStatus(center, request.id, 'confirmed'), { code: 'closedAppointment' });
@@ -195,5 +195,5 @@ test('cancelled records leave active Dashboard summaries and staff email collisi
   assert.equal(getDashboardSummary(await adapter.getWorkspace(center)).todayAppointments.length, 1);
   await adapter.updateAppointmentStatus(center, record.id, 'cancelled');
   assert.equal(getDashboardSummary(await adapter.getWorkspace(center)).todayAppointments.length, 0);
-  await assert.rejects(adapter.saveTherapist(center, { name: 'Staff', email: 'center@example.com', phone: '0591111111', specialty: 'Mobility', experience: '2', price: '25', availability: 'available' }), { code: 'duplicateEmail' });
+  await assert.rejects(adapter.saveTherapist(center, { name: 'Staff', email: 'center@example.com', phone: '0591111111', specialty: 'Mobility', experience: '2', availability: 'available' }), { code: 'duplicateEmail' });
 });

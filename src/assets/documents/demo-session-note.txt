@@ -1,0 +1,8 @@
+PhysioGuide - Fictional demonstration attachment
+
+This file demonstrates a downloadable conversation attachment.
+It is not a medical record, diagnosis, exercise prescription, or treatment plan.
+No real patient information is included.
+
+Future integration: the backend should return an authorized attachment URL,
+file name, media type, size, and the appropriate conversation permissions.

@@ -3,6 +3,7 @@ import Modal from '../shared/Modal/Modal.jsx';
 import Button from '../shared/Button/Button.jsx';
 import FormField from '../shared/FormField/FormField.jsx';
 import { Feedback, SelectField } from './CenterUI.jsx';
+import Avatar from '../shared/Avatar/Avatar.jsx';
 import useCenter from './useCenter.js';
 import { saveCenterPatient } from '../../services/patientService.js';
 import { saveCenterTherapist } from '../../services/therapistService.js';
@@ -29,6 +30,7 @@ function RecordForm({
     dir,
     notify
   } = useCenter();
+  const professionalOnly = kind === 'therapist' && Boolean(record?.id);
   const [values, setValues] = useState(() => ({
     name: record?.name?.en || '',
     nameAr: record?.name?.ar || '',
@@ -101,9 +103,12 @@ function RecordForm({
     setError('');
     setFields({});
     try {
-      const submitted = {
-        ...values
-      };
+      const keys = professionalOnly
+        ? ['specialty', 'specialtyAr', 'experience', 'availability']
+        : ['name', 'nameAr', 'email', 'phone', 'specialty', 'specialtyAr', 'experience', 'availability', 'imageUrl'];
+      const submitted = kind === 'therapist'
+        ? Object.fromEntries(keys.map(key => [key, values[key]]))
+        : { ...values };
       if (imageFile) submitted.imageUrl = await prepareCenterImage(imageFile);
       await saveMethods[kind](actor, submitted, record?.id);
       notify(tr('saved'));
@@ -120,6 +125,10 @@ function RecordForm({
       <Button type="submit" form="center-record-form" loading={busy}>{tr('save')}</Button>
     </>}>
     <form id="center-record-form" onSubmit={submit} noValidate>
+      {professionalOnly && <div className="center-record-summary">
+        <Avatar src={record.imageUrl} name={name(record.name)} size="md" />
+        <strong>{name(record.name)}</strong>
+      </div>}
       <p className="center-form-help">{tr('requiredFields')}</p>
       <div className="center-form-grid">
         {kind === 'appointment' ? <>
@@ -139,13 +148,13 @@ function RecordForm({
             rows: 3
           })}
         </> : <>
-          {field('name', {
+          {!professionalOnly && <>{field('name', {
             required: true
           })}
           {field('nameAr', {
             dir: 'rtl'
-          })}
-          {kind !== 'service' && <>
+          })}</>}
+          {kind !== 'service' && !professionalOnly && <>
             {field('email', {
               type: 'email',
               required: true,
@@ -181,10 +190,6 @@ function RecordForm({
               type: 'number',
               required: true
             })}
-            {field('price', {
-              type: 'number',
-              required: true
-            })}
             {select('availability', ['available', 'unavailable'].map(value => ({
               value,
               label: tr(value)
@@ -192,6 +197,7 @@ function RecordForm({
           </>}
           {kind === 'service' && <>
             {field('price', {
+              label: tr('servicePrice'),
               type: 'number',
               required: true
             })}
@@ -210,7 +216,7 @@ function RecordForm({
               rows: 3
             })}
           </>}
-          {select('imageUrl', [{
+          {!professionalOnly && <>{select('imageUrl', [{
             value: '',
             label: tr('noImage')
           }, ...(kind === 'service' ? data.serviceImageOptions : data.portraitOptions).map((value, index) => ({
@@ -224,6 +230,7 @@ function RecordForm({
             <input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={event => setImageFile(event.target.files?.[0] || null)} />
             <small>{tr('imageHelp')}</small>
           </label>
+          </>}
         </>}
       </div>
       <Feedback error>{error}</Feedback>

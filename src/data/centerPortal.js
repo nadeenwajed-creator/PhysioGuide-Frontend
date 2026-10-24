@@ -1,3 +1,4 @@
+import demoNote from '../assets/documents/demo-session-note.txt?url';
 import { dateKey } from '../utils/centerFormat.js';
 import room from '../assets/images/center/center-treatment-room.webp';
 import gym from '../assets/images/center/center-gym.webp';
@@ -64,7 +65,7 @@ export function createCenterPortalData(now = new Date()) {
     completedSessions: 420 + index * 35,
     about: bilingual('Helping you move with confidence through thoughtful, individual care.', 'رعاية فردية مدروسة تساعدك على الحركة بثقة.')
   }));
-  // Consistent IDs link schedules, patient history, and ratings.
+  // Consistent IDs link schedules, patient history, reviews, and conversations.
   const appointments = Array.from({
     length: 24
   }, (_, index) => ({
@@ -88,6 +89,40 @@ export function createCenterPortalData(now = new Date()) {
     reply: '',
     reported: false
   }));
+  const conversations = patients.slice(0, 6).map((patient, index) => ({
+    id: `conversation-${index + 1}`,
+    patientId: patient.id,
+    therapistId: 'therapist-3',
+    unreadCount: index === 0 ? 2 : index === 1 ? 1 : 0,
+    messages: [{
+      id: `message-${index}-1`,
+      direction: 'outgoing',
+      text: bilingual('Hello. How did you feel after our last session?', 'مرحبًا، كيف شعرت بعد جلستنا الأخيرة؟'),
+      sentAt: `${today}T10:12:00`,
+      status: 'sent',
+      attachments: []
+    }, {
+      id: `message-${index}-2`,
+      direction: 'incoming',
+      text: bilingual('Thank you. I have a few questions for our next appointment.', 'شكرًا لك. لدي بعض الأسئلة لموعدنا القادم.'),
+      sentAt: `${today}T10:15:00`,
+      attachments: []
+    }]
+  }));
+  conversations[0].messages.push({
+    id: 'demo-attachment-message',
+    direction: 'outgoing',
+    text: bilingual('A sample attachment for this demo.', 'مرفق نموذجي لهذه التجربة.'),
+    sentAt: `${today}T10:18:00`,
+    status: 'sent',
+    attachments: [{
+      id: 'demo-note',
+      name: 'demo-session-note.txt',
+      size: 387,
+      type: 'text/plain',
+      url: demoNote
+    }]
+  });
   return {
     today,
     center: {
@@ -111,7 +146,7 @@ export function createCenterPortalData(now = new Date()) {
     services,
     appointments,
     reviews,
-    conversations: [],
+    conversations,
     notificationPreferences: {
       appointments: true,
       reviews: true,

@@ -16,6 +16,10 @@ function ChatHeader({
   status = 'unknown',
   therapistProfile = {},
   onBack,
+  showBack = true,
+  showProfileAction = true,
+  showPresence = true,
+  roleLabel,
 }) {
   const { language, dir, t } = useLanguage();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -91,7 +95,7 @@ function ChatHeader({
     <>
       {/* Chat header with back button, therapist details and menu */}
       <header className="pg-chat-header" dir={dir}>
-        <Button
+        {showBack && <Button
           variant="ghost"
           icon={dir === 'rtl' ? faArrowRight : faArrowLeft}
           iconOnly
@@ -99,7 +103,7 @@ function ChatHeader({
           aria-label={t('chatHeader.back')}
           onClick={onBack}
           disabled={!onBack}
-        />
+        />}
 
         <div className="pg-chat-header__identity">
           <Avatar
@@ -115,22 +119,23 @@ function ChatHeader({
               <bdi>{displayName}</bdi>
             </h2>
 
-            <p
+            {roleLabel && <p className="pg-chat-header__role">{roleLabel}</p>}
+            {showPresence && <p
               className="pg-chat-header__status"
               data-status={connectionStatus}
               role="status"
               aria-atomic="true"
             >
               {statusText}
-            </p>
+            </p>}
           </div>
         </div>
 
-        <ActionsMenu
+        {showProfileAction && <ActionsMenu
           className="pg-chat-header__actions"
           ariaLabel={t('chatHeader.actions')}
           items={menuItems}
-        />
+        />}
       </header>
 
       {/* Popup showing the therapist's professional information */}

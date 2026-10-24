@@ -1,15 +1,122 @@
-.center-services__filters { grid-template-columns: minmax(0,2fr) minmax(0,1fr); }
-.center-services__grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
-.center-services__card.center-panel { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-.center-services__card > .center-record-image { aspect-ratio: 2.1; border-radius: 9px; }
-.center-services__card h2 { font-size: 15px; line-height: 1.6; margin: 0; }
-.center-services__meta { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 8px; }
-.center-services__meta strong { color: var(--color-primary); font-size: 17px; }
-.center-services__meta span { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-size: 12px; }
-.center-services__card p { margin: 0; font-size: 13px; line-height: 1.7; color: var(--color-text-secondary); }
-.center-services__actions { display: flex; gap: 8px; margin-block-start: auto; padding-block-start: 4px; }
-.center-services__actions > :first-child { flex: 1; }
-@container remaining (max-width: 940px) { .center-services__grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@container remaining (max-width: 540px) { .center-services__grid { grid-template-columns: minmax(0,1fr); gap: 12px; } .center-services__card > .center-record-image { aspect-ratio: 2.25; } }
-.center-services__card > .center-record-image { object-position: center 30%; }
-@container remaining (max-width: 600px) { .center-services__filters > * { grid-column: 1 / -1; } }
+﻿/* Search and duration filter. */
+.center-services__filters {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+/* Keep the photo and service information balanced within each row. */
+.center-services__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 410px));
+  gap: 16px;
+  justify-content: center;
+}
+
+.center-services__card.center-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-rows: minmax(120px, 1fr) auto;
+  align-items: start;
+  gap: 10px 12px;
+  padding: 12px;
+}
+
+.center-services__image {
+  position: relative;
+  align-self: stretch;
+  min-inline-size: 0;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--color-bg-light);
+}
+
+.center-services__image > .center-record-image {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+  object-position: center;
+  border-radius: inherit;
+}
+
+.center-services__details {
+  display: grid;
+  min-inline-size: 0;
+  gap: 6px;
+}
+
+.center-services__details h2 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.center-services__details p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+  min-block-size: 3.2em;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.center-services__details strong {
+  color: var(--color-primary);
+  font-size: 17px;
+}
+
+/* The footer stays aligned across each row, including longer service names. */
+.center-services__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.center-services__duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.center-services__actions > .pg-button.pg-button--sm {
+  margin-inline-start: auto;
+  min-block-size: 36px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+/* Retain a comfortable touch target on phones and tablets. */
+@media (pointer: coarse), (max-width: 767px) {
+  .center-services__actions > .pg-button.pg-button--sm {
+    min-block-size: 40px;
+  }
+}
+
+/* Reduce column count instead of squeezing the card content. */
+/* Responsive layout adjustments. */
+@container remaining (max-width: 1000px) {
+  .center-services__grid {
+    grid-template-columns: repeat(2, minmax(0, 410px));
+  }
+}
+
+@container remaining (max-width: 640px) {
+  .center-services__grid {
+    grid-template-columns: minmax(0, 410px);
+    gap: 12px;
+  }
+
+  .center-services__filters > * {
+    grid-column: 1 / -1;
+  }
+}

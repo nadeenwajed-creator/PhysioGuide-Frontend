@@ -13,7 +13,7 @@ function setup(extra = {}) {
   return { create, records, sessionStore, accountStore };
 }
 const admin = { id: 'test-reviewer', role: 'admin' };
-const request = email => ({ email, password: 'PhysioGuide123!', centerName: 'Registered Center', phone: '0591234567', location: { address: 'Nablus Street', coordinates: { latitude: 32.22, longitude: 35.26 } } });
+const request = email => ({ email, password: 'PhysioGuide123!', centerName: 'Registered Center', phone: '0591234567', location: { address: 'Nablus Street', coordinates: { latitude: 32.22, longitude: 35.26 }, confirmed: true } });
 
 test('pending application retains registration details across adapter recreation and rejects access', async () => {
   const { create, records, sessionStore } = setup();

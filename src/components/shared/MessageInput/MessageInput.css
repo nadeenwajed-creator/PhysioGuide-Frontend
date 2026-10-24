@@ -99,6 +99,25 @@
   display: none;
 }
 
+.pg-message-input__emoji-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pg-message-input__emoji-picker button {
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  min-inline-size: 40px;
+  min-block-size: 40px;
+  font-size: 20px;
+}
+
+.pg-message-input__emoji-picker button:focus-visible {
+  outline: 2px solid var(--color-primary);
+}
+
 .pg-message-input__attach-button.pg-button,
 .pg-message-input__send-button.pg-button {
   flex: 0 0 46px;

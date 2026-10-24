@@ -35,9 +35,13 @@ export async function callCenter(method, ...args) {
       if (claimed?.id !== session.id || claimed?.role !== session.role) throw new ServiceError('forbidden');
       args[0] = session;
     } else if (!['center', 'physiotherapist'].includes(session.role)) throw new ServiceError('forbidden');
+    if (!session.centerId) {
+      if (method === 'getMessagingWorkspace' && session.role === 'patient') return { patients: [], therapists: [], conversations: [], notifications: [] };
+      throw new ServiceError('forbidden');
+    }
     const source = getAdapter(session.centerId);
     const result = source.execute ? await source.execute(method, ...args) : await source[method](...args);
-    if (source.execute && method !== 'getWorkspace' && method !== 'prepareImage') emit();
+    if (source.execute && !['getWorkspace', 'getMessagingWorkspace', 'prepareImage'].includes(method)) emit();
     return result;
   } catch (error) {
     throw normalizeServiceError(error);

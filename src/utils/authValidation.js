@@ -1,5 +1,6 @@
+import { validCoordinates } from '../services/center/remainingOperations.js';
 // Checks form fields. The backend must also validate every request.
-export function validateAuthForm(values, { role, mode }) {
+export function validateAuthForm(values, { role, mode, coordinates = null, locationConfirmed = false }) {
   const errors = {};
   const registering = mode === 'signup';
   const required = registering
@@ -27,6 +28,7 @@ export function validateAuthForm(values, { role, mode }) {
       errors.phone = 'phone';
     }
   }
+  if (registering && role === 'center' && !errors.location && (!validCoordinates(coordinates) || !locationConfirmed)) errors.location = 'confirmLocation';
   return errors;
 }
 
@@ -36,7 +38,7 @@ export function normalizePhone(phone) {
 }
 
 // Prepares the request without changing the password or sending its confirmation.
-export function createAuthRequest(values, { role, mode }, coordinates = null) {
+export function createAuthRequest(values, { role, mode }, coordinates = null, confirmed = false) {
   const credentials = { email: values.email.trim(), password: values.password };
   if (mode === 'login') return credentials;
   const request = { ...credentials, phone: normalizePhone(values.phone) };
@@ -44,7 +46,7 @@ export function createAuthRequest(values, { role, mode }, coordinates = null) {
     return {
       ...request,
       centerName: values.name.trim(),
-      location: { address: values.location.trim(), coordinates },
+      location: { address: values.location.trim(), coordinates, confirmed },
     };
   }
   return { ...request, fullName: values.name.trim() };

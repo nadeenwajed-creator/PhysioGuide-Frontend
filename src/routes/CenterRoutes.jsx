@@ -9,7 +9,10 @@ import Reviews from '../pages/center/Reviews.jsx';
 import CenterProfile from '../pages/center/CenterProfile.jsx';
 import Settings from '../pages/center/Settings.jsx';
 import RequireRole from './RequireRole.jsx';
-import AccountDestination from '../components/auth/AccountDestination.jsx';
+import Messages from '../pages/physiotherapist/Messages.jsx';
+import Conversation from '../pages/physiotherapist/Conversation.jsx';
+import TherapistLayout from '../layouts/TherapistLayout.jsx';
+import TherapistProfile from '../pages/physiotherapist/Profile.jsx';
 
 // Keep the route-element contract consumed by the existing AppRoutes aggregator.
 const centerRoutes = (
@@ -28,7 +31,12 @@ const centerRoutes = (
   </Route>
   </Route>
   <Route element={<RequireRole roles={['physiotherapist']} />}>
-    <Route path="/center/physiotherapist" element={<AccountDestination />} />
+    <Route path="/center/physiotherapist" element={<TherapistLayout />}>
+      <Route index element={<Navigate to="profile" replace />} />
+      <Route path="profile" element={<TherapistProfile />} />
+      <Route path="messages" element={<Messages />} />
+      <Route path="messages/:conversationId" element={<Conversation />} />
+    </Route>
   </Route>
   </>
 );

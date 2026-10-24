@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { faPaperclip, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faPaperclip, faPaperPlane, faFaceSmile } from '@fortawesome/free-solid-svg-icons';
 
 import AttachmentCard from '../AttachmentCard/AttachmentCard.jsx';
 import Button from '../Button/Button.jsx';
@@ -12,12 +12,13 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MiB per file.
 const ALLOWED_EXTENSIONS = /\.(jpe?g|png|pdf|docx?)$/i;
 const FILE_ACCEPT = '.jpg,.jpeg,.png,.pdf,.doc,.docx';
 
-function MessageInput({ onSend, disabled = false, className = '' }) {
+function MessageInput({ onSend, disabled = false, className = '', enableEmoji = false }) {
   const { dir, t } = useLanguage();
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
 
   const fileInputRef = useRef(null);
   const textAreaRef = useRef(null);
@@ -82,7 +83,7 @@ function MessageInput({ onSend, disabled = false, className = '' }) {
       return;
     }
 
-    const payload = { text: text.trim(), attachments: [...attachments] };
+    const payload = { text: text.trim(), attachments: [...attachments], clientId: crypto.randomUUID() };
     sendingRef.current = true;
     setSending(true);
     setError('');
@@ -94,6 +95,7 @@ function MessageInput({ onSend, disabled = false, className = '' }) {
       } else {
         setText('');
         setAttachments([]);
+        setEmojiOpen(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
       }
     } catch {
@@ -105,6 +107,7 @@ function MessageInput({ onSend, disabled = false, className = '' }) {
   }
 
   function handleKeyDown(event) {
+    if (event.key === 'Escape') setEmojiOpen(false);
     if (event.key !== 'Enter' || event.shiftKey) return;
     // Do not submit while composing Arabic text with an IME.
     if (event.nativeEvent?.isComposing || event.keyCode === 229) return;
@@ -116,6 +119,16 @@ function MessageInput({ onSend, disabled = false, className = '' }) {
 
   return (
     <form className={classes} dir={dir} onSubmit={handleSubmit}>
+      {enableEmoji && emojiOpen && <div className="pg-message-input__emoji-picker" role="group" aria-label={t('messaging.emoji')}>
+        {['😊', '👋', '👍', '🙏', '💪', '❤️'].map(emoji => <button type="button" key={emoji} disabled={isDisabled} onClick={() => {
+          const field = textAreaRef.current;
+          const start = field?.selectionStart ?? text.length;
+          const end = field?.selectionEnd ?? start;
+          setText(previous => previous.slice(0, start) + emoji + previous.slice(end));
+          setEmojiOpen(false);
+          requestAnimationFrame(() => { field?.focus(); field?.setSelectionRange(start + emoji.length, start + emoji.length); });
+        }}>{emoji}</button>)}
+      </div>}
       {attachments.length > 0 && (
         <div className="pg-message-input__previews">
           <div className="pg-message-input__previews-heading">
@@ -146,6 +159,7 @@ function MessageInput({ onSend, disabled = false, className = '' }) {
             ref={textAreaRef}
             className="pg-message-input__textarea"
             rows={1}
+            maxLength={10000}
             dir="auto"
             value={text}
             onChange={(event) => {
@@ -185,6 +199,8 @@ function MessageInput({ onSend, disabled = false, className = '' }) {
           disabled={isDisabled || attachments.length >= MAX_ATTACHMENTS}
         />
 
+        {enableEmoji && <Button variant="ghost" icon={faFaceSmile} iconOnly className="pg-message-input__emoji-button"
+          aria-label={t('messaging.emoji')} aria-expanded={emojiOpen} disabled={isDisabled} onClick={() => setEmojiOpen(value => !value)} />}
         <Button
           type="submit"
           variant="primary"
