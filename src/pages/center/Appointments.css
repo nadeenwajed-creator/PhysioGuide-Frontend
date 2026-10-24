@@ -1,47 +1,146 @@
-﻿.center-appointments__toolbar {
+/* Appointments page layout. */
+.center-appointments__toolbar {
   display: grid;
-  grid-template-columns: minmax(180px, 1.4fr) minmax(160px, 1fr) minmax(180px, 1.2fr) minmax(140px, 1fr) minmax(130px, .9fr);
+  grid-template-columns: minmax(180px, 1.4fr) minmax(160px, 1fr) minmax(
+      180px,
+      1.2fr
+    ) minmax(140px, 1fr) minmax(130px, 0.9fr);
   gap: 12px;
   align-items: end;
   margin-block-end: 16px;
 }
-.center-appointments__toolbar > * { min-inline-size: 0; }
-.center-appointments__desktop-filters { display: contents; }
-.center-appointments__label { display: block; font-size: 12px; line-height: 1.5; margin-block-end: 5px; }
-.center-appointments__month input { min-inline-size: 0; inline-size: 100%; }
-.center-appointments__month input::-webkit-calendar-picker-indicator { margin: 0; padding: 0; cursor: pointer; }
-.center-appointments__toolbar .center-appointments__filter-toggle { display: none; }
-.center-appointments__filter-toggle { position: relative; }
-.center-appointments__filter-count { position: absolute; inset-block-start: -7px; inset-inline-end: -7px; min-inline-size: 20px; block-size: 20px; display: grid; place-items: center; border-radius: 50%; background: var(--color-primary); color: var(--color-white); font-size: 11px; }
-:root[data-theme='dark'] .center-appointments__filter-count { color: var(--color-bg-main); }
-.center-appointments__statuses { flex-wrap: nowrap; overflow-x: auto; padding-block: 4px 8px; margin-block-end: 12px; gap: 4px; }
-.center-appointments__statuses button { flex: 0 0 auto; white-space: nowrap; }
-.center-table--appointments th:nth-child(1) { inline-size: 21%; }
-.center-table--appointments th:nth-child(2) { inline-size: 19%; }
-.center-table--appointments th:nth-child(3) { inline-size: 17%; }
-.center-table--appointments th:nth-child(4) { inline-size: 15%; }
-.center-table--appointments th:nth-child(5) { inline-size: 12%; }
-.center-table--appointments th:nth-child(6) { inline-size: 16%; }
+.center-appointments__toolbar > * {
+  min-inline-size: 0;
+}
+.center-appointments__desktop-filters {
+  display: contents;
+}
+.center-appointments__label {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-block-end: 5px;
+}
+.center-appointments__month input {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+.center-appointments__month input::-webkit-calendar-picker-indicator {
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.center-appointments__toolbar .center-appointments__filter-toggle {
+  display: none;
+}
+.center-appointments__filter-toggle {
+  position: relative;
+}
+.center-appointments__filter-count {
+  position: absolute;
+  inset-block-start: -7px;
+  inset-inline-end: -7px;
+  min-inline-size: 20px;
+  block-size: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 11px;
+}
+:root[data-theme='dark'] .center-appointments__filter-count {
+  color: var(--color-bg-main);
+}
+.center-appointments__statuses {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-block: 4px 8px;
+  margin-block-end: 12px;
+  gap: 4px;
+}
+.center-appointments__statuses button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.center-table--appointments th:nth-child(1) {
+  inline-size: 21%;
+}
+.center-table--appointments th:nth-child(2) {
+  inline-size: 19%;
+}
+.center-table--appointments th:nth-child(3) {
+  inline-size: 17%;
+}
+.center-table--appointments th:nth-child(4) {
+  inline-size: 15%;
+}
+.center-table--appointments th:nth-child(5) {
+  inline-size: 12%;
+}
+.center-table--appointments th:nth-child(6) {
+  inline-size: 16%;
+}
 
+/* Responsive layout adjustments. */
 @media (max-width: 1199px) {
-  .center-appointments__toolbar { grid-template-columns: minmax(0, 1fr) minmax(170px, .6fr) auto; gap: 12px; }
-  .center-appointments__desktop-filters { display: none; }
-  .center-appointments__toolbar .center-appointments__filter-toggle { display: inline-flex; }
+  .center-appointments__toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 0.6fr) auto;
+    gap: 12px;
+  }
+  .center-appointments__desktop-filters {
+    display: none;
+  }
+  .center-appointments__toolbar .center-appointments__filter-toggle {
+    display: inline-flex;
+  }
 }
 @media (max-width: 599px) {
-  .center-appointments__toolbar { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
-  .center-appointments__search { grid-column: 1 / -1; }
-  .center-appointments__statuses button { padding-inline: 10px; }
-  .center-appointments__month .pg-form-field__control { padding-inline: 10px; font-size: 14px; }
+  .center-appointments__toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  .center-appointments__search {
+    grid-column: 1 / -1;
+  }
+  .center-appointments__statuses button {
+    padding-inline: 10px;
+  }
+  .center-appointments__month .pg-form-field__control {
+    padding-inline: 10px;
+    font-size: 14px;
+  }
 }
 
-.pg-modal__overlay:has(.center-filter-panel) { padding: 0; }
-.pg-modal__overlay[open]:has(.center-filter-panel) { place-items: stretch end; }
-.center-filter-panel.pg-modal { max-inline-size: 400px; block-size: 100%; border-radius: 0; }
-.center-filter-panel__fields { display: grid; gap: 20px; }
+.pg-modal__overlay:has(.center-filter-panel) {
+  padding: 0;
+}
+.pg-modal__overlay[open]:has(.center-filter-panel) {
+  place-items: stretch end;
+}
+.center-filter-panel.pg-modal {
+  max-inline-size: 400px;
+  block-size: 100%;
+  border-radius: 0;
+}
+.center-filter-panel__fields {
+  display: grid;
+  gap: 20px;
+}
 @media (max-width: 767px) {
-  .pg-modal__overlay[open]:has(.center-filter-panel) { place-items: end center; }
-  .center-filter-panel.pg-modal { max-inline-size: none; block-size: auto; max-block-size: 85dvh; border-radius: 20px 20px 0 0; }
-  .center-filter-panel .pg-modal__body { padding-block: 20px; }
-  .center-filter-panel .pg-modal__footer { padding-block-end: max(16px, env(safe-area-inset-bottom)); }
+  .pg-modal__overlay[open]:has(.center-filter-panel) {
+    place-items: end center;
+  }
+  .center-filter-panel.pg-modal {
+    max-inline-size: none;
+    block-size: auto;
+    max-block-size: 85dvh;
+    border-radius: 20px 20px 0 0;
+  }
+  .center-filter-panel .pg-modal__body {
+    padding-block: 20px;
+  }
+  .center-filter-panel .pg-modal__footer {
+    padding-block-end: max(16px, env(safe-area-inset-bottom));
+  }
 }

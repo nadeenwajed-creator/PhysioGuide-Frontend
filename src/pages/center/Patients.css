@@ -1,3 +1,4 @@
+/* Patients page layout. */
 .center-table--patients th:first-child {
   inline-size: 25%;
 }
@@ -10,15 +11,29 @@
   inline-size: 12%;
 }
 
-.center-table--patients th:nth-child(3) { inline-size: 19%; }
-.center-table--patients th:nth-child(4) { inline-size: 14%; }
+.center-table--patients th:nth-child(3) {
+  inline-size: 19%;
+}
+.center-table--patients th:nth-child(4) {
+  inline-size: 14%;
+}
 
+/* Responsive layout adjustments. */
 @container center-records (max-width: 850px) {
-  .center-table--patients .center-table__contact { padding-inline-start: 50px; }
-  .center-table--patients .center-contact { font-size: 13px; }
-  .center-table--patients td:nth-child(3) { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .center-table--patients .center-table__contact {
+    padding-inline-start: 50px;
+  }
+  .center-table--patients .center-contact {
+    font-size: 13px;
+  }
+  .center-table--patients td:nth-child(3) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
 }
 
 @container center-records (max-width: 360px) {
-  .center-table--patients .center-table__contact { padding-inline-start: 0; }
+  .center-table--patients .center-table__contact {
+    padding-inline-start: 0;
+  }
 }
