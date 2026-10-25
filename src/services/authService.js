@@ -2,7 +2,7 @@ import { AuthServiceError, normalizeAuthError } from './auth/authErrors.js';
 import { createMockAuthAdapter } from './auth/mockAuthAdapter.js';
 
 // Mock authentication runs only in development and never creates a real session.
-const adapter = import.meta.env?.DEV === true ? createMockAuthAdapter() : null;
+const adapter = import.meta.env?.DEV == true ? createMockAuthAdapter() : null;
 
 export const authMode = adapter?.mode ?? 'unavailable';
 export const isAuthDemo = authMode === 'demo';
