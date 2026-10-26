@@ -1,0 +1,11 @@
+.account-destination { min-block-size: 100vh; display: flex; flex-direction: column; }
+.account-destination__main { flex: 1; inline-size: min(100%, 960px); margin-inline: auto; padding: 32px 24px; }
+.account-destination__main h1 { font-size: 25px; font-weight: 600; line-height: 1.5; color: var(--color-primary-darker); }
+.account-destination__main p { overflow-wrap: anywhere; }
+.account-destination__card { padding: 24px; margin-block: 24px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.account-destination__card h2 { font-size: 18px; }
+.account-destination__main > a { color: var(--color-primary); font-size: 14px; text-underline-offset: 3px; }
+/* These account destinations have no sidebar or page search yet. */
+.account-destination .pg-navbar__brand > button,
+.account-destination .pg-navbar__search-toggle { display: none; }
+@media (max-width: 479px) { .account-destination__main { padding: 20px 12px; } .account-destination__main h1 { font-size: 22px; } }

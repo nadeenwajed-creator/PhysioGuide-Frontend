@@ -1,0 +1,101 @@
+/* Centered error placeholder matches the role-select layout and typography. */
+.error-page {
+  inline-size: min(560px, calc(100% - 32px));
+  margin: auto;
+  padding-block: 40px;
+  text-align: center;
+}
+
+.error-page__icon {
+  display: grid;
+  place-items: center;
+  inline-size: 64px;
+  block-size: 64px;
+  margin-inline: auto;
+  margin-block-end: 16px;
+  border-radius: 18px;
+  background: var(--color-surface-mint);
+  color: var(--color-primary);
+  font-size: 28px;
+}
+
+.error-page__code {
+  margin: 0 0 4px;
+  font-size: clamp(44px, 7vw, 64px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--color-primary-darker);
+}
+
+.error-page__title {
+  margin: 0 auto 10px;
+  font-size: clamp(22px, 2.3vw, 30px);
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--color-primary-darker);
+}
+
+.error-page__description {
+  margin: 0 auto 24px;
+  max-inline-size: 44ch;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.error-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Buttons need the pointer cursor the link version gets natively. */
+.error-page__actions button.public-link-button {
+  cursor: pointer;
+}
+
+/* Short error pages stay vertically centered like role-select. */
+.public-layout:has(.error-page) .public-layout__main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Arabic headings use a taller line box and no extra letter spacing. */
+.error-page__title:lang(ar) {
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+.error-page__code:lang(ar) {
+  letter-spacing: normal;
+}
+
+@media (max-width: 479px) {
+  .error-page {
+    inline-size: calc(100% - 24px);
+    padding-block: 28px;
+  }
+  .error-page__icon {
+    inline-size: 52px;
+    block-size: 52px;
+    border-radius: 14px;
+    font-size: 24px;
+    margin-block-end: 14px;
+  }
+  .error-page__code {
+    font-size: clamp(40px, 12vw, 52px);
+  }
+  .error-page__title {
+    font-size: 22px;
+  }
+  .error-page__description {
+    font-size: 13px;
+    margin-block-end: 20px;
+  }
+  .error-page__actions {
+    gap: 10px;
+  }
+}

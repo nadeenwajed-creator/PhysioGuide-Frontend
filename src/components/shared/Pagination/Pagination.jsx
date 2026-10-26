@@ -44,7 +44,6 @@ function Pagination({
 
   const visibleCount = Math.min(3, totalPages);
 
-  // Keep the current page centered whenever possible.
   const startPage = Math.max(
     1,
     Math.min(

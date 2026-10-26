@@ -1,5 +1,5 @@
 import { AuthServiceError } from './authErrors.js';
-import { saveSession } from './session.js';
+import { clearSession, loadSession, saveSession } from './session.js';
 
 // Backend endpoints provided by the API.
 const REGISTER_PATIENT_PATH = '/api/Auth/register/patient';
@@ -180,6 +180,20 @@ function extractUser(body) {
   return null;
 }
 
+// Converts a backend login response into the session shape the app expects.
+function toSession(body, credentials) {
+  const user = extractUser(body) ?? {};
+  const id = String(user.id ?? user.userId ?? user.email ?? credentials?.email ?? '');
+
+  return {
+    id,
+    role: 'patient',
+    patientId: String(user.patientId ?? user.id ?? user.userId ?? id),
+    name: user.fullName ?? user.name ?? credentials?.email ?? '',
+    email: user.email ?? credentials?.email ?? '',
+  };
+}
+
 // Calls the real backend described by API_BASE_URL.
 export function createApiAuthAdapter(baseUrl) {
   const root = baseUrl.replace(/\/+$/, '');
@@ -217,13 +231,30 @@ export function createApiAuthAdapter(baseUrl) {
       );
 
       // Keep the session so the dashboard can use it after navigation.
+      const session = toSession(body, credentials);
+
       saveSession({
         token: extractToken(body),
-        user: extractUser(body),
+        session,
         authenticatedAt: Date.now(),
       });
 
-      return { mode: 'live', status: 'authenticated', role: 'patient' };
+      return {
+        mode: 'live',
+        status: 'authenticated',
+        role: session.role,
+        session,
+      };
+    },
+
+    // Restores the session saved by loginPatient after a page reload.
+    async restoreSession() {
+      return loadSession()?.session ?? null;
+    },
+
+    // Removes the saved session when the user signs out.
+    async logout() {
+      clearSession();
     },
   };
 }

@@ -11,6 +11,7 @@ export class AuthServiceError extends Error {
 // Converts errors into codes that the form can translate.
 export function normalizeAuthError(error) {
   if (error instanceof AuthServiceError) return error;
+  if (error?.code) return new AuthServiceError(error.code, error.fields || error.fieldErrors);
   if (error instanceof TypeError) return new AuthServiceError('network');
   return new AuthServiceError('unexpected');
 }

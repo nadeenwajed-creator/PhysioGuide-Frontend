@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import Button from '../shared/Button/Button.jsx';
+import Modal from '../shared/Modal/Modal.jsx';
 import FormField from '../shared/FormField/FormField.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 
@@ -20,15 +21,10 @@ import {
 
 import { normalizeAuthError } from '../../services/auth/authErrors.js';
 import { centerLocationService } from '../../services/auth/centerLocation.js';
-import {
-  createAuthRequest,
-  validateAuthForm,
-} from '../../utils/authValidation.js';
-
+import { searchCenterAddress } from '../../services/centerLocationService.js';
+import { createAuthRequest, validateAuthForm } from '../../utils/authValidation.js';
 import './AuthForm.css';
 
-// Maps each user role and authentication mode to its corresponding service.
-// This avoids writing separate login and registration logic for each role.
 const operations = {
   patient: {
     login: loginPatient,
@@ -50,7 +46,6 @@ const initialValues = {
   password: '',
   confirmPassword: '',
 };
-
 // Lists the field validation error codes that the UI knows how to display.
 const knownFieldErrors = [
   'required',
@@ -108,11 +103,10 @@ function AuthForm({ role, mode }) {
 
   // Stores the coordinates returned by the browser's geolocation service.
   const [coordinates, setCoordinates] = useState(null);
-
-  // Tracks the current location operation or its result.
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
+  const [locationBusy, setLocationBusy] = useState(false);
   const [locationStatus, setLocationStatus] = useState('');
-
-  // References the form DOM element so we can focus its fields.
+  const [locationChoices, setLocationChoices] = useState([]);
   const formRef = useRef(null);
 
   // References the heading so keyboard and screen-reader users
@@ -173,14 +167,15 @@ function AuthForm({ role, mode }) {
     setFeedback(null);
 
     if (field === 'location') {
-      // Reset the location status because the user entered a new value.
+      setLocationConfirmed(false);
+      setCoordinates(null);
       setLocationStatus('');
-
-      // Invalidate the previous location operation.
+      setLocationChoices([]);
       locationRef.current += 1;
 
       // Cancel the previous reverse-geocoding request if possible.
       lookupRef.current?.abort();
+      setLocationBusy(false);
     }
   }
 
@@ -205,15 +200,14 @@ function AuthForm({ role, mode }) {
   async function handleSubmit(event) {
     // Prevent the browser from reloading the page on form submission.
     event.preventDefault();
-
-    // Ignore duplicate submissions while another request is in progress.
-    if (submittingRef.current) return;
-
-    // Validate the form before making any network request.
-    // The validation rules depend on the current role and mode.
-    const validation = validateAuthForm(values, { role, mode });
-
-    // Display the validation errors returned by the validation utility.
+    if (submittingRef.current || locationBusy) return;
+    const validation = validateAuthForm(values, { role, mode, coordinates, locationConfirmed });
+    // Resolve a manually entered address before sending the registration request.
+    if (Object.keys(validation).length === 1 && validation.location === 'confirmLocation') {
+      setErrors({});
+      await findLocation(false);
+      return;
+    }
     setErrors(validation);
 
     // Remove any previous feedback message.
@@ -235,58 +229,16 @@ function AuthForm({ role, mode }) {
     const requestId = ++requestRef.current;
 
     try {
-      // Build the request payload and call the appropriate service.
-      // The operations object selects the function using role and mode.
-      const result = await operations[role][mode](
-        createAuthRequest(values, { role, mode }, coordinates)
-      );
-
-      // Ignore the response if this request is no longer the latest one.
+      const result = await operations[role][mode](createAuthRequest(values, { role, mode }, coordinates, locationConfirmed));
       if (requestId !== requestRef.current) return;
 
-      // Navigate only when a real login returns an authenticated session.
-      // Demo responses and registration responses must not open the dashboard.
-      if (
-        result.mode === 'live' &&
-        result.status === 'authenticated' &&
-        !registering
-      ) {
-        // Replace the current history entry so Back does not return
-        // the user to the login form.
-        navigate(getAuthenticatedDestination(result.role), {
-          replace: true,
-        });
-
+      if (result.status === 'authenticated' && !registering) {
+        navigate(getAuthenticatedDestination(result.role), { replace: true });
         return;
       }
 
-      // Handle demo-mode login or registration responses.
-      if (result.mode === 'demo') {
-        setFeedback({
-          kind: 'info',
-          key: registering
-            ? 'auth.demoRegistration'
-            : 'auth.demoLogin',
-        });
-      } else if (
-        result.mode === 'live' &&
-        registering &&
-        result.status === 'registered'
-      ) {
-        // A created account signs in on the next screen.
-        navigate(`/${role}/login`, {
-          replace: true,
-          state: { notice: 'auth.registeredNotice' },
-        });
-
-        return;
-      } else if (
-        result.mode === 'live' &&
-        registering &&
-        result.status === 'pending-review'
-      ) {
-        // Registration may require manual approval before sign-in.
-        setFeedback({ kind: 'info', key: 'auth.pendingReview' });
+      if (registering && ['registered', 'pending-review'].includes(result.status)) {
+        setFeedback({ kind: 'info', key: result.status === 'pending-review' ? 'auth.pendingReview' : 'auth.registered' });
       } else {
         // Unexpected response shapes should be handled as errors.
         throw new Error('Unexpected authentication response');
@@ -347,91 +299,61 @@ function AuthForm({ role, mode }) {
     }
   }
 
-  // Retrieves the user's current coordinates and tries to resolve them
-  // into a readable address for center registration.
-  async function useCurrentLocation() {
-    // Cancel any previous address lookup before starting another one.
+  async function findLocation(useDevice) {
     lookupRef.current?.abort();
 
     // Create a controller so the address lookup can be cancelled.
     const controller = new AbortController();
     lookupRef.current = controller;
-
-    // Inform the UI that the browser is retrieving the user's location.
-    setLocationStatus('loading');
-
-    // Assign an identifier to this location operation.
-    const requestId = ++locationRef.current;
-
+    const token = ++locationRef.current;
+    setLocationBusy(true);
+    setLocationStatus('auth.location.loading');
+    setLocationChoices([]);
     try {
-      // Request the user's coordinates through the location service.
-      const point = await centerLocationService.getCoordinates();
-
-      // Ignore the result if another location operation has started.
-      if (requestId !== locationRef.current) return;
-
-      // Save the coordinates even if reverse geocoding does not find an address.
-      setCoordinates(point);
-
-      // Update the UI while converting coordinates into an address.
-      setLocationStatus('lookingUp');
-
-      try {
-        // Reverse geocoding converts latitude/longitude into a readable address.
-        // The current language controls the returned address language when supported.
-        const address = await centerLocationService.getAddress(point, {
-          language,
-          signal: controller.signal,
-        });
-
-        // Ignore an outdated address lookup result.
-        if (requestId !== locationRef.current) return;
-
-        if (address) {
-          // Fill the location field with the resolved address.
-          setValues((previous) => ({
-            ...previous,
-            location: address,
-          }));
-
-          // Clear any validation error associated with the location field.
-          setErrors((previous) => ({
-            ...previous,
-            location: undefined,
-          }));
-
-          // Clear previous feedback after successfully updating the location.
-          setFeedback(null);
+      let choices;
+      if (useDevice) {
+        const point = await centerLocationService.getCoordinates();
+        if (token !== locationRef.current) return;
+        setLocationStatus('auth.location.lookingUp');
+        let address = values.location.trim();
+        try {
+          address = await centerLocationService.getAddress(point, { language, signal: controller.signal }) || address;
+        } catch {
+          // Device coordinates remain usable with an address supplied by the user.
         }
-
-        // "found" means an address was resolved.
-        // "captured" means coordinates were obtained without a readable address.
-        setLocationStatus(address ? 'found' : 'captured');
-      } catch (error) {
-        // Report address lookup errors only if this operation is still current.
-        if (requestId === locationRef.current) {
-          setLocationStatus(
-            ['lookupTimeout', 'lookupUnavailable'].includes(error?.code)
-              ? error.code
-              : 'lookupFailed'
-          );
-        }
+        choices = address ? [{ address, coordinates: point }] : [];
+      } else {
+        choices = await searchCenterAddress(values.location, { language, signal: controller.signal });
       }
+      if (token !== locationRef.current) return;
+      setLocationChoices(choices);
+      setLocationStatus(choices.length ? '' : 'center.remaining.noAddressResults');
     } catch (error) {
-      // Handle errors that prevent obtaining the coordinates.
-      if (requestId === locationRef.current) {
-        setLocationStatus(
-          ['unsupported', 'denied', 'timeout', 'failed'].includes(error?.code)
-            ? error.code
-            : 'failed'
-        );
-      }
+      if (token !== locationRef.current) return;
+      const code = ['unsupported', 'denied', 'timeout', 'failed', 'lookupTimeout', 'lookupUnavailable', 'lookupFailed'].includes(error?.code) ? error.code : 'failed';
+      setLocationStatus(`auth.location.${code}`);
+    } finally {
+      if (token === locationRef.current) setLocationBusy(false);
     }
   }
 
-  // Reusable field renderer to avoid duplicating FormField configuration.
-  // It connects each input to React state, validation, and accessibility props.
-  function field(name, label, type = 'text', autoComplete = name, extraProps = {}) {
+  function confirmLocation(selection) {
+    setValues(previous => ({ ...previous, location: selection.address }));
+    setCoordinates(selection.coordinates);
+    setLocationConfirmed(true);
+    setErrors(previous => ({ ...previous, location: undefined }));
+    setFeedback(null);
+    setLocationStatus('auth.location.found');
+    setLocationChoices([]);
+  }
+
+  function field(
+    name,
+    label,
+    type = "text",
+    autoComplete = name,
+    extraProps = {}
+  ) {
     return (
       <FormField
         // Create a unique ID for this role, mode, and field combination.
@@ -443,23 +365,18 @@ function AuthForm({ role, mode }) {
         // Send input changes through the shared change handler.
         onChange={(value) => changeField(name, value)}
         required
-        // Prevent edits while an authentication request is running.
-        disabled={pending}
+        disabled={pending || locationBusy}
         autoComplete={autoComplete}
         // Keep email and phone inputs left-to-right in Arabic layouts.
-        dir={['email', 'phone'].includes(name) ? 'ltr' : undefined}
+        dir={["email", "phone"].includes(name) ? "ltr" : undefined}
         // Enable the password visibility control for password fields.
-        showPasswordToggle={type === 'password'}
+        showPasswordToggle={type === "password"}
         // Translate and display the field's current validation error.
-        error={
-          errors[name]
-            ? t(`auth.validation.${errors[name]}`)
-            : undefined
-        }
+        error={errors[name] ? t(`auth.validation.${errors[name]}`) : undefined}
         // Show password requirements only on the registration form.
         helperText={
-          name === 'password' && registering
-            ? t('auth.passwordHint')
+          name === "password" && registering
+            ? t("auth.passwordHint")
             : undefined
         }
         {...extraProps}
@@ -528,22 +445,13 @@ function AuthForm({ role, mode }) {
           {registering && role === 'center' && (
             <div className="auth-form__location">
               {field('location', 'auth.location', 'text', 'street-address')}
-
-              {/* Requests the user's location and attempts to fill the address. */}
-              <Button
-                variant="ghost"
-                size="lg"
-                icon={faLocationCrosshairs}
-                onClick={useCurrentLocation}
-                loading={['loading', 'lookingUp'].includes(locationStatus)}
-                disabled={pending}
-              >
+              <Button variant="ghost" size="lg" icon={faLocationCrosshairs} onClick={() => findLocation(true)} loading={locationBusy} disabled={pending}>
                 {t('auth.currentLocation')}
               </Button>
 
               {/* Announces location progress and errors accessibly. */}
               <p className="auth-form__location-status" role="status">
-                {locationStatus && t(`auth.location.${locationStatus}`)}
+                {locationStatus && t(locationStatus)}
               </p>
             </div>
           )}
@@ -566,15 +474,7 @@ function AuthForm({ role, mode }) {
             )}
         </div>
 
-        {/* Submits the form and reflects the current request state. */}
-        <Button
-          type="submit"
-          size="lg"
-          fullWidth
-          loading={pending}
-          // Prevent submission while the location lookup is in progress.
-          disabled={['loading', 'lookingUp'].includes(locationStatus)}
-        >
+        <Button type="submit" size="lg" fullWidth loading={pending} disabled={locationBusy}>
           {t(registering ? 'auth.createAccount' : 'auth.signIn')}
 
           {/* Directional icon follows the application's directional styling. */}
@@ -593,7 +493,19 @@ function AuthForm({ role, mode }) {
         )}
       </form>
 
-      {/* Display success, informational, or error feedback when available. */}
+      {locationChoices.length > 0 && (
+        <Modal isOpen title={t('center.remaining.confirmClinic')} onClose={() => setLocationChoices([])}>
+          {/* Selecting an address explicitly confirms its coordinates for registration. */}
+          <div className="auth-form__fields">
+            {locationChoices.map((selection, index) => (
+              <Button key={index} variant="outline" onClick={() => confirmLocation(selection)}>
+                {selection.address}
+              </Button>
+            ))}
+          </div>
+        </Modal>
+      )}
+
       {feedback && (
         <div
           ref={feedbackRef}

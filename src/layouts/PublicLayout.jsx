@@ -10,9 +10,20 @@ function PublicLayout() {
   const { pathname } = useLocation();
   const { t } = useLanguage();
   const showFooter = pathname === "/";
-  const titleKey = pathname === '/' ? 'public.pageTitle'
-    : pathname === '/choose-role' ? 'role.pageTitle'
-      : pathname.endsWith('/signup') ? 'auth.createAccount' : 'auth.signIn';
+  const errorTitles = {
+    '/404': 'error.notFound.title',
+    '/403': 'error.forbidden.title',
+    '/500': 'error.server.title',
+    '/offline': 'error.offline.title',
+    '/maintenance': 'error.maintenance.title',
+  };
+  const isKnownPage = pathname === '/' || pathname === '/choose-role'
+    || pathname.endsWith('/login') || pathname.endsWith('/signup');
+  const titleKey = errorTitles[pathname]
+    ?? (pathname === '/' ? 'public.pageTitle'
+      : pathname === '/choose-role' ? 'role.pageTitle'
+        : pathname.endsWith('/signup') ? 'auth.createAccount'
+          : isKnownPage ? 'auth.signIn' : 'error.notFound.title');
 
   // Updates the title for the current page and language.
   useEffect(() => {

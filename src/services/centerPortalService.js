@@ -1,0 +1,79 @@
+import { executePatientOperation } from './patient/mockPatientOperations.js';
+import { createMockCenterAdapter } from './center/mockCenterAdapter.js';
+import { centerStore, getCenterStore, readMockCenter, getMockTherapists } from './mock/centerRepository.js';
+import { getAuthSnapshot, restoreSession } from './authService.js';
+import { mockEnabled, httpClient } from './runtime.js';
+import { createOperationAdapter } from './api/operationAdapter.js';
+import { centerOperations } from './api/backendContract.js';
+import { ServiceError, normalizeServiceError } from './api/serviceError.js';
+import { authorizeCenterOperation } from './center/access.js';
+import { mockAccountStore } from './mock/accountRepository.js';
+import { mockAccounts } from './auth/mockAccounts.js';
+
+const adapters = new Map();
+const listeners = new Set();
+const emit = () => listeners.forEach(listener => listener());
+function getAdapter(centerId) {
+  const key = mockEnabled ? centerId : 'api';
+  if (!adapters.has(key)) {
+    const adapter = mockEnabled ? createMockCenterAdapter(readMockCenter(centerId), {
+      store: getCenterStore(centerId),
+      reservedEmails: () => [...mockAccounts, ...(mockAccountStore.read() || []), ...getMockTherapists().filter(person => person.centerId !== centerId)].map(account => account.email.toLowerCase()),
+    }) : createOperationAdapter(httpClient, centerOperations);
+    adapter.subscribe?.(emit);
+    adapters.set(key, adapter);
+  }
+  return adapters.get(key);
+}
+export const subscribeCenter = listener => { listeners.add(listener); return () => listeners.delete(listener); };
+export async function callCenter(method, ...args) {
+  try {
+    const session = mockEnabled ? await restoreSession({ force: true }) : getAuthSnapshot().session || await restoreSession();
+    if (!session || getAuthSnapshot().session?.id !== session.id) throw new ServiceError('unauthenticated');
+    authorizeCenterOperation(session, method);
+    if (method !== 'prepareImage') {
+      const claimed = args[0];
+      if (claimed?.id !== session.id || claimed?.role !== session.role) throw new ServiceError('forbidden');
+      args[0] = session;
+    } else if (!['center', 'physiotherapist'].includes(session.role)) throw new ServiceError('forbidden');
+    if (mockEnabled && session.role === 'patient') {
+      const result = await executePatientOperation(method, session, ...args.slice(1));
+      if (method === 'savePatientProfile') await restoreSession({ force: true });
+      if (!method.startsWith('get') && method !== 'preparePatientImage') emit();
+      return result;
+    }
+    // Patient operations span approved centers; API mappings must enforce patient scope.
+    if (!mockEnabled && session.role === 'patient') {
+      const result = await getAdapter('api').execute(method, ...args);
+      if (!method.startsWith('get')) emit();
+      return result;
+    }
+    if (!session.centerId) {
+      if (method === 'getMessagingWorkspace' && session.role === 'patient') return { patients: [], therapists: [], conversations: [], notifications: [] };
+      // In API mode the bearer token scopes every request server-side, so a
+      // staff session without a centre id (older login payloads) still works:
+      // the adapter is not keyed by centre and the API resolves the centre.
+      if (mockEnabled) throw new ServiceError('forbidden');
+    }
+    const source = getAdapter(session.centerId);
+    const result = source.execute ? await source.execute(method, ...args) : await source[method](...args);
+    if (source.execute && !['getWorkspace', 'getMessagingWorkspace', 'prepareImage'].includes(method)) emit();
+    return result;
+  } catch (error) {
+    throw normalizeServiceError(error);
+  }
+}
+export const getCenterWorkspace = actor => callCenter('getWorkspace', actor);
+export const prepareCenterImage = file => callCenter('prepareImage', file);
+
+if (mockEnabled && typeof window !== 'undefined') {
+  window.addEventListener('storage', event => {
+    if ((!event.key || event.key.startsWith(centerStore.key) || event.key === mockAccountStore.key || event.key?.startsWith('physioguide.mock.patient-preferences.v1:')) && getAuthSnapshot().session) {
+      try {
+        // Patient operations read fresh workspaces without populating the adapter cache.
+        if (getAuthSnapshot().session.role === 'patient') emit();
+        else for (const adapter of adapters.values()) adapter.reload?.();
+      } catch { emit(); }
+    }
+  });
+}

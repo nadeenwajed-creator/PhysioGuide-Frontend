@@ -1,0 +1,8 @@
+.clinic-location-editor { min-width: 0; }
+.clinic-location-editor__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-block: 12px; }
+.clinic-location-editor__results { display: grid; gap: 8px; margin-block: 12px; }
+.clinic-location-editor__results .pg-button { text-align: start; white-space: normal; }
+.clinic-location-editor__confirm { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.6; }
+.clinic-location-editor__confirm input { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 2px; accent-color: var(--color-primary); }
+.clinic-location-editor__error { color: var(--color-danger, #b42318); font-size: 13px; margin-block: 8px; }
+.clinic-location-editor > p { font-size: 13px; line-height: 1.6; }

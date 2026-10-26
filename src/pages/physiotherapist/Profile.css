@@ -1,0 +1,339 @@
+.therapist-profile__layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 2.3fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.therapist-profile__identity.center-panel {
+  padding: 22px 16px 16px;
+  text-align: center;
+}
+
+.therapist-profile__photo {
+  position: relative;
+  inline-size: 144px;
+  margin: 0 auto 16px;
+}
+
+.therapist-profile__photo .pg-avatar {
+  inline-size: 144px;
+  block-size: 144px;
+}
+
+.therapist-profile__photo .pg-avatar__visual {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.therapist-profile__photo .therapist-profile__camera {
+  position: absolute;
+  inset-inline-end: -3px;
+  inset-block-end: 3px;
+  border-radius: 50%;
+  background: var(--color-bg-light);
+  border-color: var(--color-border);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+}
+
+.therapist-profile h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.therapist-profile__role,
+.therapist-profile__help {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0 0 18px;
+}
+
+.therapist-profile__summary-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 8px;
+  border-block-start: 1px solid var(--color-border);
+  text-align: start;
+}
+
+.therapist-profile__summary-line > svg {
+  color: var(--color-primary);
+  font-size: 24px;
+  flex: 0 0 28px;
+}
+
+.therapist-profile__summary-line strong,
+.therapist-profile__summary-line span {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.therapist-profile__summary-line span {
+  margin-block-start: 4px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* Metrics use only the values provided by the therapist record. */
+.therapist-profile__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 6px 0 0;
+  padding: 14px 4px;
+  background: var(--color-bg-light);
+  border-radius: 10px;
+}
+
+.therapist-profile__metrics > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-inline: 5px;
+}
+
+.therapist-profile__metrics > div + div {
+  border-inline-start: 1px solid var(--color-border);
+}
+
+.therapist-profile__metrics dt {
+  display: contents;
+}
+
+.therapist-profile__metrics svg {
+  color: var(--color-primary);
+  font-size: 20px;
+  margin-block-end: 10px;
+}
+
+.therapist-profile__metrics dd {
+  order: 1;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 3px;
+}
+
+.therapist-profile__metrics dt span {
+  order: 2;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.therapist-profile__content {
+  min-inline-size: 0;
+}
+
+.therapist-profile__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: var(--color-bg-light);
+  border-radius: 10px;
+  margin-block-end: 22px;
+}
+
+.therapist-profile__tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-block-size: 48px;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.therapist-profile__tabs button[aria-selected='true'],
+.therapist-profile__tabs button:hover {
+  color: var(--color-primary-darker);
+  background: color-mix(in srgb, var(--color-success) 22%, var(--color-bg-light));
+}
+
+.therapist-profile__tabs button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.therapist-profile__fields,
+.therapist-profile__professional {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.therapist-profile__fields .pg-form-field {
+  min-inline-size: 0;
+}
+
+.therapist-profile__fields input[readonly] {
+  background: var(--color-bg-light);
+  color: var(--color-text-secondary);
+}
+
+.therapist-profile__bio {
+  grid-column: 1 / -1;
+}
+
+.therapist-profile__bio .pg-form-field__helper {
+  text-align: end;
+}
+
+.therapist-profile__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-block-start: 22px;
+}
+
+.therapist-profile__professional {
+  margin: 0 0 24px;
+  gap: 12px;
+}
+
+.therapist-profile__professional > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-inline-size: 0;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg-light);
+}
+
+.therapist-profile__info-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  block-size: 40px;
+  color: var(--color-primary);
+  font-size: 23px;
+}
+
+.therapist-profile__availability {
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+  border-radius: 50%;
+}
+
+.therapist-profile__availability span {
+  inline-size: 12px;
+  block-size: 12px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+}
+
+.therapist-profile__availability span[data-status='available'] {
+  background: var(--color-success);
+}
+
+.therapist-profile__professional dt {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.therapist-profile__professional dd {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.therapist-profile__services {
+  padding-block-start: 20px;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.therapist-profile__service-list {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.therapist-profile__service-head,
+.therapist-profile__service {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.therapist-profile__service-head {
+  background: var(--color-bg-light);
+  font-weight: 600;
+}
+
+.therapist-profile__service {
+  border-block-start: 1px solid var(--color-border);
+}
+
+.therapist-profile__service > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-inline-size: 0;
+}
+
+.therapist-profile__service .center-record-image {
+  inline-size: 42px;
+  block-size: 42px;
+  flex: 0 0 42px;
+  border-radius: 8px;
+}
+
+/* Stack before the identity card can squeeze the bilingual form. */
+@media (max-width: 1199px) {
+  .therapist-profile__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .therapist-profile__identity {
+    max-inline-size: 440px;
+    inline-size: 100%;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 599px) {
+  .therapist-profile__fields,
+  .therapist-profile__professional {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .therapist-profile__tabs button {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .therapist-profile__actions > button {
+    flex: 1 1 140px;
+  }
+
+  .therapist-profile__service-head,
+  .therapist-profile__service {
+    padding: 10px 8px;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .therapist-profile__service > div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
