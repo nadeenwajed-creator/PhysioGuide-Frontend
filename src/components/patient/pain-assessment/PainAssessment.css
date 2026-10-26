@@ -1,0 +1,1074 @@
+.pain-page {
+  color: var(--color-text-primary);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.pain-page *, .pain-page *::before, .pain-page *::after {
+  box-sizing: border-box;
+}
+
+.pain-page :is(h1,h2,h3,p,figure) {
+  margin: 0;
+}
+
+.pain-page :is(button,input,a):focus-visible {
+  outline: 3px solid var(--color-primary-light);
+  outline-offset: 4px;
+}
+
+.pain-page h1:focus, .pain-result h1:focus {
+  outline: none;
+}
+
+.pain-page h1 {
+  font-size: clamp(25px, 2.5vw, 34px);
+  font-weight: 750;
+  line-height: 1.22;
+  letter-spacing: -.035em;
+  scroll-margin-block-start: 90px;
+}
+
+.pain-page h2 {
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -.025em;
+}
+
+.pain-page h3 {
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.pain-wizard {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 13%, var(--color-surface));
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--color-primary-darker) 4%, transparent);
+  padding: 24px;
+}
+
+.pain-progress-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-block-end: 34px;
+}
+
+.pain-wizard-label {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.pain-progress-header progress {
+  appearance: none;
+  border: 0;
+  height: 8px;
+  border-radius: 20px;
+  flex: 1;
+  min-inline-size: 30px;
+  overflow: hidden;
+  background: var(--color-surface-mint);
+  color: var(--color-primary-light);
+}
+
+.pain-progress-header progress::-webkit-progress-bar {
+  background: var(--color-surface-mint);
+  border-radius: 20px;
+}
+
+.pain-progress-header progress::-webkit-progress-value {
+  background: var(--color-primary-light);
+  border-radius: 20px;
+}
+
+.pain-progress-header progress::-moz-progress-bar {
+  background: var(--color-primary-light);
+  border-radius: 20px;
+}
+
+.pain-step-count {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.pain-columns {
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+}
+
+.pain-question, .pain-visual {
+  min-inline-size: 0;
+}
+
+.pain-eyebrow {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-block-end: 10px !important;
+}
+
+.pain-question-help {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.65;
+  margin-block: 12px 18px !important;
+}
+
+.pain-choices {
+  border: 0;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pain-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pain-choice {
+  position: relative;
+  inline-size: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: 8px 13px;
+  min-block-size: 46px;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 150ms, background-color 150ms;
+}
+
+.pain-choice:hover {
+  border-color: var(--color-primary-light);
+}
+
+.pain-choice:focus-within {
+  outline: 3px solid var(--color-primary-light);
+  outline-offset: 3px;
+}
+
+.pain-choice input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+}
+
+.pain-choice.is-selected {
+  border-color: var(--color-primary-light);
+  background: var(--color-bg-soft);
+}
+
+.pain-choice-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+.pain-choice.is-selected .pain-choice-icon {
+  background: var(--color-surface-mint);
+}
+
+.pain-choice-copy {
+  flex: 1;
+  min-inline-size: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.pain-choice-copy strong {
+  font-weight: 550;
+}
+
+.pain-choice-copy small {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-block-start: 4px;
+}
+
+.pain-choice-check {
+  flex: 0 0 23px;
+  inline-size: 23px;
+  block-size: 23px;
+  border: 1.5px solid var(--color-text-muted);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+}
+
+.pain-choice.is-selected .pain-choice-check {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.pain-step-1 .pain-choice {
+  padding-block: 5px;
+}
+
+.pain-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-block-start: 30px;
+}
+
+.pain-navigation .pg-button {
+  min-inline-size: 128px;
+  border-radius: 28px;
+  min-block-size: 46px;
+}
+
+.pain-next-arrow {
+  margin-inline-start: 14px;
+}
+
+.pain-validation {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.pain-bodies {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  direction: ltr;
+  inline-size: 100%;
+  padding: 8px;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at 50% 55%, var(--color-surface-mint), transparent 72%);
+}
+
+.pain-bodies figure {
+  flex: 1;
+  min-inline-size: 0;
+  max-inline-size: 236px;
+}
+
+.pain-body {
+  position: relative;
+  aspect-ratio: 500 / 970;
+  inline-size: 100%;
+}
+
+.pain-body img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.pain-bodies figcaption {
+  text-align: center;
+  color: var(--color-primary-dark);
+  font-size: 12px;
+  margin-block-start: 7px;
+}
+
+.pain-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  inline-size: 22%;
+  aspect-ratio: 1;
+  min-inline-size: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pain-hotspot:hover, .pain-hotspot:focus-visible {
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+}
+
+.pain-hotspot.is-active {
+  background: radial-gradient(circle, #ecfff8 0 7%, #34c6b8bb 9% 20%, #34c6b84d 22% 48%, #34c6b815 52% 70%, transparent 72%);
+  box-shadow: 0 0 15px #34c6b82a;
+}
+
+.pain-hotspot--lower_back.is-active {
+  background: radial-gradient(circle, #fff8ef 0 7%, #ef9276b8 9% 20%, #ef92764d 22% 48%, #ef927615 52% 70%, transparent 72%);
+}
+
+.pain-bodies--mini {
+  inline-size: 112px;
+  flex: 0 0 112px;
+  padding: 0;
+  gap: 2px;
+  background: var(--color-bg-light);
+  border-radius: 12px;
+  align-self: center;
+}
+
+.pain-bodies--mini .pain-hotspot {
+  min-inline-size: 0;
+  inline-size: 32%;
+  pointer-events: none;
+}
+
+.pain-bands {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pain-bands .pain-choice {
+  cursor: default;
+  min-block-size: 67px;
+}
+
+.pain-band-range {
+  display: grid;
+  place-items: center;
+  min-inline-size: 54px;
+  block-size: 43px;
+  border-radius: 10px;
+  color: var(--color-primary-dark);
+  background: var(--color-bg-soft);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.pain-intensity-visual {
+  padding: 16px 8px 0;
+}
+
+.pain-gauge {
+  inline-size: min(100%, 270px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  padding: 22px;
+  margin-inline: auto;
+  background: conic-gradient(var(--color-primary-light) var(--pain-angle), var(--color-surface-mint) 0);
+}
+
+.pain-gauge-inner {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 50%;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+  padding: 12px;
+}
+
+.pain-gauge-inner strong {
+  font-size: 64px;
+  line-height: 1.1;
+  color: var(--color-primary-darker);
+  font-weight: 700;
+}
+
+.pain-gauge-inner span {
+  font-size: 15px;
+}
+
+.pain-slider {
+  margin-block: 42px 18px;
+  position: relative;
+}
+
+.pain-slider input {
+  appearance: none;
+  display: block;
+  inline-size: 100%;
+  block-size: 44px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pain-slider input::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 8px;
+  background: linear-gradient(to right, var(--color-primary-light) var(--pain-fill), var(--color-surface-mint) var(--pain-fill));
+}
+
+.pain-slider input::-webkit-slider-thumb {
+  appearance: none;
+  inline-size: 24px;
+  block-size: 24px;
+  margin-top: -8px;
+  background: var(--color-primary-light);
+  border: 3px solid var(--color-surface);
+  border-radius: 50%;
+  box-shadow: 0 1px 6px #0003;
+}
+
+.pain-slider input::-moz-range-track {
+  height: 8px;
+  border-radius: 8px;
+  background: var(--color-surface-mint);
+}
+
+.pain-slider input::-moz-range-progress {
+  height: 8px;
+  border-radius: 8px;
+  background: var(--color-primary-light);
+}
+
+.pain-slider input::-moz-range-thumb {
+  inline-size: 20px;
+  block-size: 20px;
+  background: var(--color-primary-light);
+  border: 3px solid var(--color-surface);
+  border-radius: 50%;
+}
+
+.pain-slider-value {
+  position: absolute;
+  inset-block-start: -22px;
+  transform: translateX(-50%);
+  min-inline-size: 30px;
+  text-align: center;
+  padding: 1px 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.pain-slider-ends {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.pain-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-bg-soft);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pain-info > svg {
+  color: var(--color-primary);
+  font-size: 23px;
+  flex-shrink: 0;
+}
+
+.pain-step-3 .pain-choice, .pain-step-5 .pain-choice {
+  min-block-size: 71px;
+}
+
+.pain-step-4 .pain-choice {
+  min-block-size: 52px;
+}
+
+.pain-rings {
+  position: relative;
+  inline-size: min(100%, 420px);
+  aspect-ratio: 1;
+  margin: 0 auto 20px;
+}
+
+.pain-ring {
+  position: absolute;
+  inline-size: var(--pain-ring-size);
+  aspect-ratio: 1;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 15%, var(--color-surface));
+  box-shadow: inset 0 0 20px color-mix(in srgb, var(--color-primary) 4%, transparent);
+  color: var(--color-primary-dark);
+}
+
+.pain-ring:nth-child(even) {
+  background: var(--color-surface-mint);
+}
+
+.pain-ring.is-selected {
+  background: var(--color-primary-light);
+  color: var(--color-surface);
+}
+
+.pain-ring > span {
+  display: block;
+  text-align: center;
+  margin-block-start: 5%;
+  font-size: clamp(10px, 1.1vw, 13px);
+  font-weight: 600;
+  padding-inline: 10px;
+}
+
+.pain-rings-icon {
+  position: absolute;
+  bottom: 7%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  inline-size: 16%;
+  aspect-ratio: 1;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border-radius: 50%;
+  font-size: 27px;
+}
+
+.pain-duration-summary strong {
+  color: var(--color-primary-dark);
+  font-size: 14px;
+}
+
+.pain-duration-summary p {
+  margin-block-start: 3px;
+  font-size: 12px;
+}
+
+.pain-texture {
+  position: relative;
+  aspect-ratio: 1 / 1.05;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #00353e;
+}
+
+.pain-texture > img, .pain-texture > canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.pain-texture > img {
+  object-fit: cover;
+  object-position: 58% center;
+}
+
+.pain-texture > canvas {
+  pointer-events: none;
+}
+
+.pain-texture-chips {
+  position: absolute;
+  top: 16px;
+  inset-inline: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 6px;
+}
+
+.pain-texture-chips button {
+  font-size: 11px;
+  color: #f3faf9;
+  background: #043f49e8;
+  border: 1px solid #96cac5;
+  border-radius: 24px;
+  padding: 6px 10px;
+  min-block-size: 34px;
+}
+
+.pain-texture-chips button[aria-pressed='true'] {
+  border-color: #fff;
+  background: #135b62;
+}
+
+.pain-texture-preview {
+  position: absolute;
+  inset-inline: 14px;
+  bottom: 14px;
+  padding: 16px;
+  border: 1px solid #c3dddb;
+  border-radius: 15px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: 0 3px 15px #0002;
+}
+
+.pain-texture-preview strong {
+  font-size: 18px;
+}
+
+.pain-texture-preview p {
+  font-size: 13px;
+  margin-block-start: 5px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.pain-caption {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-block-start: 9px !important;
+}
+
+.pain-context {
+  background: var(--color-bg-soft);
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid var(--color-surface-mint);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pain-context-heading {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+}
+
+.pain-context-heading .pain-choice-icon {
+  inline-size: 44px;
+  block-size: 44px;
+  font-size: 25px;
+  background: var(--color-surface-mint);
+}
+
+.pain-context h2 {
+  font-size: 21px;
+}
+
+.pain-context p {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-block-start: 5px;
+}
+
+.pain-context-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 15px;
+  background: var(--color-surface);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 4%, transparent);
+}
+
+.pain-context-card > div:first-child {
+  min-inline-size: 0;
+}
+
+.pain-context-card small {
+  display: block;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 650;
+  margin-block-end: 8px;
+}
+
+.pain-context-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.pain-context-card h3 {
+  font-size: 17px;
+}
+
+.pain-history-icon {
+  color: var(--color-primary);
+  background: var(--color-bg-soft);
+  inline-size: 70px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  font-size: 32px;
+}
+
+.pain-result {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pain-result-hero {
+  padding: 28px 24px;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-surface-mint);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.pain-result-check {
+  display: grid;
+  place-items: center;
+  inline-size: 58px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-surface-mint);
+  color: var(--color-primary);
+  margin: 0 auto 10px;
+  font-size: 28px;
+}
+
+.pain-result-hero > p:first-of-type {
+  color: var(--color-primary);
+  font-size: 15px;
+  margin-block-end: 10px;
+}
+
+.pain-result-hero h2 {
+  color: var(--color-primary);
+  font-size: clamp(22px, 2.3vw, 28px);
+  margin-block: 10px;
+}
+
+.pain-result-hero > p:last-child {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+  max-inline-size: 700px;
+  margin-inline: auto;
+}
+
+.pain-result-centers > h2 {
+  margin-block-end: 14px;
+}
+
+.pain-centers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pain-center-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-start: auto;
+  padding: 10px 14px;
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  min-block-size: 44px;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pain-center-link:hover {
+  background: var(--color-bg-soft);
+}
+
+.pain-empty {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 28px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.pain-empty .pg-button {
+  margin-block-start: 14px;
+}
+
+.pain-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--color-bg-soft);
+}
+
+.pain-disclaimer > svg {
+  font-size: 26px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.pain-disclaimer p {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  flex: 1;
+}
+
+.pain-disclaimer .pg-button {
+  flex-shrink: 0;
+}
+
+.pain-page[dir='rtl'] h1 {
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+@media (min-width: 1500px) {
+  .pain-wizard {
+    padding: 30px;
+  }
+
+  .pain-columns {
+    gap: 42px;
+  }
+
+  .pain-choice-copy {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 1150px) and (min-width: 992px) {
+  .pain-columns {
+    gap: 20px;
+  }
+
+  .pain-wizard {
+    padding: 20px;
+  }
+
+  .pain-context {
+    padding: 14px;
+  }
+
+  .pain-context-card {
+    padding: 12px;
+  }
+
+  .pain-bodies--mini {
+    inline-size: 85px;
+    flex-basis: 85px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pain-wizard {
+    padding: 20px;
+  }
+
+  .pain-progress-header {
+    gap: 14px;
+    margin-block-end: 26px;
+  }
+
+  .pain-wizard-label {
+    font-size: 14px;
+  }
+
+  .pain-columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+
+  .pain-page h1 {
+    font-size: 27px;
+  }
+
+  .pain-visual {
+    inline-size: 100%;
+    max-inline-size: 500px;
+    margin-inline: auto;
+  }
+
+  .pain-step-1 .pain-visual {
+    max-inline-size: 400px;
+  }
+
+  .pain-bodies {
+    padding: 0;
+  }
+
+  .pain-choice-copy {
+    font-size: 15px;
+  }
+
+  .pain-choice-copy small {
+    font-size: 12px;
+  }
+
+  .pain-navigation {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-block-start: 22px;
+  }
+
+  .pain-validation {
+    order: -1;
+    flex-basis: 100%;
+    min-block-size: 18px;
+  }
+
+  .pain-navigation .pg-button {
+    min-inline-size: 110px;
+  }
+
+  .pain-ring > span {
+    font-size: 12px;
+  }
+
+  .pain-centers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pain-disclaimer {
+    flex-wrap: wrap;
+    align-items: start;
+  }
+
+  .pain-disclaimer .pg-button {
+    inline-size: 100%;
+  }
+}
+
+@media (max-width: 389px) {
+  .pain-wizard {
+    padding: 16px 12px;
+    border-radius: 14px;
+  }
+
+  .pain-progress-header {
+    gap: 10px;
+  }
+
+  .pain-wizard-label {
+    font-size: 12px;
+  }
+
+  .pain-step-count {
+    font-size: 13px;
+  }
+
+  .pain-page h1 {
+    font-size: 25px;
+  }
+
+  .pain-question-help {
+    font-size: 14px;
+  }
+
+  .pain-choice {
+    padding-inline: 9px;
+    gap: 8px;
+  }
+
+  .pain-choice-icon {
+    inline-size: 30px;
+    block-size: 30px;
+  }
+
+  .pain-choice-copy {
+    font-size: 13px;
+  }
+
+  .pain-navigation .pg-button {
+    min-inline-size: 0;
+  }
+
+  .pain-next-arrow {
+    margin-inline-start: 5px;
+  }
+
+  .pain-context {
+    padding: 12px;
+  }
+
+  .pain-context-card {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .pain-bodies--mini {
+    inline-size: 86px;
+    flex-basis: 86px;
+  }
+
+  .pain-context h2 {
+    font-size: 19px;
+  }
+
+  .pain-ring > span {
+    font-size: 10px;
+  }
+
+  .pain-rings-icon {
+    font-size: 20px;
+  }
+
+  .pain-texture-preview {
+    padding: 12px;
+    inset-inline: 10px;
+    bottom: 10px;
+  }
+
+  .pain-texture-preview strong {
+    font-size: 15px;
+  }
+
+  .pain-texture-preview p {
+    font-size: 11px;
+  }
+
+  .pain-texture-chips {
+    inset-inline: 10px;
+    top: 10px;
+    gap: 4px;
+  }
+
+  .pain-texture-chips button {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pain-page *, .pain-page *::before, .pain-page *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
