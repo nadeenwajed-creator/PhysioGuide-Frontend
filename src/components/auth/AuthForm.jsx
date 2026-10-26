@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowRight,
@@ -45,6 +45,7 @@ const initialValues = {
   name: '',
   email: '',
   phone: '',
+  gender: '',
   location: '',
   password: '',
   confirmPassword: '',
@@ -80,6 +81,9 @@ function AuthForm({ role, mode }) {
   // Allows navigation to another route after successful authentication.
   const navigate = useNavigate();
 
+  // Reads the confirmation notice carried over from the registration screen.
+  const location = useLocation();
+
   // Determines whether the current form is for registration or login.
   const registering = mode === 'signup';
 
@@ -96,7 +100,11 @@ function AuthForm({ role, mode }) {
 
   // Stores the feedback message displayed after success or failure.
   // Example: { kind: 'error', key: 'auth.error.network' }
-  const [feedback, setFeedback] = useState(null);
+  const [feedback, setFeedback] = useState(() =>
+    location.state?.notice
+      ? { kind: 'info', key: location.state.notice }
+      : null
+  );
 
   // Stores the coordinates returned by the browser's geolocation service.
   const [coordinates, setCoordinates] = useState(null);
@@ -263,16 +271,22 @@ function AuthForm({ role, mode }) {
       } else if (
         result.mode === 'live' &&
         registering &&
-        ['registered', 'pending-review'].includes(result.status)
+        result.status === 'registered'
       ) {
-        // Registration may succeed immediately or require manual approval.
-        setFeedback({
-          kind: 'info',
-          key:
-            result.status === 'pending-review'
-              ? 'auth.pendingReview'
-              : 'auth.registered',
+        // A created account signs in on the next screen.
+        navigate(`/${role}/login`, {
+          replace: true,
+          state: { notice: 'auth.registeredNotice' },
         });
+
+        return;
+      } else if (
+        result.mode === 'live' &&
+        registering &&
+        result.status === 'pending-review'
+      ) {
+        // Registration may require manual approval before sign-in.
+        setFeedback({ kind: 'info', key: 'auth.pendingReview' });
       } else {
         // Unexpected response shapes should be handled as errors.
         throw new Error('Unexpected authentication response');
@@ -417,7 +431,7 @@ function AuthForm({ role, mode }) {
 
   // Reusable field renderer to avoid duplicating FormField configuration.
   // It connects each input to React state, validation, and accessibility props.
-  function field(name, label, type = 'text', autoComplete = name) {
+  function field(name, label, type = 'text', autoComplete = name, extraProps = {}) {
     return (
       <FormField
         // Create a unique ID for this role, mode, and field combination.
@@ -448,6 +462,7 @@ function AuthForm({ role, mode }) {
             ? t('auth.passwordHint')
             : undefined
         }
+        {...extraProps}
       />
     );
   }
@@ -493,6 +508,18 @@ function AuthForm({ role, mode }) {
             'email',
             'username'
           )}
+
+          {/* Gender is required by the patient registration endpoint. */}
+          {registering &&
+            role === 'patient' &&
+            field('gender', 'auth.gender', 'text', 'off', {
+              as: 'select',
+              options: [
+                { value: '', label: t('auth.gender.select') },
+                { value: 'Male', label: t('auth.gender.male') },
+                { value: 'Female', label: t('auth.gender.female') },
+              ],
+            })}
 
           {/* Phone number is required only during registration. */}
           {registering && field('phone', 'auth.phone', 'tel', 'tel')}

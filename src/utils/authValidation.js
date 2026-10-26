@@ -8,6 +8,9 @@ export function validateAuthForm(values, { role, mode }) {
 
   // Center registration always requires a readable address.
   if (registering && role === 'center') required.push('location');
+
+  // Patient registration must state the gender expected by the backend.
+  if (registering && role === 'patient') required.push('gender');
   required.forEach((field) => {
     if (!values[field]?.trim()) errors[field] = 'required';
   });
@@ -47,5 +50,5 @@ export function createAuthRequest(values, { role, mode }, coordinates = null) {
       location: { address: values.location.trim(), coordinates },
     };
   }
-  return { ...request, fullName: values.name.trim() };
+  return { ...request, fullName: values.name.trim(), gender: values.gender };
 }

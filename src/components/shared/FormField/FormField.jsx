@@ -16,6 +16,7 @@ function FormField({
   name,
   as = 'input',
   type = 'text',
+  options = [],
   rows = 4,
   layout = 'vertical',
   placeholder,
@@ -50,6 +51,7 @@ function FormField({
   const errorId = `${fieldId}-error`;
 
   const isTextarea = as === 'textarea';
+  const isSelect = as === 'select';
   const isControlled = value !== undefined;
   const hasError = Boolean(error);
 
@@ -130,7 +132,15 @@ function FormField({
             className="pg-form-field__input-wrap"
             dir={dir}
           >
-            {isTextarea ? (
+            {isSelect ? (
+              <select {...controlProps}>
+                {options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : isTextarea ? (
               <textarea
                 {...controlProps}
                 rows={rows}
