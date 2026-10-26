@@ -5,6 +5,7 @@ import { assignedTherapistServices, normalizeTherapistServices } from './therapi
 import { addProfessionalNotification, getTherapistNotifications } from './therapistNotifications.js';
 import { normalizeMessages, conversationView, messageNotifications } from './messagingModel.js';
 import { createMessagingOperations } from './messagingOperations.js';
+import { addAppointmentAlert, appointmentAlerts } from '../patient/notificationPolicy.js';
 
 // Domain rules are enforced here as well as in the UI. A real server must enforce them atomically.
 export function createMockCenterAdapter(seed, { store, now = () => new Date(), reservedEmails = () => [] } = {}) {
@@ -245,6 +246,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
         note: clean(values.note)
       };
       state.appointments = id ? state.appointments.map(item => item.id === id ? record : item) : [...state.appointments, record];
+      addAppointmentAlert(state, record, now());
       emit();
       return clone(record);
     },
@@ -275,6 +277,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       if (appointment.status === 'pending' && appointment.origin !== 'patient') fail('closedAppointment');
       if (status === 'confirmed') validateAppointment(appointment, id);
       appointment.status = status;
+      addAppointmentAlert(state, appointment, now());
       emit();
       return clone(appointment);
     },
@@ -410,7 +413,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       refreshState();
       if (actor?.role === 'patient') {
         if (actor.centerId !== state.center.id || !state.patients.some(person => person.id === actor.patientId)) fail('forbidden');
-        const own = messageNotifications(state, 'patient', actor.patientId);
+        const own = [...messageNotifications(state, 'patient', actor.patientId), ...appointmentAlerts(state, actor.patientId)];
         if (id !== undefined && !own.some(item => item.id === id)) fail('notFound');
         state.patientNotificationReadIds ??= {};
         state.patientNotificationReadIds[actor.patientId] = [...new Set([

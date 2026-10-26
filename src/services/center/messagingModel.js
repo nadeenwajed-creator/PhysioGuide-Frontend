@@ -82,7 +82,7 @@ export function messageNotifications(state, role, id) {
     .filter((conversation) => conversation[field] === id)
     .flatMap((conversation) =>
       conversation.messages
-        .filter((message) => message.senderRole !== role)
+        .filter((message) => message.senderRole !== role && !message.notificationSuppressedFor?.includes(key))
         .map((message) => {
           const notificationId = `message:${conversation.id}:${message.id}`;
           return {

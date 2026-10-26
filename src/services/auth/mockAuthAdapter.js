@@ -22,6 +22,10 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     const { id, role, centerId, therapistId, patientId, name, email } = account;
     const profile = role === 'center' && centerId ? getCenter(centerId)
       : role === 'physiotherapist' ? getTherapists().find(person => person.id === therapistId && (person.centerId || MOCK_CENTER_ID) === centerId) : null;
+    if (role === 'patient') {
+      const personal = readAccounts().find(item => item.id === id && item.role === 'patient')?.profile;
+      return { id, role, centerId, patientId, name: personal?.name || name, email, ...(personal ? { phone: personal.phone, imageUrl: personal.imageUrl } : {}) };
+    }
     return { id, role, centerId, therapistId, patientId, name: profile?.name || name, email };
   }
   async function login(credentials, roles) {

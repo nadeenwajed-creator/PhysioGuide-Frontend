@@ -3,6 +3,7 @@ import {
   conversationView,
   messageNotifications,
 } from './messagingModel.js';
+import { recipientPreferences, appointmentAlerts, syncAppointmentReminders } from '../patient/notificationPolicy.js';
 
 export function createMessagingOperations({
   getState,
@@ -66,6 +67,7 @@ export function createMessagingOperations({
     async getMessagingWorkspace(actor) {
       refresh();
       const state = participant(actor);
+      if (actor.role === 'patient' && syncAppointmentReminders(state, actor.patientId, now())) emit();
       const field = actor.role === 'patient' ? 'patientId' : 'therapistId';
       const conversations = state.conversations.filter(
         (item) => item[field] === actor[field]
@@ -87,7 +89,8 @@ export function createMessagingOperations({
         conversations: conversations.map((item) =>
           conversationView(item, actor)
         ),
-        notifications: messageNotifications(state, actor.role, actor[field]),
+        notifications: [...messageNotifications(state, actor.role, actor[field]),
+          ...(actor.role === 'patient' ? appointmentAlerts(state, actor.patientId) : [])],
       });
     },
     async markConversationRead(actor, id, messageIds) {
@@ -146,6 +149,10 @@ export function createMessagingOperations({
         status: 'sent',
         readBy: [],
         notificationReadBy: [],
+        // Suppression belongs to this event. Message delivery and unread receipts
+        // remain independent; a later preference change cannot revive muted alerts.
+        notificationSuppressedFor: actor.role === 'physiotherapist' && !recipientPreferences(getState(), item.patientId).newMessages
+          ? [`patient:${item.patientId}`] : [],
       };
       item.messages.push(message);
       item.unreadCount = conversationView(item, {

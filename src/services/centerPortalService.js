@@ -1,3 +1,4 @@
+import { executePatientOperation } from './patient/mockPatientOperations.js';
 import { createMockCenterAdapter } from './center/mockCenterAdapter.js';
 import { centerStore, getCenterStore, readMockCenter, getMockTherapists } from './mock/centerRepository.js';
 import { getAuthSnapshot, restoreSession } from './authService.js';
@@ -35,6 +36,18 @@ export async function callCenter(method, ...args) {
       if (claimed?.id !== session.id || claimed?.role !== session.role) throw new ServiceError('forbidden');
       args[0] = session;
     } else if (!['center', 'physiotherapist'].includes(session.role)) throw new ServiceError('forbidden');
+    if (mockEnabled && session.role === 'patient') {
+      const result = await executePatientOperation(method, session, ...args.slice(1));
+      if (method === 'savePatientProfile') await restoreSession({ force: true });
+      if (!method.startsWith('get') && method !== 'preparePatientImage') emit();
+      return result;
+    }
+    // Patient operations span approved centers; API mappings must enforce patient scope.
+    if (!mockEnabled && session.role === 'patient') {
+      const result = await getAdapter('api').execute(method, ...args);
+      if (!method.startsWith('get')) emit();
+      return result;
+    }
     if (!session.centerId) {
       if (method === 'getMessagingWorkspace' && session.role === 'patient') return { patients: [], therapists: [], conversations: [], notifications: [] };
       throw new ServiceError('forbidden');
@@ -52,8 +65,12 @@ export const prepareCenterImage = file => callCenter('prepareImage', file);
 
 if (mockEnabled && typeof window !== 'undefined') {
   window.addEventListener('storage', event => {
-    if ((!event.key || event.key.startsWith(centerStore.key)) && getAuthSnapshot().session) {
-      try { for (const adapter of adapters.values()) adapter.reload?.(); } catch { emit(); }
+    if ((!event.key || event.key.startsWith(centerStore.key) || event.key === mockAccountStore.key || event.key?.startsWith('physioguide.mock.patient-preferences.v1:')) && getAuthSnapshot().session) {
+      try {
+        // Patient operations read fresh workspaces without populating the adapter cache.
+        if (getAuthSnapshot().session.role === 'patient') emit();
+        else for (const adapter of adapters.values()) adapter.reload?.();
+      } catch { emit(); }
     }
   });
 }
