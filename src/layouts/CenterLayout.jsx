@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { faHouse, faCalendarDays, faUsers, faUserDoctor, faBriefcaseMedical, faStar, faBuilding, faGear, faComments, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faCalendarDays, faUsers, faUserDoctor, faBriefcaseMedical, faStar, faBuilding, faGear, faComments, faUser, faLocationDot, faClipboardList } from '@fortawesome/free-solid-svg-icons';
 import Navbar from '../components/shared/Navbar/Navbar.jsx';
 import Sidebar from '../components/shared/Sidebar/Sidebar.jsx';
 import Footer from '../components/shared/Footer/Footer.jsx';
@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { logout as signOut } from '../services/authService.js';
 import { markNotificationsRead } from '../services/notificationService.js';
 import { localized } from '../utils/centerFormat.js';
+import { notificationPreference } from '../services/patient/notificationPolicy.js';
 import logo from '../assets/logo/physioguide-icon.svg';
 import './CenterLayout.css';
 const centerNavigation = [
@@ -39,6 +40,9 @@ function CenterLayout({ portal = 'center' }) {
   const patientPortal = portal === 'patient';
   const messagesBase = patientPortal ? '/patient/messages' : '/center/physiotherapist/messages';
   const { pathname } = useLocation();
+  // The local assessment must stay usable independently of messaging availability.
+  // Authentication remains enforced by the existing Patient route guard.
+  const localAssessment = patientPortal && pathname.replace(/\/$/, '') === '/patient/pain-assessment';
   const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -65,6 +69,7 @@ function CenterLayout({ portal = 'center' }) {
         const result = await (patientPortal ? getMessagingWorkspace(actor) : getCenterWorkspace(actor));
         if (active && current === request) {
           setWorkspace({
+            actorId: actor.id,
             role,
             centerId: actor.centerId,
             therapistId: actor.therapistId,
@@ -86,15 +91,15 @@ function CenterLayout({ portal = 'center' }) {
       window.removeEventListener('focus', refresh);
     };
   }, [actor, role, retry, patientPortal]);
-  const data = workspace?.role === role && workspace.centerId === actor.centerId && workspace.therapistId === actor.therapistId && workspace.patientId === actor.patientId ? workspace.data : null;
-  const navigation = patientPortal ? [['dashboard', faHouse], ['messages', faComments]] : therapistPortal ? [['messages', faComments], ['profile', faUser]] : centerNavigation;
-  const profilePath = patientPortal ? '/patient/dashboard' : therapistPortal ? '/center/physiotherapist/profile' : '/center/profile';
+  const data = workspace?.actorId === actor.id && workspace.role === role && workspace.centerId === actor.centerId && workspace.therapistId === actor.therapistId && workspace.patientId === actor.patientId ? workspace.data : null;
+  const navigation = patientPortal ? [['dashboard', faHouse], ['centers', faLocationDot], ['pain-assessment', faClipboardList], ['appointments', faCalendarDays], ['messages', faComments], ['profile', faUser], ['settings', faGear]] : therapistPortal ? [['messages', faComments], ['profile', faUser]] : centerNavigation;
+  const profilePath = patientPortal ? '/patient/profile' : therapistPortal ? '/center/physiotherapist/profile' : '/center/profile';
   const items = navigation.map(([id, icon]) => ({
     id,
     icon,
-    label: tr(id === 'messages' || therapistPortal ? `therapistProfile.${id}` : id === 'profile' ? 'centerProfile' : id),
+    label: patientPortal ? t(`patientDiscovery.${id}`) : tr(id === 'messages' || therapistPortal ? `therapistProfile.${id}` : id === 'profile' ? 'centerProfile' : id),
     to: patientPortal ? `/patient/${id}` : therapistPortal ? `/center/physiotherapist/${id}` : `/center/${id}`,
-    end: id !== 'messages',
+    end: !['messages','centers'].includes(id),
     badge: id === 'messages' ? (data?.conversations || []).reduce((sum, item) => sum + item.unreadCount, 0) : undefined,
   }));
   const current = items.find(item => pathname.startsWith(item.to));
@@ -102,14 +107,14 @@ function CenterLayout({ portal = 'center' }) {
   useEffect(() => {
     document.title = `${title} | PhysioGuide`;
   }, [title]);
-  const account = patientPortal ? data?.patients.find(item => item.id === actor.patientId) || actor : therapistPortal ? data?.therapists.find(item => item.id === actor.therapistId) : data?.center;
+  const account = patientPortal ? data?.patientProfile || data?.patients.find(item => item.id === actor.patientId) || actor : therapistPortal ? data?.therapists.find(item => item.id === actor.therapistId) : data?.center;
   const user = {
     name: name(account?.name),
     avatar: account?.imageUrl
   };
   const results = search.trim() ? items.filter(item => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())) : [];
   const notifications = (data?.notifications || [])
-    .filter(item => data.notificationPreferences?.[notificationPreferences[item.type]] !== false)
+    .filter(item => data.notificationPreferences?.[patientPortal ? notificationPreference(item) : notificationPreferences[item.type]] !== false)
     .map(item => ({
       ...item,
       title: (therapistPortal || patientPortal) && item.titleKey ? tr(`therapistNotifications.${item.titleKey}`) : name(item.title),
@@ -118,7 +123,7 @@ function CenterLayout({ portal = 'center' }) {
         ? '/center/physiotherapist/profile?tab=professional'
         : item.target?.kind === 'conversation' && data.conversations?.some(conversation => conversation.id === item.target.id)
           ? `${messagesBase}/${encodeURIComponent(item.target.id)}`
-          : undefined : undefined,
+          : item.target?.kind === 'appointment' && patientPortal ? `/patient/appointments?appointment=${encodeURIComponent(item.target.id)}` : undefined : undefined,
     }));
 
   function notify(message, { error = false } = {}) {
@@ -158,7 +163,7 @@ function CenterLayout({ portal = 'center' }) {
         user={user}
         compact={compact}
         profilePath={profilePath}
-        labels={{ logout: tr('logout'), profile: tr(patientPortal ? 'dashboard' : therapistPortal ? 'therapistProfile.profile' : 'centerProfile') }}
+        labels={{ logout: tr('logout'), profile: patientPortal ? t('patientDiscovery.profile') : tr(therapistPortal ? 'therapistProfile.profile' : 'centerProfile') }}
         onRequestLogout={() => setLogout(true)}
       />}
     />
@@ -173,7 +178,7 @@ function CenterLayout({ portal = 'center' }) {
             <Feedback key={flash.id} error={flash.error} onDismiss={() => setFlash(null)}>{flash.message}</Feedback>
             {flash.error && <Button variant="ghost" onClick={() => setFlash(null)}>{tr('dismiss')}</Button>}
           </div>}
-          {error ? <>
+          {localAssessment ? <Outlet key={actor.id} /> : error ? <>
             <Feedback error>{tr(`error.${error}`)}</Feedback>
             <Button onClick={() => setRetry(value => value + 1)}>{tr('retry')}</Button>
           </> : data ? <Outlet context={{
