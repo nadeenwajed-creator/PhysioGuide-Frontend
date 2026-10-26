@@ -1,0 +1,1140 @@
+/* Patient account pages */
+.pa-page {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.pa-page .center-page-header {
+  margin-bottom: 0;
+}
+
+.pa-page .center-page-header h1 {
+  font-size: clamp(22px,2vw,28px);
+}
+
+.pa-page h2 {
+  font-size: 18px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.pa-page p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.pa-page .pg-button {
+  min-height: 44px;
+  padding: 9px 14px;
+  font-size: 14px;
+}
+
+.pa-page :focus-visible,.pa-edit-form :focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.pa-page a {
+  color: var(--color-primary);
+}
+
+.pa-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pa-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 12px 20px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.pa-tabs button[aria-selected=true] {
+  background: var(--color-surface-mint);
+  color: var(--color-primary);
+  border-color: var(--color-primary-light);
+  font-weight: 600;
+}
+
+.pa-appointments {
+  display: grid;
+  gap: 14px;
+}
+
+.pa-empty {
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.pa-appointment {
+  display: grid;
+  grid-template-columns: 90px 72px minmax(0,1fr) auto;
+  gap: 20px;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 22px;
+  background: var(--color-surface);
+}
+
+.pa-date {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+  padding-inline-end: 18px;
+  border-inline-end: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: 14px;
+}
+
+.pa-date strong {
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.pa-date bdi {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.pa-therapist-photo,.pa-therapist-photo img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.pa-appointment__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pa-appointment__text h2 {
+  font-size: 17px;
+}
+
+.pa-appointment__text p {
+  margin: 6px 0 2px;
+  color: var(--color-text-primary);
+}
+
+.pa-appointment__text small {
+  color: var(--color-text-secondary);
+}
+
+.pa-appointment__actions {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+
+.pa-appointment__actions .pg-button {
+  border-radius: 24px;
+}
+
+.pa-profile {
+  display: grid;
+  grid-template-columns: minmax(230px,1fr) minmax(0,2fr);
+  gap: 24px;
+}
+
+.pa-profile__identity {
+  padding: 28px 20px;
+  background: var(--color-surface-mint);
+  border-radius: 10px;
+}
+
+.pa-identity {
+  min-width: 0;
+}
+
+.pa-avatar {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin-inline: auto;
+}
+
+.pa-avatar>img,.pa-avatar>.center-record-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.pa-page .pa-camera {
+  position: absolute;
+  bottom: 0;
+  inset-inline-end: 0;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+
+.pa-identity__text {
+  overflow-wrap: anywhere;
+}
+
+.pa-profile__identity h2 {
+  margin-top: 18px;
+  font-size: 22px;
+  text-align: center;
+}
+
+.pa-profile__identity .pa-identity__text>p {
+  margin: 5px 0 22px;
+  text-align: center;
+}
+
+.pa-contact {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+}
+
+.pa-contact p {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 12px 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.pa-contact svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.pa-contact bdi {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pa-profile__content {
+  border-inline-start: 1px solid var(--color-border);
+  padding-inline-start: 24px;
+  min-width: 0;
+}
+
+.pa-section-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pa-section-heading p {
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+.pa-personal-fields {
+  margin: 18px 0 24px;
+}
+
+.pa-personal-fields>div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.pa-personal-fields dt {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.pa-personal-fields dt svg {
+  width: 24px;
+  font-size: 24px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.pa-personal-fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pa-care {
+  border-top: 1px solid var(--color-border);
+  padding-top: 20px;
+}
+
+.pa-care>p {
+  margin: 6px 0 16px;
+  font-size: 14px;
+}
+
+.pa-care-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pa-care-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  text-decoration: none;
+  background: var(--color-surface);
+}
+
+.pa-care-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-surface-mint);
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.pa-care-card strong {
+  display: block;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.pa-care-card span span {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.pa-settings {
+  display: grid;
+  grid-template-columns: 235px minmax(0,1fr);
+  gap: 26px;
+  min-height: 380px;
+}
+
+.pa-tabs--vertical {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 8px;
+  border-inline-end: 1px solid var(--color-border);
+  padding-inline-end: 20px;
+}
+
+.pa-tabs--vertical button {
+  justify-content: start;
+  border-color: transparent;
+  border-radius: 8px;
+  text-align: start;
+  padding: 14px 12px;
+  border-inline-start: 3px solid transparent;
+}
+
+.pa-tabs--vertical button[aria-selected=true] {
+  border-color: transparent;
+  border-inline-start-color: var(--color-primary);
+}
+
+.pa-tabs--vertical svg {
+  font-size: 22px;
+  width: 26px;
+  flex-shrink: 0;
+}
+
+.pa-settings__content {
+  min-width: 0;
+}
+
+.pa-settings__content>p,.pa-settings__content form>p {
+  margin: 6px 0 24px;
+  font-size: 14px;
+}
+
+.pa-settings .pa-identity {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-block: 26px;
+}
+
+.pa-settings .pa-avatar {
+  width: 128px;
+  height: 128px;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.pa-settings .pa-contact {
+  border: 0;
+  padding: 0;
+}
+
+.pa-settings .pa-identity__text>p {
+  margin: 4px 0 14px;
+}
+
+.pa-account-action {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-border);
+  padding-top: 20px;
+  margin-top: 26px;
+}
+
+.pa-security-form {
+  display: grid;
+  gap: 14px;
+  max-width: 650px;
+}
+
+.pa-security-form .pg-form-field__control,.pa-edit-form .pg-form-field__control {
+  font-size: 14px;
+  min-height: 44px;
+}
+
+.pa-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.pa-preferences {
+  display: grid;
+}
+
+.pa-preference {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pa-preference strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pa-preference small {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pa-preference input {
+  appearance: none;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+}
+
+.pa-preference input:before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 3px;
+  inset-inline-start: 3px;
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.pa-preference input:checked {
+  background: var(--color-primary);
+}
+
+.pa-preference input:checked:before {
+  inset-inline-start: 21px;
+}
+
+.pa-edit-form {
+  display: grid;
+  gap: 14px;
+}
+
+.pa-photo-editor {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.pa-photo-editor>img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.pa-photo-editor label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.pa-photo-editor input {
+  max-width: 100%;
+  font-size: 13px;
+}
+
+.pa-photo-editor small {
+  color: var(--color-text-secondary);
+}
+
+.pa-select-label {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.pa-select-label select {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+@container (max-width:950px) {
+  .pa-appointment {
+    grid-template-columns: 75px 60px minmax(0,1fr);
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .pa-therapist-photo,.pa-therapist-photo img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .pa-appointment__actions {
+    grid-column: 2/-1;
+    justify-content: space-between;
+  }
+
+  .pa-date {
+    grid-row: span 2;
+  }
+
+  .pa-profile {
+    grid-template-columns: 220px minmax(0,1fr);
+    gap: 18px;
+  }
+
+  .pa-profile__content {
+    padding-inline-start: 18px;
+  }
+
+  .pa-care-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pa-settings {
+    grid-template-columns: 210px minmax(0,1fr);
+    gap: 18px;
+  }
+}
+
+@container (max-width:700px) {
+  .pa-profile {
+    grid-template-columns: 1fr;
+  }
+
+  .pa-profile__content {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+
+  .pa-profile__identity {
+    padding: 20px;
+  }
+
+  .pa-profile__identity .pa-contact {
+    max-width: 350px;
+    margin-inline: auto;
+  }
+
+  .pa-settings {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .pa-tabs--vertical {
+    border-inline-end: 0;
+    padding-inline-end: 0;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 12px;
+  }
+
+  .pa-tabs--vertical button {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .pa-settings .pa-identity {
+    gap: 18px;
+  }
+
+  .pa-care-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@container (max-width:440px) {
+  .pa-page .center-panel {
+    padding: 14px;
+  }
+
+  .pa-tabs {
+    gap: 6px;
+  }
+
+  .pa-tabs:not(.pa-tabs--vertical) button {
+    padding: 9px 8px;
+    flex: 1;
+    font-size: 13px;
+  }
+
+  .pa-appointment {
+    grid-template-columns: 58px 46px minmax(0,1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .pa-date {
+    padding-inline-end: 8px;
+    font-size: 12px;
+  }
+
+  .pa-date strong {
+    font-size: 27px;
+  }
+
+  .pa-therapist-photo,.pa-therapist-photo img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .pa-appointment__text h2 {
+    font-size: 15px;
+  }
+
+  .pa-appointment__text p {
+    font-size: 14px;
+  }
+
+  .pa-appointment__actions {
+    grid-column: 1/-1;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pa-date {
+    grid-row: auto;
+  }
+
+  .pa-page .pa-appointment__actions .pg-button {
+    font-size: 13px;
+  }
+
+  .pa-care-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pa-personal-fields>div {
+    gap: 10px;
+    padding-block: 16px;
+    font-size: 14px;
+  }
+
+  .pa-personal-fields dt {
+    gap: 10px;
+  }
+
+  .pa-settings .pa-identity {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .pa-settings .pa-avatar {
+    width: 110px;
+    height: 110px;
+  }
+
+  .pa-account-action .pg-button {
+    width: 100%;
+  }
+}
+
+@media (max-width:440px) {
+  .pa-photo-editor {
+    flex-direction: column;
+    align-items: start;
+  }
+}
+
+/* Appointment cards, profile and settings */
+
+.pa-appointment {
+  grid-template-columns: 88px 56px minmax(0,1fr) auto;
+  gap: 16px;
+  padding: 10px 16px 10px 10px;
+  min-width: 0;
+}
+
+.pa-date-status {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 9px;
+  background: var(--color-bg-soft);
+  padding: 6px 3px;
+  min-width: 0;
+}
+
+.pa-date {
+  padding: 0;
+  border: 0;
+  gap: 0;
+  grid-row: auto;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.pa-date strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.pa-date bdi {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.pa-therapist-photo,.pa-therapist-photo img {
+  width: 56px;
+  height: 56px;
+}
+
+.pa-appointment__text h2 {
+  font-size: 16px;
+}
+
+.pa-appointment__text p {
+  font-size: 13px;
+  margin-block: 5px 0;
+}
+
+.pa-appointment__actions {
+  grid-column: auto;
+  gap: 0;
+}
+
+.pa-page .pa-appointment-detail {
+  border-radius: 9px;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.pa-profile {
+  grid-template-columns: minmax(210px,.9fr) minmax(0,1.8fr);
+  gap: 20px;
+}
+
+.pa-profile__identity {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-soft);
+  padding: 24px 20px 18px;
+}
+
+.pa-profile-edit {
+  align-self: flex-end;
+  margin-block-start: 20px;
+}
+
+.pa-profile__identity .pa-avatar {
+  border: 1px solid var(--color-primary-light);
+  border-radius: 50%;
+}
+
+.pa-profile__identity .pa-contact {
+  border: 0;
+  padding-top: 0;
+}
+
+.pa-profile__identity .pa-identity__text>p {
+  margin-block-end: 22px;
+}
+
+.pa-contact p>svg {
+  padding: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-surface-mint);
+  box-sizing: border-box;
+}
+
+.pa-contact p:last-child>svg {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+.pa-personal-fields {
+  margin-block: 16px 20px;
+}
+
+.pa-personal-fields>div {
+  padding-block: 13px;
+  gap: 12px;
+}
+
+.pa-personal-fields dt {
+  gap: 12px;
+  font-size: 13px;
+}
+
+.pa-personal-fields dd {
+  font-size: 13px;
+}
+
+.pa-field-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-mint);
+  color: var(--color-primary);
+}
+
+.pa-personal-fields .pa-field-icon svg {
+  width: 19px;
+  height: 19px;
+  font-size: 19px;
+  color: inherit;
+}
+
+.pa-field-icon--gender {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.pa-field-icon--city {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.pa-care-grid {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 12px;
+}
+
+.pa-care-card {
+  align-items: flex-start;
+  padding: 16px 12px;
+  gap: 10px;
+  background: var(--color-bg-light);
+  color: var(--color-primary);
+}
+
+.pa-care-card--completed {
+  background: var(--color-success-bg);
+}
+
+.pa-care-card--completed .pa-care-icon {
+  background: color-mix(in srgb,var(--color-success) 12%,var(--color-surface));
+  color: var(--color-success);
+}
+
+.pa-care-card strong {
+  font-size: 29px;
+}
+
+.pa-care-card span span {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-block-start: 5px;
+}
+
+.pa-settings {
+  grid-template-columns: 190px minmax(0,1fr);
+  min-height: 0;
+  gap: 24px;
+}
+
+.pa-tabs--vertical {
+  flex-direction: column;
+  border-inline-end: 1px solid var(--color-border);
+  border-bottom: 0;
+  padding-inline-end: 16px;
+  padding-block-end: 0;
+}
+
+.pa-tabs--vertical button {
+  flex: none;
+  padding: 12px 10px;
+  font-size: 13px;
+  gap: 10px;
+}
+
+.pa-tabs--vertical svg {
+  padding: 10px;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-mint);
+  color: var(--color-primary);
+}
+
+#settings-security svg {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+#settings-notifications svg {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.pa-settings .pa-identity {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 22px;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--color-bg-soft);
+  margin-block: 20px;
+}
+
+.pa-settings .pa-avatar {
+  width: 112px;
+  height: 112px;
+  border: 1px solid var(--color-primary-light);
+  border-radius: 50%;
+}
+
+.pa-settings .pa-identity h2 {
+  font-size: 21px;
+}
+
+.pa-settings .pa-contact p {
+  margin-block: 8px;
+  font-size: 13px;
+}
+
+.pa-settings .pa-contact p>svg {
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  background: none;
+}
+
+.pa-settings .pa-identity__text>p {
+  font-size: 13px;
+  margin-block-end: 14px;
+}
+
+.pa-account-action {
+  margin-block-start: 20px;
+  padding-block-start: 16px;
+}
+
+@media (max-width:767px) {
+  .pa-profile {
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .pa-profile__content {
+    padding-inline-start: 0;
+    border: 0;
+  }
+
+  .pa-profile__identity .pa-contact {
+    max-width: 360px;
+    margin-inline: auto;
+  }
+
+  .pa-profile-edit {
+    margin-block-start: 10px;
+  }
+
+  .pa-settings {
+    grid-template-columns: minmax(0,1fr);
+    gap: 20px;
+  }
+
+  .pa-tabs--vertical {
+    flex-direction: row;
+    gap: 4px;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0;
+  }
+
+  .pa-tabs--vertical button {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 8px 4px 12px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .pa-tabs--vertical button[aria-selected=true] {
+    background: var(--color-bg-soft);
+    border: 0;
+    border-bottom: 3px solid var(--color-primary);
+  }
+
+  .pa-tabs--vertical svg {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+  }
+
+  .pa-settings .pa-identity {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+    padding: 22px 16px;
+  }
+
+  .pa-settings .pa-avatar {
+    margin: 0 auto;
+    width: 120px;
+    height: 120px;
+  }
+
+  .pa-settings .pa-contact {
+    text-align: start;
+  }
+
+  .pa-account-action .pg-button {
+    width: 100%;
+  }
+
+  .pa-appointment {
+    grid-template-columns: 76px 48px minmax(0,1fr) 32px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .pa-date-status .pg-status-badge {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    padding-inline: 4px;
+  }
+
+  .pa-therapist-photo,.pa-therapist-photo img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .pa-appointment__text h2 {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .pa-appointment__text p {
+    font-size: 12px;
+  }
+
+  .pa-appointment__actions {
+    grid-column: auto;
+  }
+
+  .pa-page .pa-appointment-detail {
+    width: 32px;
+    min-width: 32px;
+    padding: 6px;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .pa-detail-label {
+    display: none;
+  }
+}
+
+@media (max-width:359px) {
+  .pa-appointment {
+    grid-template-columns: 72px 44px minmax(0,1fr) 28px;
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .pa-therapist-photo,.pa-therapist-photo img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pa-page .pa-appointment-detail {
+    width: 28px;
+    min-width: 28px;
+    padding: 4px;
+  }
+
+  .pa-appointment__text h2 {
+    font-size: 12px;
+  }
+
+  .pa-care-card {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 12px;
+    position: relative;
+  }
+}
