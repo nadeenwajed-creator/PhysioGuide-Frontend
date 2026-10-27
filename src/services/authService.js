@@ -16,6 +16,7 @@ const demoAdapter = mockEnabled && import.meta.env?.DEV == true ? createMockAuth
 function adapterFor(role) {
   // Patient sign-in has always used the real backend when one is configured.
   if (role === 'patient') return liveAdapter ?? demoAdapter;
+  if (role === 'admin') return liveAdapter ?? demoAdapter;
   if (mockEnabled) return demoAdapter;
   return liveAdapter ?? demoAdapter;
 }
@@ -81,6 +82,8 @@ export const loginPatient = (credentials) =>
   login('patient', 'loginPatient', credentials);
 export const loginCenter = (credentials) =>
   login('center', 'loginCenter', credentials);
+export const loginAdmin = (credentials) =>
+  login('admin', 'loginAdmin', credentials);
 export const registerPatient = (data) =>
   callAuth('patient', 'registerPatient', data);
 export const registerCenter = (data) =>
@@ -90,6 +93,7 @@ export function getAuthenticatedDestination(role) {
   if (role === 'patient') return '/patient/dashboard';
   if (role === 'center') return '/center/dashboard';
   if (role === 'physiotherapist') return '/center/physiotherapist';
+  if (role === 'admin') return '/admin/dashboard';
   throw new AuthServiceError('unsupportedRole');
 }
 

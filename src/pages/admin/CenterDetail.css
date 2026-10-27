@@ -1,0 +1,119 @@
+.admin-center-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary);
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+
+.admin-center-detail__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-center-detail__title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-center-detail__image {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--color-surface-mint);
+}
+
+.admin-center-detail__title h1 {
+  margin: 0;
+  font-size: clamp(24px, 2.5vw, 32px);
+  font-weight: 600;
+  color: var(--color-primary-darker);
+}
+
+.admin-center-detail__title span {
+  color: var(--color-text-secondary);
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-tab {
+  border: none;
+  background: transparent;
+  padding: 12px 16px;
+  font: inherit;
+  color: var(--color-text-secondary);
+  position: relative;
+  cursor: pointer;
+}
+
+.admin-tab.is-active {
+  color: var(--color-primary);
+}
+
+.admin-tab.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--color-primary);
+}
+
+.admin-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.admin-key-value {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.admin-key-value > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-key-value span {
+  color: var(--color-text-secondary);
+}
+
+.admin-key-value strong {
+  font-weight: 600;
+}
+
+.admin-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}

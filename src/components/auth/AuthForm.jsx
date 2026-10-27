@@ -14,6 +14,7 @@ import { useLanguage } from '../../context/LanguageContext.jsx';
 import {
   loginPatient,
   loginCenter,
+  loginAdmin,
   registerPatient,
   registerCenter,
   getAuthenticatedDestination,
@@ -33,6 +34,9 @@ const operations = {
   center: {
     login: loginCenter,
     signup: registerCenter,
+  },
+  admin: {
+    login: loginAdmin,
   },
 };
 
@@ -388,12 +392,12 @@ function AuthForm({ role, mode }) {
     <div className="auth-form">
       {/* Display a short label above the main heading. */}
       <p className="auth-form__eyebrow">
-        {t(registering ? 'auth.createEyebrow' : 'auth.welcomeEyebrow')}
+        {t(registering ? "auth.createEyebrow" : "auth.welcomeEyebrow")}
       </p>
 
       {/* The heading changes according to login or registration mode. */}
       <h1 ref={headingRef} tabIndex={-1}>
-        {t(registering ? 'auth.createTitle' : 'auth.loginTitle')}
+        {t(registering ? "auth.createTitle" : "auth.loginTitle")}
       </h1>
 
       {/* Decorative divider; hidden from assistive technology. */}
@@ -412,41 +416,48 @@ function AuthForm({ role, mode }) {
           {/* Name is required only during registration. */}
           {registering &&
             field(
-              'name',
-              role === 'center' ? 'auth.centerName' : 'auth.fullName',
-              'text',
-              role === 'center' ? 'organization' : 'name'
+              "name",
+              role === "center" ? "auth.centerName" : "auth.fullName",
+              "text",
+              role === "center" ? "organization" : "name"
             )}
 
           {/* The email label depends on whether the user is a patient or center. */}
           {field(
-            'email',
-            role === 'center' ? 'auth.centerEmail' : 'auth.email',
-            'email',
-            'username'
+            "email",
+            role === "center" ? "auth.centerEmail" : "auth.email",
+            "email",
+            "username"
           )}
 
           {/* Gender is required by the patient registration endpoint. */}
           {registering &&
-            role === 'patient' &&
-            field('gender', 'auth.gender', 'text', 'off', {
-              as: 'select',
+            role === "patient" &&
+            field("gender", "auth.gender", "text", "off", {
+              as: "select",
               options: [
-                { value: '', label: t('auth.gender.select') },
-                { value: 'Male', label: t('auth.gender.male') },
-                { value: 'Female', label: t('auth.gender.female') },
+                { value: "", label: t("auth.gender.select") },
+                { value: "Male", label: t("auth.gender.male") },
+                { value: "Female", label: t("auth.gender.female") },
               ],
             })}
 
           {/* Phone number is required only during registration. */}
-          {registering && field('phone', 'auth.phone', 'tel', 'tel')}
+          {registering && field("phone", "auth.phone", "tel", "tel")}
 
           {/* Center registration additionally requires a location. */}
-          {registering && role === 'center' && (
+          {registering && role === "center" && (
             <div className="auth-form__location">
-              {field('location', 'auth.location', 'text', 'street-address')}
-              <Button variant="ghost" size="lg" icon={faLocationCrosshairs} onClick={() => findLocation(true)} loading={locationBusy} disabled={pending}>
-                {t('auth.currentLocation')}
+              {field("location", "auth.location", "text", "street-address")}
+              <Button
+                variant="ghost"
+                size="lg"
+                icon={faLocationCrosshairs}
+                onClick={() => findLocation(true)}
+                loading={locationBusy}
+                disabled={pending}
+              >
+                {t("auth.currentLocation")}
               </Button>
 
               {/* Announces location progress and errors accessibly. */}
@@ -458,24 +469,30 @@ function AuthForm({ role, mode }) {
 
           {/* Password is present in both login and registration forms. */}
           {field(
-            'password',
-            'auth.password',
-            'password',
-            registering ? 'new-password' : 'current-password'
+            "password",
+            "auth.password",
+            "password",
+            registering ? "new-password" : "current-password"
           )}
 
           {/* Confirmation is required only during registration. */}
           {registering &&
             field(
-              'confirmPassword',
-              'auth.confirmPassword',
-              'password',
-              'new-password'
+              "confirmPassword",
+              "auth.confirmPassword",
+              "password",
+              "new-password"
             )}
         </div>
 
-        <Button type="submit" size="lg" fullWidth loading={pending} disabled={locationBusy}>
-          {t(registering ? 'auth.createAccount' : 'auth.signIn')}
+        <Button
+          type="submit"
+          size="lg"
+          fullWidth
+          loading={pending}
+          disabled={locationBusy}
+        >
+          {t(registering ? "auth.createAccount" : "auth.signIn")}
 
           {/* Directional icon follows the application's directional styling. */}
           <FontAwesomeIcon
@@ -488,17 +505,25 @@ function AuthForm({ role, mode }) {
         {/* Display an accessible status message while the request is running. */}
         {pending && (
           <p className="auth-form__pending" role="status">
-            {t('auth.submitting')}
+            {t("auth.submitting")}
           </p>
         )}
       </form>
 
       {locationChoices.length > 0 && (
-        <Modal isOpen title={t('center.remaining.confirmClinic')} onClose={() => setLocationChoices([])}>
+        <Modal
+          isOpen
+          title={t("center.remaining.confirmClinic")}
+          onClose={() => setLocationChoices([])}
+        >
           {/* Selecting an address explicitly confirms its coordinates for registration. */}
           <div className="auth-form__fields">
             {locationChoices.map((selection, index) => (
-              <Button key={index} variant="outline" onClick={() => confirmLocation(selection)}>
+              <Button
+                key={index}
+                variant="outline"
+                onClick={() => confirmLocation(selection)}
+              >
                 {selection.address}
               </Button>
             ))}
@@ -512,69 +537,73 @@ function AuthForm({ role, mode }) {
           tabIndex={-1}
           className={`auth-form__feedback auth-form__feedback--${feedback.kind}`}
           // Errors use an alert; informational messages use a status region.
-          role={feedback.kind === 'error' ? 'alert' : 'status'}
+          role={feedback.kind === "error" ? "alert" : "status"}
         >
           <p>{t(feedback.key)}</p>
 
           {/* Offer a login link after a successful registration response. */}
-          {registering && feedback.kind !== 'error' && (
-            <Link to={`/${role}/login`}>
-              {t('auth.returnToLogin')}
-            </Link>
+          {registering && feedback.kind !== "error" && (
+            <Link to={`/${role}/login`}>{t("auth.returnToLogin")}</Link>
           )}
         </div>
       )}
 
-      {/* Social authentication section. */}
-      <div className="auth-form__social">
-        <p className="auth-form__divider">
-          {t('auth.continueWith')}
-        </p>
+      {role != "admin" &&
+      (
+        <>
+          {/* Social authentication section. */}
+          <div className="auth-form__social">
+            <p className="auth-form__divider">{t("auth.continueWith")}</p>
 
-        <div className="auth-form__social-buttons">
-          {/* Google stays unavailable until OAuth is connected. */}
-          <Button
-            variant="outline"
-            size="lg"
-            className="auth-form__google"
-            disabled
-            aria-label={t('auth.googleUnavailable')}
-            title={t('auth.googleUnavailable')}
-          >
-            {/* Inline SVG renders the Google logo without an image dependency. */}
-            <svg
-              className="auth-form__google-icon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.36Z"
-              />
-              <path
-                fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"
-              />
-              <path
-                fill="#FBBC05" d="M6.41 13.92A6 6 0 0 1 6.1 12c0-.67.11-1.31.31-1.92V7.49H3.07A10 10 0 0 0 2 12c0 1.61.38 3.14 1.07 4.51l3.34-2.59Z"
-              />
-              <path
-                fill="#EA4335" d="M12 5.96c1.47 0 2.79.51 3.82 1.51l2.86-2.86A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59A6 6 0 0 1 12 5.96Z"
-              />
-            </svg>
+            <div className="auth-form__social-buttons">
+              {/* Google stays unavailable until OAuth is connected. */}
+              <Button
+                variant="outline"
+                size="lg"
+                className="auth-form__google"
+                disabled
+                aria-label={t("auth.googleUnavailable")}
+                title={t("auth.googleUnavailable")}
+              >
+                {/* Inline SVG renders the Google logo without an image dependency. */}
+                <svg
+                  className="auth-form__google-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    fill="#4285F4"
+                    d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.36Z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M6.41 13.92A6 6 0 0 1 6.1 12c0-.67.11-1.31.31-1.92V7.49H3.07A10 10 0 0 0 2 12c0 1.61.38 3.14 1.07 4.51l3.34-2.59Z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.96c1.47 0 2.79.51 3.82 1.51l2.86-2.86A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59A6 6 0 0 1 12 5.96Z"
+                  />
+                </svg>
 
-            <span>Google</span>
-          </Button>
-        </div>
-      </div>
+                <span>Google</span>
+              </Button>
+            </div>
+          </div>
 
-      {/* Switch between login and registration for the current role. */}
-      <p className="auth-form__switch">
-        {t(registering ? 'auth.haveAccount' : 'auth.noAccount')}{' '}
-
-        <Link to={`/${role}/${registering ? 'login' : 'signup'}`}>
-          {t(registering ? 'auth.signIn' : 'auth.createOne')}
-        </Link>
-      </p>
+          {/* Switch between login and registration for the current role. */}
+          <p className="auth-form__switch">
+            {t(registering ? "auth.haveAccount" : "auth.noAccount")}{" "}
+            <Link to={`/${role}/${registering ? "login" : "signup"}`}>
+              {t(registering ? "auth.signIn" : "auth.createOne")}
+            </Link>
+          </p>
+        </>
+      )}
     </div>
   );
 }

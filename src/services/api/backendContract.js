@@ -82,6 +82,9 @@ const login = () => ({
 export const authOperations = {
   loginPatient: login(),
   loginCenter: login(),
+  // The hidden admin entry uses the same credential endpoint; only the
+  // response role separates it from the other portals.
+  loginAdmin: login(),
 
   registerPatient: {
     request: (data) => ({
