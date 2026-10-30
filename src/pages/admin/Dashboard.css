@@ -79,6 +79,11 @@
   font-weight: 500;
 }
 
+.admin-metric-card__badge--down {
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
 .admin-metric-card__icon {
   display: grid;
   place-items: center;

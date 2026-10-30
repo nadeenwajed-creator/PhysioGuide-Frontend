@@ -247,6 +247,8 @@ export function createApiAuthAdapter(baseUrl) {
 
       // Keep the session so the dashboard can use it after navigation.
       const session = toSession(body, credentials);
+      console.log("session: " + session);
+      console.log("token: " + extractToken(body))
 
       saveSession({
         token: extractToken(body),

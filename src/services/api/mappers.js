@@ -381,3 +381,278 @@ export function toApplication(item) {
     location: item?.location || { address: '', coordinates: {}, confirmed: false },
   };
 }
+
+// The admin pages read one list shape everywhere: { items, total, filters }.
+// Statuses arrive in any casing ("Pending", "APPROVED") and are normalized to
+// the lowercase vocabulary the badge classes and the mock records use.
+const adminList = (body) => {
+  const items = Array.isArray(body) ? body : body?.items ?? body?.results ?? [];
+  const total = Number(
+    Array.isArray(body) ? items.length : body?.total ?? body?.count ?? items?.length ?? 0
+  );
+  return {
+    items: Array.isArray(items) ? items : [],
+    total: Number.isFinite(total) ? total : 0,
+    filters: (Array.isArray(body) ? null : body?.filters) || {},
+  };
+};
+
+const lower = (value, fallback = '') =>
+  value == null || value === '' ? fallback : String(value).toLowerCase();
+
+const num = (value, fallback = 0) => {
+  if (value == null || value === '') return fallback;
+  const parsed = Number(String(value).replace(/,/g, ''));
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const pct = (value) => {
+  if (value == null || value === '') return null;
+  const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+export function toAdminDashboard(body) {
+  const metric = (entry) => ({
+    value: num(entry?.value ?? entry),
+    change: pct(entry?.change ?? entry?.delta),
+  });
+  return {
+    metrics: {
+      centers: metric(body?.metrics?.activeCenters),
+      patients: metric(body?.metrics?.registeredPatients),
+      therapists: metric(body?.metrics?.physiotherapists),
+    },
+    monthly: (Array.isArray(body?.monthlyBookings) ? body.monthlyBookings : []).map((value) =>
+      num(value)
+    ),
+    health: {
+      percent: num(body?.health?.percent),
+      approvalResponse: body?.health?.approvalResponse ?? null,
+      satisfaction: num(body?.health?.satisfaction),
+    },
+    notifications: (Array.isArray(body?.notifications) ? body.notifications : []).map(
+      (item, index) => ({
+        id: item?.id ?? index,
+        text: item?.text ?? '',
+        unread: item?.unread !== false,
+      })
+    ),
+    pending: {
+      total: num(body?.pendingApprovals?.total),
+      centers: num(body?.pendingApprovals?.centers),
+      therapists: num(body?.pendingApprovals?.therapists),
+      reviews: num(
+        body?.pendingApprovals?.reportedReviews ?? body?.pendingApprovals?.reviews
+      ),
+    },
+    activity: (Array.isArray(body?.activity) ? body.activity : []).map((item, index) => ({
+      id: item?.id ?? index,
+      text: item?.text ?? '',
+      at: item?.at ?? null,
+    })),
+  };
+}
+
+export function toAdminCenterRow(item) {
+  return {
+    id: String(item?.id ?? item?.centerId ?? ''),
+    name: item?.name ?? '',
+    manager: item?.manager ?? item?.managerName ?? '',
+    location: item?.location ?? item?.city ?? '',
+    therapists: num(item?.therapists ?? item?.activeTherapists),
+    status: lower(item?.status, 'pending'),
+  };
+}
+
+export function toAdminCenters(body) {
+  const list = adminList(body);
+  return {
+    ...list,
+    items: list.items.map(toAdminCenterRow),
+    filters: {
+      cities: Array.isArray(list.filters?.cities) ? list.filters.cities : [],
+      specialties: Array.isArray(list.filters?.specialties) ? list.filters.specialties : [],
+    },
+  };
+}
+
+export function toAdminCenter(body) {
+  const specialties = body?.specialties;
+  return {
+    id: String(body?.id ?? body?.centerId ?? ''),
+    name: body?.name ?? '',
+    imageUrl: body?.imageUrl ?? null,
+    status: lower(body?.status, 'pending'),
+    location: body?.location ?? '',
+    manager: body?.manager ?? body?.managerName ?? '',
+    therapists: num(body?.therapists ?? body?.activeTherapists),
+    specialties: Array.isArray(specialties)
+      ? specialties
+      : specialties
+        ? String(specialties)
+            .split(',')
+            .map((part) => part.trim())
+            .filter(Boolean)
+        : [],
+    submittedAt: body?.submittedAt ?? null,
+    documents: (Array.isArray(body?.documents) ? body.documents : []).map((item, index) =>
+      typeof item === 'string'
+        ? { id: String(index), name: item }
+        : { id: String(item?.id ?? index), name: item?.name ?? '' }
+    ),
+    photos: (Array.isArray(body?.photos) ? body.photos : []).map((item, index) =>
+      typeof item === 'string'
+        ? { id: String(index), url: item }
+        : { id: String(item?.id ?? index), url: item?.url ?? null }
+    ),
+  };
+}
+
+export function toAdminPatient(item) {
+  return {
+    id: String(item?.id ?? item?.patientId ?? ''),
+    name: item?.name ?? item?.fullName ?? '',
+    email: item?.email ?? '',
+    age: item?.age == null || item?.age === '' ? null : num(item.age),
+    city: item?.city ?? '',
+    appointments: num(item?.appointments ?? item?.appointmentCount),
+    lastVisit: item?.lastVisit ?? null,
+    status: lower(item?.status, 'active'),
+  };
+}
+
+export function toAdminPatients(body) {
+  const list = adminList(body);
+  return {
+    ...list,
+    items: list.items.map(toAdminPatient),
+    filters: { cities: Array.isArray(list.filters?.cities) ? list.filters.cities : [] },
+  };
+}
+
+export function toAdminPhysiotherapist(item) {
+  const id = String(item?.id ?? item?.therapistId ?? '');
+  return {
+    id,
+    license: item?.license ?? item?.licenseId ?? id,
+    name: item?.name ?? item?.fullName ?? '',
+    specialty: item?.specialty ?? '',
+    center: item?.center ?? item?.centerName ?? '',
+    rating: item?.rating == null || item?.rating === '' ? null : num(item.rating),
+    reviews: num(item?.reviews ?? item?.reviewCount),
+    status: lower(item?.status, 'active'),
+  };
+}
+
+export function toAdminPhysiotherapists(body) {
+  const list = adminList(body);
+  return {
+    ...list,
+    items: list.items.map(toAdminPhysiotherapist),
+    filters: {
+      specialties: Array.isArray(list.filters?.specialties) ? list.filters.specialties : [],
+      centers: Array.isArray(list.filters?.centers) ? list.filters.centers : [],
+    },
+  };
+}
+
+export function toAdminAppointment(item) {
+  return {
+    id: String(item?.id ?? item?.appointmentId ?? ''),
+    patient: item?.patient ?? item?.patientName ?? '',
+    center: item?.center ?? item?.centerName ?? '',
+    therapist: item?.therapist ?? item?.therapistName ?? '',
+    service: item?.service ?? item?.serviceName ?? '',
+    datetime: item?.datetime ?? item?.date ?? null,
+    status: lower(item?.status, 'pending'),
+  };
+}
+
+export function toAdminAppointments(body) {
+  const list = adminList(body);
+  return {
+    ...list,
+    items: list.items.map(toAdminAppointment),
+    filters: { centers: Array.isArray(list.filters?.centers) ? list.filters.centers : [] },
+  };
+}
+
+// Options feed the create-appointment form: ids and names plus the center each
+// therapist belongs to so the select can narrow by the chosen center.
+const optionList = (value) =>
+  (Array.isArray(value) ? value : []).map((item, index) =>
+    typeof item === 'string'
+      ? { id: String(index), name: item }
+      : {
+          id: String(item?.id ?? ''),
+          name: item?.name ?? '',
+          ...(item?.centerId != null ? { centerId: String(item.centerId) } : {}),
+        }
+  );
+
+export function toAdminAppointmentOptions(body) {
+  return {
+    patients: optionList(body?.patients),
+    centers: optionList(body?.centers),
+    therapists: optionList(body?.therapists),
+    services: optionList(body?.services),
+  };
+}
+
+export function toAdminReview(item) {
+  return {
+    id: String(item?.id ?? item?.reviewId ?? ''),
+    name: item?.name ?? item?.patientName ?? '',
+    context: item?.context ?? '',
+    text: item?.text ?? item?.comment ?? '',
+    rating: num(item?.rating, 0),
+    status: lower(item?.status, 'published'),
+    createdAt: item?.createdAt ?? null,
+  };
+}
+
+export function toAdminReviews(body) {
+  const list = adminList(body);
+  const summary = body?.summary ?? {};
+  const flagged = summary?.flaggedPercent ?? 0;
+  return {
+    total: list.total,
+    filters: list.filters,
+    summary: {
+      score: num(summary?.score ?? summary?.overallRating),
+      total: num(summary?.total ?? summary?.reviewCount),
+      // The summary card prints a ready-made "0.1%", numbers included.
+      flaggedPercent: typeof flagged === 'number' ? `${flagged}%` : String(flagged || '0%'),
+      distribution: (Array.isArray(summary?.distribution)
+        ? summary.distribution
+        : []
+      ).map((value) => num(value)),
+      published: num(summary?.published),
+      pending: num(summary?.pending),
+      reported: num(summary?.reported),
+    },
+    items: list.items.map(toAdminReview),
+  };
+}
+
+export function toAdminSettings(body) {
+  const profile = body?.profile ?? {};
+  return {
+    profile: {
+      name: profile?.fullName ?? profile?.name ?? '',
+      role: profile?.role ?? '',
+      verified: profile?.verified === true,
+      lastSignIn: profile?.lastSignIn ?? null,
+      location: profile?.location ?? '',
+      adminId: profile?.adminId == null ? '' : String(profile.adminId),
+    },
+    security: { twoFactorEnabled: body?.security?.twoFactorEnabled === true },
+    notifications: {
+      approvalRequests: body?.notifications?.approvalRequests === true,
+      appointmentUpdates: body?.notifications?.appointmentUpdates === true,
+      reportedReviews: body?.notifications?.reportedReviews === true,
+      systemAlerts: body?.notifications?.systemAlerts === true,
+    },
+  };
+}

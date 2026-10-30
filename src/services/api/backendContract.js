@@ -168,6 +168,219 @@ export const authOperations = {
   },
 };
 
+// --- admin portal ----------------------------------------------------------
+// Every operation below is admin-only; the bearer token carries the role the
+// backend must enforce. List queries pass their filters straight through and
+// the gateway drops empty values.
+
+const ADMIN = '/api/admin';
+
+export const adminOperations = {
+  getAdminDashboard: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/dashboard`,
+      query: { year: params?.year },
+    }),
+    response: resolved(map.toAdminDashboard),
+  },
+
+  getAdminCenters: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/centers`,
+      query: {
+        search: params?.search,
+        status: params?.status,
+        specialty: params?.specialty,
+        city: params?.city,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminCenters),
+  },
+
+  getAdminCenter: {
+    request: (_actor, { id } = {}) => ({
+      method: 'GET',
+      path: `${ADMIN}/centers/${encodeURIComponent(id)}`,
+    }),
+    response: resolved(map.toAdminCenter),
+  },
+
+  setAdminCenterStatus: {
+    request: (_actor, { id, status, reason } = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/centers/${encodeURIComponent(id)}/status`,
+      data: { status, ...(reason ? { reason } : {}) },
+    }),
+    response: resolved(map.toAdminCenter),
+  },
+
+  getAdminPatients: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/patients`,
+      query: {
+        search: params?.search,
+        status: params?.status,
+        city: params?.city,
+        sort: params?.sort,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminPatients),
+  },
+
+  setAdminPatientStatus: {
+    request: (_actor, { id, status } = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/patients/${encodeURIComponent(id)}/status`,
+      data: { status },
+    }),
+    response: resolved((body) => map.toAdminPatient(body)),
+  },
+
+  getAdminPhysiotherapists: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/physiotherapists`,
+      query: {
+        search: params?.search,
+        specialty: params?.specialty,
+        center: params?.center,
+        status: params?.status,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminPhysiotherapists),
+  },
+
+  setAdminPhysiotherapistStatus: {
+    request: (_actor, { id, status } = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(id)}/status`,
+      data: { status },
+    }),
+    response: resolved((body) => map.toAdminPhysiotherapist(body)),
+  },
+
+  addAdminPhysiotherapist: {
+    request: (_actor, values) => ({
+      method: 'POST',
+      path: `${ADMIN}/physiotherapists`,
+      data: {
+        fullName: values?.fullName,
+        email: values?.email,
+        licenseId: values?.licenseId,
+        specialty: values?.specialty,
+        centerId: values?.centerId,
+      },
+    }),
+    response: resolved((body) => map.toAdminPhysiotherapist(body)),
+  },
+
+  getAdminAppointments: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/appointments`,
+      query: {
+        search: params?.search,
+        status: params?.status,
+        center: params?.center,
+        from: params?.from,
+        to: params?.to,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminAppointments),
+  },
+
+  getAdminAppointmentOptions: {
+    request: () => ({ method: 'GET', path: `${ADMIN}/appointments/options` }),
+    response: resolved(map.toAdminAppointmentOptions),
+  },
+
+  createAdminAppointment: {
+    request: (_actor, values) => ({
+      method: 'POST',
+      path: `${ADMIN}/appointments`,
+      data: {
+        patientId: values?.patientId,
+        centerId: values?.centerId,
+        therapistId: values?.therapistId,
+        serviceId: values?.serviceId,
+        date: values?.date,
+        time: values?.time,
+      },
+    }),
+    response: resolved((body) => map.toAdminAppointment(body)),
+  },
+
+  getAdminReviews: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/reviews`,
+      query: {
+        search: params?.search,
+        rating: params?.rating,
+        status: params?.status,
+        sort: params?.sort,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminReviews),
+  },
+
+  moderateAdminReview: {
+    request: (_actor, { id, action } = {}) => ({
+      method: 'POST',
+      path: `${ADMIN}/reviews/${encodeURIComponent(id)}/moderate`,
+      data: { action },
+    }),
+    response: resolved((body) => map.toAdminReview(body)),
+  },
+
+  getAdminSettings: {
+    request: () => ({ method: 'GET', path: `${ADMIN}/settings` }),
+    response: resolved(map.toAdminSettings),
+  },
+
+  saveAdminSettings: {
+    request: (_actor, values) => ({
+      method: 'PUT',
+      path: `${ADMIN}/settings`,
+      data: {
+        ...(values?.profile
+          ? {
+              profile: {
+                fullName: values.profile.name,
+                location: values.profile.location,
+              },
+            }
+          : {}),
+        notifications: values?.notifications,
+      },
+    }),
+    response: resolved(map.toAdminSettings),
+  },
+
+  // The admin settings page reuses the shared credential endpoint.
+  changeAdminPassword: {
+    request: (_actor, values) => ({
+      method: 'POST',
+      path: `${AUTH}/change-password`,
+      data: passwordPair(values),
+    }),
+    response: (body) => body ?? {},
+  },
+};
+
 // --- messaging helpers -----------------------------------------------------
 
 // Loads each conversation's messages; the workspaces only carry previews.

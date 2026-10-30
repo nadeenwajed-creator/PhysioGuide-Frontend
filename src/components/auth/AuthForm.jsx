@@ -69,7 +69,10 @@ const knownErrors = [
   'validation',
   'unavailable',
   'unexpected',
+  // Backend account states carried by the API's `code` field, so a rejected
+  // or pending centre sees its own message instead of a generic failure.
   'accountPending',
+  'accountRejected',
   'unsupportedRole',
 ];
 

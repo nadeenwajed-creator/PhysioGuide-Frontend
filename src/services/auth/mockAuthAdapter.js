@@ -91,6 +91,7 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     mode: 'mock',
     loginPatient: credentials => login(credentials, ['patient']),
     loginCenter: credentials => login(credentials, ['center', 'physiotherapist']),
+    loginAdmin: credentials => login(credentials, ['admin']),
     registerPatient: values => register(values, 'patient'),
     registerCenter: values => register(values, 'center'),
     async listCenterApplications({ actor, status } = {}) {

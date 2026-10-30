@@ -163,3 +163,71 @@
   background: var(--color-surface-mint);
   color: var(--color-primary);
 }
+
+.admin-pagination__pages button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Loading / error block shared by every admin query state. */
+.admin-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.admin-state[role='status'] {
+  border: none;
+  background: transparent;
+}
+
+/* Remaining status vocabularies used by appointments and moderation. */
+.admin-badge--confirmed,
+.admin-badge--completed,
+.admin-badge--published {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.admin-badge--cancelled {
+  background: var(--color-bg-soft);
+  color: var(--color-text-secondary);
+}
+
+.admin-badge--reported {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+/* Status cells are selects so moderation happens in place. */
+select.admin-badge {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+  background-image: none;
+}
+
+select.admin-badge:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+select.admin-badge option {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+/* Stacked form used inside the admin modals. */
+.admin-form {
+  display: grid;
+  gap: 16px;
+}

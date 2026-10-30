@@ -3,17 +3,35 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
+import { QueryState, AdminPagination } from './AdminUI.jsx';
 import './ListPages.css';
 
-const centers = [
-  { id: 'CTR-4821', name: 'Al Noor Rehabilitation', manager: 'Faisal Omar', location: 'Jeddah', therapists: 18, status: 'pending' },
-  { id: 'CTR-4822', name: 'MotionCare Center', manager: 'Sara Khalid', location: 'Riyadh', therapists: 24, status: 'approved' },
-  { id: 'CTR-4823', name: 'Healing Hands Clinic', manager: 'Omar Nasser', location: 'Dammam', therapists: 12, status: 'approved' },
-];
-
 function AdminCenters() {
-  const { t } = useLanguage();
-  const [search, setSearch] = useState('');
+  const { t, language } = useLanguage();
+  const [filters, setFilters] = useState({
+    search: '',
+    status: '',
+    specialty: '',
+    city: '',
+    page: 1,
+    pageSize: 5,
+  });
+
+  // Changing a filter returns to the first page; page clicks keep the filters.
+  const update = (values) =>
+    setFilters((previous) => ({
+      ...previous,
+      ...values,
+      ...('page' in values ? {} : { page: 1 }),
+    }));
+
+  const search = useDebouncedValue(filters.search, 300);
+  const state = useAdminQuery('getAdminCenters', { ...filters, search });
+
+  const data = state.data;
+  const options = data?.filters ?? { cities: [], specialties: [] };
+  const number = new Intl.NumberFormat(language);
 
   return (
     <div className="admin-list-page">
@@ -27,67 +45,105 @@ function AdminCenters() {
       <div className="admin-list-page__filters">
         <div className="admin-search">
           <FontAwesomeIcon icon={faSearch} />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin.centers.search')} />
+          <input
+            value={filters.search}
+            onChange={(e) => update({ search: e.target.value })}
+            placeholder={t('admin.centers.search')}
+          />
         </div>
-        <select className="admin-select">
-          <option>{t('admin.allStatuses')}</option>
-          <option>{t('admin.status.pending')}</option>
-          <option>{t('admin.status.approved')}</option>
-          <option>{t('admin.status.rejected')}</option>
-          <option>{t('admin.status.suspended')}</option>
+        <select
+          className="admin-select"
+          value={filters.status}
+          onChange={(e) => update({ status: e.target.value })}
+          aria-label={t('center.status')}
+        >
+          <option value="">{t('admin.allStatuses')}</option>
+          <option value="pending">{t('admin.status.pending')}</option>
+          <option value="approved">{t('admin.status.approved')}</option>
+          <option value="rejected">{t('admin.status.rejected')}</option>
+          <option value="suspended">{t('admin.status.suspended')}</option>
         </select>
-        <select className="admin-select">
-          <option>{t('admin.allSpecialties')}</option>
+        <select
+          className="admin-select"
+          value={filters.specialty}
+          onChange={(e) => update({ specialty: e.target.value })}
+          aria-label={t('admin.allSpecialties')}
+        >
+          <option value="">{t('admin.allSpecialties')}</option>
+          {options.specialties.map((specialty) => (
+            <option key={specialty} value={specialty}>
+              {specialty}
+            </option>
+          ))}
         </select>
-        <select className="admin-select">
-          <option>{t('admin.allCities')}</option>
+        <select
+          className="admin-select"
+          value={filters.city}
+          onChange={(e) => update({ city: e.target.value })}
+          aria-label={t('admin.allCities')}
+        >
+          <option value="">{t('admin.allCities')}</option>
+          {options.cities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
         </select>
       </div>
 
-      <div className="admin-table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>{t('admin.centers.nameId')}</th>
-              <th>{t('admin.centers.manager')}</th>
-              <th>{t('admin.centers.location')}</th>
-              <th>{t('admin.centers.activeTherapists')}</th>
-              <th>{t('center.status')}</th>
-              <th>{t('center.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {centers.map((center) => (
-              <tr key={center.id}>
-                <td>
-                  <div className="admin-table__primary">
-                    <strong>{center.name}</strong>
-                    <span>{center.id}</span>
-                  </div>
-                </td>
-                <td>{center.manager}</td>
-                <td>{center.location}</td>
-                <td>{center.therapists}</td>
-                <td>
-                  <span className={`admin-badge admin-badge--${center.status}`}>
-                    {t(`admin.status.${center.status}`)}
-                  </span>
-                </td>
-                <td>
-                  <div className="admin-table__actions">
-                    <Link to={`/admin/centers/${center.id}`} className="admin-link">
-                      {t('center.view')}
-                    </Link>
-                    <button className="admin-icon-button" aria-label="More actions">
-                      <FontAwesomeIcon icon={faEllipsisV} />
-                    </button>
-                  </div>
-                </td>
+      <QueryState state={state} empty={!state.data?.items?.length}>
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>{t('admin.centers.nameId')}</th>
+                <th>{t('admin.centers.manager')}</th>
+                <th>{t('admin.centers.location')}</th>
+                <th>{t('admin.centers.activeTherapists')}</th>
+                <th>{t('center.status')}</th>
+                <th>{t('center.actions')}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data?.items?.map((center) => (
+                <tr key={center.id}>
+                  <td>
+                    <div className="admin-table__primary">
+                      <strong>{center.name}</strong>
+                      <span>{center.id}</span>
+                    </div>
+                  </td>
+                  <td>{center.manager}</td>
+                  <td>{center.location}</td>
+                  <td>{center.therapists}</td>
+                  <td>
+                    <span className={`admin-badge admin-badge--${center.status}`}>
+                      {t(`admin.status.${center.status}`)}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="admin-table__actions">
+                      <Link to={`/admin/centers/${center.id}`} className="admin-link">
+                        {t('center.view')}
+                      </Link>
+                      <button className="admin-icon-button" aria-label={t('center.actions')}>
+                        <FontAwesomeIcon icon={faEllipsisV} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <AdminPagination
+            page={filters.page}
+            pageSize={filters.pageSize}
+            total={data?.total ?? 0}
+            totalLabel={t('admin.centers.total', { total: number.format(data?.total ?? 0) })}
+            onChange={(page) => update({ page })}
+          />
+        </div>
+      </QueryState>
     </div>
   );
 }
