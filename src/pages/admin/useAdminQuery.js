@@ -6,32 +6,37 @@ import { callAdmin } from '../../services/adminService.js';
 // an error state is cleared as soon as a retry starts.
 export default function useAdminQuery(method, params = {}) {
   const key = JSON.stringify(params);
-  const [state, setState] = useState({ data: null, error: null });
   const [attempt, setAttempt] = useState(0);
+  const [state, setState] = useState({ requestKey: null, data: null, error: null });
+  // Every attempt gets its own key so a stale response can never win.
+  const requestKey = `${key}#${attempt}`;
 
   useEffect(() => {
     let live = true;
-    setState((current) => (current.error ? { data: null, error: null } : current));
 
     callAdmin(method, JSON.parse(key))
       .then((data) => {
-        if (live) setState({ data, error: null });
+        if (live) setState({ requestKey, data, error: null });
       })
       .catch((error) => {
-        if (live) setState({ data: null, error });
+        if (live) setState({ requestKey, data: null, error });
       });
 
     return () => {
       live = false;
     };
-  }, [method, key, attempt]);
+  }, [method, key, attempt, requestKey]);
 
   const reload = useCallback(() => setAttempt((value) => value + 1), []);
 
+  // A response only belongs to the current filters once its key matches, so an
+  // error clears as soon as the user retries or changes a filter.
+  const current = state.requestKey === requestKey;
+
   return {
     data: state.data,
-    error: state.error,
-    loading: !state.data && !state.error,
+    error: current ? state.error : null,
+    loading: current ? !state.data && !state.error : !state.data,
     reload,
   };
 }
@@ -44,40 +49,6 @@ export function useDebouncedValue(value, delay = 300) {
     return () => window.clearTimeout(timer);
   }, [value, delay]);
   return debounced;
-}
-
-// Keeps a just-chosen status visible while its mutation runs, then drops it
-// once the refetched row confirms the same value. A failure calls revert().
-export function useStatusOverride() {
-  const [overrides, setOverrides] = useState({});
-
-  const begin = useCallback((id, status) => {
-    setOverrides((previous) => ({ ...previous, [id]: status }));
-  }, []);
-
-  const revert = useCallback((id) => {
-    setOverrides((previous) => {
-      const next = { ...previous };
-      delete next[id];
-      return next;
-    });
-  }, []);
-
-  const reconcile = useCallback((rows = []) => {
-    setOverrides((previous) => {
-      let changed = false;
-      const next = { ...previous };
-      for (const [id, status] of Object.entries(previous)) {
-        if (rows.some((row) => row.id === id && row.status === status)) {
-          delete next[id];
-          changed = true;
-        }
-      }
-      return changed ? next : previous;
-    });
-  }, []);
-
-  return { begin, revert, reconcile };
 }
 
 // Localized failure text: falls back to the generic admin message when the

@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
+import FormField from '../../components/shared/FormField/FormField.jsx';
+import Modal from '../../components/shared/Modal/Modal.jsx';
+import { Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
-import useAdminQuery from './useAdminQuery.js';
+import useAdminQuery, { errorText } from './useAdminQuery.js';
 import { QueryState } from './AdminUI.jsx';
 import './Settings.css';
 
@@ -13,14 +16,13 @@ function PasswordModal({ onClose }) {
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirm: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
 
-  const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
-  const submit = async (e) => {
-    e.preventDefault();
+  async function submit(event) {
+    event.preventDefault();
     if (form.newPassword !== form.confirm) {
-      setError(t('auth.passwordMismatch') || 'Passwords do not match');
+      setError(t('auth.validation.passwordMismatch'));
       return;
     }
     setSaving(true);
@@ -30,82 +32,69 @@ function PasswordModal({ onClose }) {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });
-      setSuccess(true);
-    } catch (err) {
-      setError(err?.message || t('admin.state.error'));
+      onClose();
+    } catch (failure) {
+      // Map the credential failures to copy that fits this form, and fall back
+      // to the shared admin text for anything else.
+      if (failure?.code === 'invalidCredentials') setError(t('admin.changePassword.wrongCurrent'));
+      else if (failure?.code === 'password' || failure?.code === 'validation') setError(t('admin.changePassword.tooShort'));
+      else setError(errorText(t, failure));
     } finally {
       setSaving(false);
     }
-  };
-
-  if (success) {
-    return (
-      <div className="admin-modal-backdrop" onClick={onClose}>
-        <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="admin-modal__header">
-            <h2>{t('admin.settingsPage.changePassword')}</h2>
-            <button className="admin-icon-button" onClick={onClose}>
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          </div>
-          <p style={{ padding: '24px', textAlign: 'center', color: 'var(--color-success)' }}>
-            <FontAwesomeIcon icon={faCheckCircle} /> Password changed successfully.
-          </p>
-        </div>
-      </div>
-    );
   }
 
   return (
-    <div className="admin-modal-backdrop" onClick={onClose}>
-      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="admin-modal__header">
-          <h2>{t('admin.settingsPage.changePassword')}</h2>
-          <button className="admin-icon-button" onClick={onClose}>
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-        </div>
-        <form onSubmit={submit} className="admin-modal__form">
-          <label>
-            Current password
-            <input
-              type="password"
-              value={form.currentPassword}
-              onChange={(e) => set('currentPassword', e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            New password
-            <input
-              type="password"
-              value={form.newPassword}
-              onChange={(e) => set('newPassword', e.target.value)}
-              required
-              minLength={8}
-            />
-          </label>
-          <label>
-            Confirm password
-            <input
-              type="password"
-              value={form.confirm}
-              onChange={(e) => set('confirm', e.target.value)}
-              required
-            />
-          </label>
-          {error && <p className="admin-modal__error">{error}</p>}
-          <div className="admin-modal__actions">
-            <Button variant="outline" type="button" onClick={onClose}>
-              {t('center.cancel')}
-            </Button>
-            <Button type="submit" disabled={saving}>
-              {saving ? t('admin.state.loading') : t('admin.settingsPage.changePassword')}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal
+      isOpen
+      size="sm"
+      title={t('admin.changePassword.title')}
+      onClose={saving ? undefined : onClose}
+      footer={
+        <>
+          <Button variant="outline" disabled={saving} onClick={onClose}>
+            {t('center.cancel')}
+          </Button>
+          <Button type="submit" form="change-password-form" loading={saving}>
+            {t('admin.changePassword.submit')}
+          </Button>
+        </>
+      }
+    >
+      <form id="change-password-form" className="admin-form" onSubmit={submit} noValidate>
+        <FormField
+          label={t('admin.changePassword.current')}
+          type="password"
+          required
+          showPasswordToggle
+          value={form.currentPassword}
+          onChange={(value) => set('currentPassword', value)}
+          disabled={saving}
+          autoComplete="current-password"
+        />
+        <FormField
+          label={t('admin.changePassword.new')}
+          type="password"
+          required
+          showPasswordToggle
+          value={form.newPassword}
+          onChange={(value) => set('newPassword', value)}
+          disabled={saving}
+          autoComplete="new-password"
+        />
+        <FormField
+          label={t('admin.changePassword.confirm')}
+          type="password"
+          required
+          showPasswordToggle
+          value={form.confirm}
+          onChange={(value) => set('confirm', value)}
+          disabled={saving}
+          autoComplete="new-password"
+        />
+        <Feedback error>{error}</Feedback>
+      </form>
+    </Modal>
   );
 }
 
@@ -115,36 +104,41 @@ function AdminSettings() {
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [notifications, setNotifications] = useState(null);
+  const [notice, setNotice] = useState(null);
 
   const data = state.data;
   const profile = data?.profile ?? {};
-  // Use the fetched notifications as the base, overlay local edits.
+  // Local edits overlay the fetched values until the save round-trip completes.
   const notifs = notifications ?? data?.notifications ?? {};
 
   const toggleNotification = (key) => {
-    setNotifications((prev) => {
-      const base = prev ?? data?.notifications ?? {};
+    setNotice(null);
+    setNotifications((previous) => {
+      const base = previous ?? data?.notifications ?? {};
       return { ...base, [key]: !base[key] };
     });
   };
 
-  const save = useCallback(async () => {
+  async function save() {
     setSaving(true);
+    setNotice(null);
     try {
       await callAdmin('saveAdminSettings', { notifications: notifs });
+      setNotifications(null);
+      setNotice({ error: false, text: t('admin.settingsPage.saved') });
       state.reload();
-    } catch {
-      // error swallowed; settings page will re-fetch
+    } catch (failure) {
+      setNotice({ error: true, text: errorText(t, failure) });
     } finally {
       setSaving(false);
     }
-  }, [notifs, state]);
+  }
 
   const notificationItems = [
-    { key: 'approvalRequests' },
-    { key: 'appointmentUpdates' },
-    { key: 'reportedReviews' },
-    { key: 'systemAlerts' },
+    'approvalRequests',
+    'appointmentUpdates',
+    'reportedReviews',
+    'systemAlerts',
   ];
 
   const formatLastSignIn = (value) => {
@@ -167,10 +161,16 @@ function AdminSettings() {
           <h1>{t('admin.settingsPage.title')}</h1>
           <p>{t('admin.settingsPage.subtitle')}</p>
         </div>
-        <Button onClick={save} disabled={saving}>
-          {saving ? t('admin.state.loading') : t('admin.settingsPage.saveChanges')}
+        <Button onClick={save} loading={saving} disabled={!data}>
+          {t('admin.settingsPage.saveChanges')}
         </Button>
       </header>
+
+      {notice && (
+        <Feedback error={notice.error} onDismiss={() => setNotice(null)}>
+          {notice.text}
+        </Feedback>
+      )}
 
       <QueryState state={state}>
         <div className="admin-settings__grid">
@@ -181,7 +181,7 @@ function AdminSettings() {
                 <div className="admin-profile__avatar" />
                 <div className="admin-profile__info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <strong>{profile.name || 'Admin'}</strong>
+                    <strong>{profile.name || '—'}</strong>
                     {profile.verified && (
                       <span className="admin-badge admin-badge--active">
                         <FontAwesomeIcon icon={faCheckCircle} />{' '}
@@ -200,9 +200,7 @@ function AdminSettings() {
                     })}
                   </span>
                   {profile.adminId && (
-                    <span>
-                      {t('admin.settingsPage.adminId', { id: profile.adminId })}
-                    </span>
+                    <span>{t('admin.settingsPage.adminId', { id: profile.adminId })}</span>
                   )}
                 </div>
               </div>
@@ -218,9 +216,7 @@ function AdminSettings() {
                 <Button variant="outline" onClick={() => setShowPassword(true)}>
                   {t('admin.settingsPage.changePassword')}
                 </Button>
-                <Button variant="outline">
-                  {t('admin.settingsPage.manage2FA')}
-                </Button>
+                <Button variant="outline">{t('admin.settingsPage.manage2FA')}</Button>
               </div>
             </div>
           </div>
@@ -229,13 +225,13 @@ function AdminSettings() {
             <div className="admin-card">
               <h2>{t('admin.settingsPage.notifications')}</h2>
               <div className="admin-toggles">
-                {notificationItems.map((item) => (
-                  <label key={item.key} className="admin-toggle">
-                    <span>{t(`admin.settingsPage.${item.key}`)}</span>
+                {notificationItems.map((key) => (
+                  <label key={key} className="admin-toggle">
+                    <span>{t(`admin.settingsPage.${key}`)}</span>
                     <input
                       type="checkbox"
-                      checked={notifs[item.key] ?? false}
-                      onChange={() => toggleNotification(item.key)}
+                      checked={notifs[key] ?? false}
+                      onChange={() => toggleNotification(key)}
                     />
                     <span className="admin-toggle__slider" />
                   </label>

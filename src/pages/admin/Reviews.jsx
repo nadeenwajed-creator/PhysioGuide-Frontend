@@ -1,13 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faStar, faFlag, faComment, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
+import { ConfirmDialog } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
 import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
 import './Reviews.css';
+
+const reviewStatuses = ['published', 'pending', 'reported'];
 
 function AdminReviews() {
   const { t, language } = useLanguage();
@@ -19,6 +22,7 @@ function AdminReviews() {
     page: 1,
     pageSize: 5,
   });
+  const [pending, setPending] = useState(null);
 
   const update = (values) =>
     setFilters((previous) => ({
@@ -38,17 +42,11 @@ function AdminReviews() {
     maximumFractionDigits: 1,
   });
 
-  const moderate = useCallback(
-    async (id, action) => {
-      try {
-        await callAdmin('moderateAdminReview', { id, action });
-        state.reload();
-      } catch {
-        // swallow — the reload will show the current state
-      }
-    },
-    [state],
-  );
+  // Throwing lets the confirmation dialog keep itself open and show the failure.
+  async function moderate() {
+    await callAdmin('moderateAdminReview', { id: pending.id, action: pending.action });
+    state.reload();
+  }
 
   return (
     <div className="admin-reviews">
@@ -110,11 +108,12 @@ function AdminReviews() {
             className="admin-select"
             value={filters.rating}
             onChange={(e) => update({ rating: e.target.value })}
+            aria-label={t('admin.allRatings')}
           >
             <option value="">{t('admin.allRatings')}</option>
-            {[5, 4, 3, 2, 1].map((r) => (
-              <option key={r} value={r}>
-                {'★'.repeat(r)} ({r})
+            {[5, 4, 3, 2, 1].map((rating) => (
+              <option key={rating} value={rating}>
+                {'★'.repeat(rating)} ({rating})
               </option>
             ))}
           </select>
@@ -122,20 +121,24 @@ function AdminReviews() {
             className="admin-select"
             value={filters.status}
             onChange={(e) => update({ status: e.target.value })}
+            aria-label={t('admin.allStatuses')}
           >
             <option value="">{t('admin.allStatuses')}</option>
-            <option value="published">{t('admin.reviews.published')}</option>
-            <option value="pending">{t('admin.reviews.pending')}</option>
-            <option value="reported">{t('admin.reviews.reported')}</option>
+            {reviewStatuses.map((status) => (
+              <option key={status} value={status}>
+                {t(`admin.status.${status}`)}
+              </option>
+            ))}
           </select>
           <select
             className="admin-select"
             value={filters.sort}
             onChange={(e) => update({ sort: e.target.value })}
+            aria-label={t('admin.newest')}
           >
             <option value="">{t('admin.newest')}</option>
-            <option value="oldest">Oldest</option>
-            <option value="highest">Highest rated</option>
+            <option value="oldest">{t('admin.oldest')}</option>
+            <option value="highest">{t('admin.highestRating')}</option>
           </select>
         </div>
 
@@ -145,7 +148,7 @@ function AdminReviews() {
               <div className="admin-review-card__header">
                 <div>
                   <strong>{review.name}</strong>
-                  <span>{review.context}</span>
+                  {review.context && <span>{review.context}</span>}
                 </div>
                 <span className="admin-review-card__rating">
                   <FontAwesomeIcon icon={faStar} style={{ color: '#f59e0b' }} />
@@ -158,26 +161,24 @@ function AdminReviews() {
                   {formatDate(review.createdAt, language)}
                 </small>
               )}
-              {review.status && (
-                <span
-                  className={`admin-badge admin-badge--${review.status}`}
-                  style={{ alignSelf: 'flex-start', marginBottom: '8px' }}
-                >
-                  {review.status}
-                </span>
-              )}
+              <span
+                className={`admin-badge admin-badge--${review.status}`}
+                style={{ alignSelf: 'flex-start' }}
+              >
+                {t(`admin.status.${review.status}`)}
+              </span>
               <div className="admin-review-card__actions">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => moderate(review.id, 'approve')}
+                  onClick={() => setPending({ id: review.id, action: 'approve' })}
                 >
                   {t('admin.reviews.moderate')}
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={() => moderate(review.id, 'remove')}
+                  onClick={() => setPending({ id: review.id, action: 'remove' })}
                 >
                   {t('admin.reviews.remove')}
                 </Button>
@@ -196,6 +197,20 @@ function AdminReviews() {
           onChange={(page) => update({ page })}
         />
       </QueryState>
+
+      {pending && (
+        <ConfirmDialog
+          title={pending.action === 'remove' ? t('admin.reviews.remove') : t('admin.reviews.moderate')}
+          description={
+            pending.action === 'remove'
+              ? t('admin.reviews.confirmRemove')
+              : t('admin.reviews.confirmModerate')
+          }
+          danger={pending.action === 'remove'}
+          onClose={() => setPending(null)}
+          onConfirm={moderate}
+        />
+      )}
     </div>
   );
 }

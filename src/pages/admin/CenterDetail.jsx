@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faCheck, faTimes, faMinus } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
+import { ConfirmDialog } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
 import { callAdmin } from '../../services/adminService.js';
@@ -10,31 +11,28 @@ import useAdminQuery from './useAdminQuery.js';
 import { QueryState } from './AdminUI.jsx';
 import './CenterDetail.css';
 
+const tabs = ['overview', 'documents', 'photos'];
+
+const confirmCopy = {
+  approved: { title: 'admin.confirm.approveTitle', text: 'admin.confirm.approveText' },
+  rejected: { title: 'admin.confirm.rejectTitle', text: 'admin.confirm.rejectText' },
+  suspended: { title: 'admin.confirm.suspendTitle', text: 'admin.confirm.suspendText' },
+};
+
 function AdminCenterDetail() {
   const { id } = useParams();
   const { t, dir, language } = useLanguage();
   const state = useAdminQuery('getAdminCenter', { id });
-  const [updating, setUpdating] = useState(null);
-
-  const changeStatus = useCallback(
-    async (status,reason) => {
-      if (updating) return;
-      setUpdating(status);
-      try {
-        await callAdmin('setAdminCenterStatus', { id, status, reason });
-        state.reload();
-      } catch {
-        // error is swallowed; the reload will re-fetch the current status
-      } finally {
-        setUpdating(null);
-      }
-    },
-    [id, updating, state],
-  );
+  const [activeTab, setActiveTab] = useState('overview');
+  const [pendingStatus, setPendingStatus] = useState(null);
 
   const center = state.data;
-  const tabKeys = ['overview', 'documents', 'photos'];
-  const [activeTab, setActiveTab] = useState('overview');
+
+  // Throwing keeps the confirmation dialog open so it can show the failure.
+  async function applyStatus() {
+    await callAdmin('setAdminCenterStatus', { id, status: pendingStatus });
+    state.reload();
+  }
 
   return (
     <div className="admin-center-detail">
@@ -70,13 +68,15 @@ function AdminCenterDetail() {
 
       <QueryState state={state}>
         <div className="admin-tabs">
-          {tabKeys.map((key) => (
+          {tabs.map((tab) => (
             <button
-              key={key}
-              className={`admin-tab${activeTab === key ? ' is-active' : ''}`}
-              onClick={() => setActiveTab(key)}
+              key={tab}
+              type="button"
+              className={`admin-tab${activeTab === tab ? ' is-active' : ''}`}
+              aria-current={activeTab === tab ? 'true' : undefined}
+              onClick={() => setActiveTab(tab)}
             >
-              {t(`admin.center.tab.${key}`)}
+              {t(`admin.center.tab.${tab}`)}
             </button>
           ))}
         </div>
@@ -99,17 +99,11 @@ function AdminCenterDetail() {
               </div>
               <div>
                 <span>{t('admin.center.field.specialties')}</span>
-                <strong>
-                  {(center?.specialties || []).join(' - ') || '—'}
-                </strong>
+                <strong>{(center?.specialties || []).join(' - ') || '—'}</strong>
               </div>
               <div>
                 <span>{t('admin.center.field.submitted')}</span>
-                <strong>
-                  {center?.submittedAt
-                    ? formatDate(center.submittedAt, language)
-                    : '—'}
-                </strong>
+                <strong>{center?.submittedAt ? formatDate(center.submittedAt, language) : '—'}</strong>
               </div>
             </div>
           </div>
@@ -118,14 +112,14 @@ function AdminCenterDetail() {
         {activeTab === 'documents' && (
           <div className="admin-card">
             <h2>{t('admin.center.tab.documents')}</h2>
-            {(center?.documents?.length ?? 0) === 0 ? (
-              <p className="admin-empty-text">{t('admin.state.empty')}</p>
-            ) : (
+            {center?.documents?.length ? (
               <ul className="admin-document-list">
                 {center.documents.map((doc) => (
                   <li key={doc.id}>{doc.name}</li>
                 ))}
               </ul>
+            ) : (
+              <p className="admin-empty-text">{t('admin.center.documents.empty')}</p>
             )}
           </div>
         )}
@@ -133,9 +127,7 @@ function AdminCenterDetail() {
         {activeTab === 'photos' && (
           <div className="admin-card">
             <h2>{t('admin.center.tab.photos')}</h2>
-            {(center?.photos?.length ?? 0) === 0 ? (
-              <p className="admin-empty-text">{t('admin.state.empty')}</p>
-            ) : (
+            {center?.photos?.length ? (
               <div className="admin-photo-grid">
                 {center.photos.map((photo) => (
                   <img
@@ -146,6 +138,8 @@ function AdminCenterDetail() {
                   />
                 ))}
               </div>
+            ) : (
+              <p className="admin-empty-text">{t('admin.center.photos.empty')}</p>
             )}
           </div>
         )}
@@ -154,35 +148,39 @@ function AdminCenterDetail() {
           <Button
             variant="primary"
             icon={faCheck}
-            disabled={!!updating || center?.status === 'approved'}
-            onClick={() => changeStatus('approved')}
+            disabled={center?.status === 'approved'}
+            onClick={() => setPendingStatus('approved')}
           >
-            {updating === 'approved'
-              ? t('admin.state.loading')
-              : t('admin.center.approve')}
+            {t('admin.center.approve')}
           </Button>
           <Button
             variant="danger"
             icon={faTimes}
-            disabled={!!updating || center?.status === 'rejected'}
-            onClick={() => changeStatus('rejected', 'Rejected by admin')}
+            disabled={center?.status === 'rejected'}
+            onClick={() => setPendingStatus('rejected')}
           >
-            {updating === 'rejected'
-              ? t('admin.state.loading')
-              : t('admin.center.reject')}
+            {t('admin.center.reject')}
           </Button>
           <Button
             variant="outline"
             icon={faMinus}
-            disabled={!!updating || center?.status === 'suspended'}
-            onClick={() => changeStatus('suspended')}
+            disabled={center?.status === 'suspended'}
+            onClick={() => setPendingStatus('suspended')}
           >
-            {updating === 'suspended'
-              ? t('admin.state.loading')
-              : t('admin.center.suspend')}
+            {t('admin.center.suspend')}
           </Button>
         </div>
       </QueryState>
+
+      {pendingStatus && (
+        <ConfirmDialog
+          title={t(confirmCopy[pendingStatus].title)}
+          description={t(confirmCopy[pendingStatus].text)}
+          danger={pendingStatus !== 'approved'}
+          onClose={() => setPendingStatus(null)}
+          onConfirm={applyStatus}
+        />
+      )}
     </div>
   );
 }

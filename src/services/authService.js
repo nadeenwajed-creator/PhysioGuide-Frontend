@@ -16,7 +16,8 @@ const demoAdapter = mockEnabled && import.meta.env?.DEV == true ? createMockAuth
 function adapterFor(role) {
   // Patient sign-in has always used the real backend when one is configured.
   if (role === 'patient') return liveAdapter ?? demoAdapter;
-  if (role === 'admin') return liveAdapter ?? demoAdapter;
+  // The admin demo account follows the data mode like the rest of the portal.
+  if (role === 'admin') return mockEnabled ? demoAdapter ?? liveAdapter : liveAdapter ?? demoAdapter;
   if (mockEnabled) return demoAdapter;
   return liveAdapter ?? demoAdapter;
 }

@@ -21,7 +21,11 @@ export async function callAdmin(method, ...args) {
     if (mockEnabled) {
       const operation = adminMockApi[method];
       if (!operation) throw new ServiceError('unavailable');
-      return await operation(session, ...args);
+      const payload = await operation(session, ...args);
+      // Mock records go through the live mappers so both data modes hand the
+      // pages exactly the same shape.
+      const mapper = adminOperations[method]?.response;
+      return typeof mapper === 'function' ? mapper(payload) : payload;
     }
 
     if (!apiAdapter) throw new ServiceError('unavailable');

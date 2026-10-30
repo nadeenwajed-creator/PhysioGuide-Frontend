@@ -247,6 +247,8 @@ const ar = {
   'admin.changePassword.confirm': 'تأكيد كلمة المرور الجديدة',
   'admin.changePassword.submit': 'تحديث كلمة المرور',
   'admin.changePassword.success': 'تم تغيير كلمة المرور بنجاح.',
+  'admin.changePassword.wrongCurrent': 'كلمة المرور الحالية غير صحيحة.',
+  'admin.changePassword.tooShort': 'يجب أن تتكوّن كلمة المرور الجديدة من 8 أحرف على الأقل.',
 
   // Language switcher
   'languageSwitcher.label': 'اختيار اللغة',

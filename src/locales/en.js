@@ -247,6 +247,8 @@ const en = {
   'admin.changePassword.confirm': 'Confirm new password',
   'admin.changePassword.submit': 'Update password',
   'admin.changePassword.success': 'Password changed successfully.',
+  'admin.changePassword.wrongCurrent': 'The current password is incorrect.',
+  'admin.changePassword.tooShort': 'The new password must be at least 8 characters.',
 
   // Language switcher
   'languageSwitcher.label': 'Choose language',

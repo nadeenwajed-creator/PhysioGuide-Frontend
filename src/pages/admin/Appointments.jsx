@@ -1,13 +1,20 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisV, faPlus, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV, faPlus, faSearch } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
+import FormField from '../../components/shared/FormField/FormField.jsx';
+import Modal from '../../components/shared/Modal/Modal.jsx';
+import { Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
-import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
+import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import './ListPages.css';
 
+const appointmentStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+
+// The options endpoint feeds every select, so the form stays in sync with the
+// centers, therapists, patients and services the backend currently allows.
 function NewAppointmentModal({ onClose, onCreated }) {
   const { t } = useLanguage();
   const optionsState = useAdminQuery('getAdminAppointmentOptions');
@@ -24,127 +31,127 @@ function NewAppointmentModal({ onClose, onCreated }) {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
-  // Narrow therapists by selected center.
+  const toOptions = (items, placeholder) => [
+    { value: '', label: placeholder },
+    ...(items || []).map((item) => ({ value: item.id, label: item.name })),
+  ];
+
   const therapists = (options?.therapists || []).filter(
-    (th) => !form.centerId || th.centerId === form.centerId,
+    (therapist) => !form.centerId || therapist.centerId === form.centerId
   );
 
-  const submit = async (e) => {
-    e.preventDefault();
+  async function submit(event) {
+    event.preventDefault();
     setSaving(true);
     setError('');
     try {
       await callAdmin('createAdminAppointment', form);
       onCreated();
-    } catch (err) {
-      setError(err?.message || t('admin.state.error'));
+    } catch (failure) {
+      setError(errorText(t, failure));
     } finally {
       setSaving(false);
     }
-  };
+  }
 
   return (
-    <div className="admin-modal-backdrop" onClick={onClose}>
-      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="admin-modal__header">
-          <h2>{t('admin.appointments.new')}</h2>
-          <button className="admin-icon-button" onClick={onClose}>
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
+    <Modal
+      isOpen
+      title={t('admin.appointments.form.title')}
+      onClose={saving ? undefined : onClose}
+      footer={
+        <>
+          <Button variant="outline" disabled={saving} onClick={onClose}>
+            {t('center.cancel')}
+          </Button>
+          <Button
+            type="submit"
+            form="new-appointment-form"
+            loading={saving}
+            disabled={!options}
+          >
+            {t('admin.appointments.new')}
+          </Button>
+        </>
+      }
+    >
+      {optionsState.error && (
+        <div className="admin-state">
+          <Feedback error>{errorText(t, optionsState.error)}</Feedback>
+          <Button variant="outline" onClick={optionsState.reload}>
+            {t('admin.state.retry')}
+          </Button>
         </div>
-        {optionsState.loading ? (
-          <p className="admin-state" role="status">
-            {t('admin.state.loading')}
-          </p>
-        ) : (
-          <form onSubmit={submit} className="admin-modal__form">
-            <label>
-              {t('admin.appointments.patient')}
-              <select
-                value={form.patientId}
-                onChange={(e) => set('patientId', e.target.value)}
-                required
-              >
-                <option value="">—</option>
-                {(options?.patients || []).map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('admin.appointments.center')}
-              <select
-                value={form.centerId}
-                onChange={(e) => {
-                  set('centerId', e.target.value);
-                  set('therapistId', '');
-                }}
-                required
-              >
-                <option value="">—</option>
-                {(options?.centers || []).map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('admin.appointments.therapist')}
-              <select
-                value={form.therapistId}
-                onChange={(e) => set('therapistId', e.target.value)}
-              >
-                <option value="">—</option>
-                {therapists.map((th) => (
-                  <option key={th.id} value={th.id}>{th.name}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('admin.appointments.service')}
-              <select
-                value={form.serviceId}
-                onChange={(e) => set('serviceId', e.target.value)}
-                required
-              >
-                <option value="">—</option>
-                {(options?.services || []).map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {t('admin.appointments.date')}
-              <input
-                type="date"
-                value={form.date}
-                onChange={(e) => set('date', e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              {t('admin.appointments.time')}
-              <input
-                type="time"
-                value={form.time}
-                onChange={(e) => set('time', e.target.value)}
-                required
-              />
-            </label>
-            {error && <p className="admin-modal__error">{error}</p>}
-            <div className="admin-modal__actions">
-              <Button variant="outline" type="button" onClick={onClose}>
-                {t('center.cancel')}
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? t('admin.state.loading') : t('admin.appointments.new')}
-              </Button>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>
+      )}
+
+      {optionsState.loading && (
+        <p className="admin-state" role="status">
+          {t('admin.state.loading')}
+        </p>
+      )}
+
+      {options && (
+        <form id="new-appointment-form" className="admin-form" onSubmit={submit} noValidate>
+          <FormField
+            label={t('admin.appointments.form.patient')}
+            as="select"
+            required
+            value={form.patientId}
+            onChange={(value) => set('patientId', value)}
+            options={toOptions(options.patients, '—')}
+            disabled={saving}
+          />
+          <FormField
+            label={t('admin.appointments.form.center')}
+            as="select"
+            required
+            value={form.centerId}
+            onChange={(value) => {
+              set('centerId', value);
+              set('therapistId', '');
+            }}
+            options={toOptions(options.centers, '—')}
+            disabled={saving}
+          />
+          <FormField
+            label={t('admin.appointments.form.therapist')}
+            as="select"
+            value={form.therapistId}
+            onChange={(value) => set('therapistId', value)}
+            options={toOptions(therapists, '—')}
+            disabled={saving}
+          />
+          <FormField
+            label={t('admin.appointments.form.service')}
+            as="select"
+            required
+            value={form.serviceId}
+            onChange={(value) => set('serviceId', value)}
+            options={toOptions(options.services, '—')}
+            disabled={saving}
+          />
+          <FormField
+            label={t('admin.appointments.form.date')}
+            type="date"
+            required
+            value={form.date}
+            onChange={(value) => set('date', value)}
+            disabled={saving}
+          />
+          <FormField
+            label={t('admin.appointments.form.time')}
+            type="time"
+            required
+            value={form.time}
+            onChange={(value) => set('time', value)}
+            disabled={saving}
+          />
+          <Feedback error>{error}</Feedback>
+        </form>
+      )}
+    </Modal>
   );
 }
 
@@ -160,6 +167,7 @@ function AdminAppointments() {
     pageSize: 5,
   });
   const [showNew, setShowNew] = useState(false);
+  const [notice, setNotice] = useState(null);
 
   const update = (values) =>
     setFilters((previous) => ({
@@ -219,10 +227,11 @@ function AdminAppointments() {
           aria-label={t('center.status')}
         >
           <option value="">{t('admin.allStatuses')}</option>
-          <option value="pending">{t('admin.status.pending')}</option>
-          <option value="confirmed">{t('admin.status.confirmed')}</option>
-          <option value="completed">{t('admin.status.completed')}</option>
-          <option value="cancelled">{t('admin.status.cancelled')}</option>
+          {appointmentStatuses.map((status) => (
+            <option key={status} value={status}>
+              {t(`admin.status.${status}`)}
+            </option>
+          ))}
         </select>
         <select
           className="admin-select"
@@ -231,9 +240,9 @@ function AdminAppointments() {
           aria-label={t('admin.allCenters')}
         >
           <option value="">{t('admin.allCenters')}</option>
-          {(options.centers || []).map((c) => (
-            <option key={c.id ?? c} value={c.id ?? c}>
-              {c.name ?? c}
+          {options.centers.map((center) => (
+            <option key={center.id} value={center.id}>
+              {center.name}
             </option>
           ))}
         </select>
@@ -242,7 +251,7 @@ function AdminAppointments() {
           className="admin-select"
           value={filters.from}
           onChange={(e) => update({ from: e.target.value })}
-          aria-label={t('admin.appointments.dateRange')}
+          aria-label={t('admin.appointments.from')}
           style={{ padding: '10px 12px' }}
         />
         <input
@@ -250,10 +259,16 @@ function AdminAppointments() {
           className="admin-select"
           value={filters.to}
           onChange={(e) => update({ to: e.target.value })}
-          aria-label="To date"
+          aria-label={t('admin.appointments.to')}
           style={{ padding: '10px 12px' }}
         />
       </div>
+
+      {notice && (
+        <Feedback error={notice.error} onDismiss={() => setNotice(null)}>
+          {notice.text}
+        </Feedback>
+      )}
 
       <QueryState state={state} empty={!data?.items?.length}>
         <div className="admin-table-wrapper">
@@ -271,19 +286,19 @@ function AdminAppointments() {
               </tr>
             </thead>
             <tbody>
-              {data?.items?.map((a) => (
-                <tr key={a.id}>
+              {data?.items?.map((appointment) => (
+                <tr key={appointment.id}>
                   <td>
-                    <strong>{a.id}</strong>
+                    <strong>{appointment.id}</strong>
                   </td>
-                  <td>{a.patient}</td>
-                  <td>{a.center}</td>
-                  <td>{a.therapist}</td>
-                  <td>{a.service}</td>
-                  <td>{formatDateTime(a.datetime)}</td>
+                  <td>{appointment.patient || '—'}</td>
+                  <td>{appointment.center || '—'}</td>
+                  <td>{appointment.therapist || '—'}</td>
+                  <td>{appointment.service || '—'}</td>
+                  <td>{formatDateTime(appointment.datetime)}</td>
                   <td>
-                    <span className={`admin-badge admin-badge--${a.status}`}>
-                      {t(`admin.status.${a.status}`)}
+                    <span className={`admin-badge admin-badge--${appointment.status}`}>
+                      {t(`admin.status.${appointment.status}`)}
                     </span>
                   </td>
                   <td>
@@ -312,6 +327,7 @@ function AdminAppointments() {
           onClose={() => setShowNew(false)}
           onCreated={() => {
             setShowNew(false);
+            setNotice({ error: false, text: t('admin.appointments.created') });
             state.reload();
           }}
         />

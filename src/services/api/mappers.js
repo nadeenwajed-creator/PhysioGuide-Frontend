@@ -400,6 +400,28 @@ const adminList = (body) => {
 const lower = (value, fallback = '') =>
   value == null || value === '' ? fallback : String(value).toLowerCase();
 
+// Reference fields reach us either as a plain string or as a nested object such
+// as { id, name }; only a label string may ever be rendered by the UI.
+const label = (value, fallback = '') => {
+  if (value == null || value === '') return fallback;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  const text = value.name ?? value.fullName ?? value.title ?? value.label ?? value.en ?? value.ar;
+  return text == null || text === '' ? fallback : String(text);
+};
+
+// Filter collections are labels (cities, specialties) or { id, name } pairs
+// (centers); normalize both so the pages can render them directly.
+const labels = (value) =>
+  (Array.isArray(value) ? value : []).map((item) => label(item)).filter(Boolean);
+
+const refOptions = (value) =>
+  (Array.isArray(value) ? value : []).map((item, index) =>
+    typeof item === 'string' || typeof item === 'number'
+      ? { id: String(index), name: String(item) }
+      : { id: String(item?.id ?? item?.centerId ?? index), name: label(item) }
+  );
+
 const num = (value, fallback = 0) => {
   if (value == null || value === '') return fallback;
   const parsed = Number(String(value).replace(/,/g, ''));
@@ -457,9 +479,9 @@ export function toAdminDashboard(body) {
 export function toAdminCenterRow(item) {
   return {
     id: String(item?.id ?? item?.centerId ?? ''),
-    name: item?.name ?? '',
-    manager: item?.manager ?? item?.managerName ?? '',
-    location: item?.location ?? item?.city ?? '',
+    name: label(item?.name ?? item?.centerName),
+    manager: label(item?.manager ?? item?.managerName),
+    location: label(item?.location ?? item?.city),
     therapists: num(item?.therapists ?? item?.activeTherapists),
     status: lower(item?.status, 'pending'),
   };
@@ -471,8 +493,8 @@ export function toAdminCenters(body) {
     ...list,
     items: list.items.map(toAdminCenterRow),
     filters: {
-      cities: Array.isArray(list.filters?.cities) ? list.filters.cities : [],
-      specialties: Array.isArray(list.filters?.specialties) ? list.filters.specialties : [],
+      cities: labels(list.filters?.cities),
+      specialties: labels(list.filters?.specialties),
     },
   };
 }
@@ -481,16 +503,16 @@ export function toAdminCenter(body) {
   const specialties = body?.specialties;
   return {
     id: String(body?.id ?? body?.centerId ?? ''),
-    name: body?.name ?? '',
+    name: label(body?.name ?? body?.centerName),
     imageUrl: body?.imageUrl ?? null,
     status: lower(body?.status, 'pending'),
-    location: body?.location ?? '',
-    manager: body?.manager ?? body?.managerName ?? '',
+    location: label(body?.location ?? body?.city),
+    manager: label(body?.manager ?? body?.managerName),
     therapists: num(body?.therapists ?? body?.activeTherapists),
     specialties: Array.isArray(specialties)
-      ? specialties
+      ? labels(specialties)
       : specialties
-        ? String(specialties)
+        ? String(label(specialties))
             .split(',')
             .map((part) => part.trim())
             .filter(Boolean)
@@ -499,7 +521,7 @@ export function toAdminCenter(body) {
     documents: (Array.isArray(body?.documents) ? body.documents : []).map((item, index) =>
       typeof item === 'string'
         ? { id: String(index), name: item }
-        : { id: String(item?.id ?? index), name: item?.name ?? '' }
+        : { id: String(item?.id ?? index), name: label(item) }
     ),
     photos: (Array.isArray(body?.photos) ? body.photos : []).map((item, index) =>
       typeof item === 'string'
@@ -512,10 +534,10 @@ export function toAdminCenter(body) {
 export function toAdminPatient(item) {
   return {
     id: String(item?.id ?? item?.patientId ?? ''),
-    name: item?.name ?? item?.fullName ?? '',
-    email: item?.email ?? '',
+    name: label(item?.name ?? item?.fullName ?? item?.patientName),
+    email: label(item?.email),
     age: item?.age == null || item?.age === '' ? null : num(item.age),
-    city: item?.city ?? '',
+    city: label(item?.city),
     appointments: num(item?.appointments ?? item?.appointmentCount),
     lastVisit: item?.lastVisit ?? null,
     status: lower(item?.status, 'active'),
@@ -527,7 +549,7 @@ export function toAdminPatients(body) {
   return {
     ...list,
     items: list.items.map(toAdminPatient),
-    filters: { cities: Array.isArray(list.filters?.cities) ? list.filters.cities : [] },
+    filters: { cities: labels(list.filters?.cities) },
   };
 }
 
@@ -535,10 +557,10 @@ export function toAdminPhysiotherapist(item) {
   const id = String(item?.id ?? item?.therapistId ?? '');
   return {
     id,
-    license: item?.license ?? item?.licenseId ?? id,
-    name: item?.name ?? item?.fullName ?? '',
-    specialty: item?.specialty ?? '',
-    center: item?.center ?? item?.centerName ?? '',
+    license: label(item?.license ?? item?.licenseId, id),
+    name: label(item?.name ?? item?.fullName ?? item?.therapistName),
+    specialty: label(item?.specialty ?? item?.specialization),
+    center: label(item?.center ?? item?.centerName),
     rating: item?.rating == null || item?.rating === '' ? null : num(item.rating),
     reviews: num(item?.reviews ?? item?.reviewCount),
     status: lower(item?.status, 'active'),
@@ -551,8 +573,8 @@ export function toAdminPhysiotherapists(body) {
     ...list,
     items: list.items.map(toAdminPhysiotherapist),
     filters: {
-      specialties: Array.isArray(list.filters?.specialties) ? list.filters.specialties : [],
-      centers: Array.isArray(list.filters?.centers) ? list.filters.centers : [],
+      specialties: labels(list.filters?.specialties),
+      centers: refOptions(list.filters?.centers),
     },
   };
 }
@@ -560,10 +582,10 @@ export function toAdminPhysiotherapists(body) {
 export function toAdminAppointment(item) {
   return {
     id: String(item?.id ?? item?.appointmentId ?? ''),
-    patient: item?.patient ?? item?.patientName ?? '',
-    center: item?.center ?? item?.centerName ?? '',
-    therapist: item?.therapist ?? item?.therapistName ?? '',
-    service: item?.service ?? item?.serviceName ?? '',
+    patient: label(item?.patient ?? item?.patientName),
+    center: label(item?.center ?? item?.centerName),
+    therapist: label(item?.therapist ?? item?.therapistName),
+    service: label(item?.service ?? item?.serviceName),
     datetime: item?.datetime ?? item?.date ?? null,
     status: lower(item?.status, 'pending'),
   };
@@ -574,7 +596,7 @@ export function toAdminAppointments(body) {
   return {
     ...list,
     items: list.items.map(toAdminAppointment),
-    filters: { centers: Array.isArray(list.filters?.centers) ? list.filters.centers : [] },
+    filters: { centers: refOptions(list.filters?.centers) },
   };
 }
 
@@ -582,11 +604,11 @@ export function toAdminAppointments(body) {
 // therapist belongs to so the select can narrow by the chosen center.
 const optionList = (value) =>
   (Array.isArray(value) ? value : []).map((item, index) =>
-    typeof item === 'string'
-      ? { id: String(index), name: item }
+    typeof item === 'string' || typeof item === 'number'
+      ? { id: String(index), name: String(item) }
       : {
-          id: String(item?.id ?? ''),
-          name: item?.name ?? '',
+          id: String(item?.id ?? item?.value ?? index),
+          name: label(item),
           ...(item?.centerId != null ? { centerId: String(item.centerId) } : {}),
         }
   );
@@ -601,11 +623,16 @@ export function toAdminAppointmentOptions(body) {
 }
 
 export function toAdminReview(item) {
+  const context =
+    label(item?.context) ||
+    [label(item?.therapist ?? item?.therapistName), label(item?.center ?? item?.centerName)]
+      .filter(Boolean)
+      .join(' - ');
   return {
     id: String(item?.id ?? item?.reviewId ?? ''),
-    name: item?.name ?? item?.patientName ?? '',
-    context: item?.context ?? '',
-    text: item?.text ?? item?.comment ?? '',
+    name: label(item?.patient ?? item?.patientName ?? item?.name),
+    context,
+    text: label(item?.text ?? item?.comment),
     rating: num(item?.rating, 0),
     status: lower(item?.status, 'published'),
     createdAt: item?.createdAt ?? null,
@@ -640,11 +667,11 @@ export function toAdminSettings(body) {
   const profile = body?.profile ?? {};
   return {
     profile: {
-      name: profile?.fullName ?? profile?.name ?? '',
-      role: profile?.role ?? '',
+      name: label(profile?.fullName ?? profile?.name),
+      role: label(profile?.role),
       verified: profile?.verified === true,
       lastSignIn: profile?.lastSignIn ?? null,
-      location: profile?.location ?? '',
+      location: label(profile?.location),
       adminId: profile?.adminId == null ? '' : String(profile.adminId),
     },
     security: { twoFactorEnabled: body?.security?.twoFactorEnabled === true },

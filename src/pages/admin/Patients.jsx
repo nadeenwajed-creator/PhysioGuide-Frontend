@@ -2,45 +2,14 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import { Feedback } from '../../components/center/CenterUI.jsx';
 import { callAdmin } from '../../services/adminService.js';
-import useAdminQuery, { useDebouncedValue, useStatusOverride } from './useAdminQuery.js';
+import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
 import './ListPages.css';
 
-function StatusMenu({ patientId, current, onChanged }) {
-  const { t } = useLanguage();
-  const [open, setOpen] = useState(false);
-  const statuses = ['active', 'inactive', 'suspended'].filter((s) => s !== current);
-
-  return (
-    <div className="admin-table__actions" style={{ position: 'relative' }}>
-      <button
-        className="admin-icon-button"
-        aria-label={t('center.actions')}
-        onClick={() => setOpen(!open)}
-      >
-        <FontAwesomeIcon icon={faEllipsisV} />
-      </button>
-      {open && (
-        <div className="admin-dropdown">
-          {statuses.map((status) => (
-            <button
-              key={status}
-              className="admin-dropdown__item"
-              onClick={() => {
-                setOpen(false);
-                onChanged(patientId, status);
-              }}
-            >
-              {t(`admin.status.${status}`)}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+const patientStatuses = ['active', 'inactive', 'suspended'];
 
 function AdminPatients() {
   const { t, language } = useLanguage();
@@ -52,7 +21,10 @@ function AdminPatients() {
     page: 1,
     pageSize: 5,
   });
+  const [savingId, setSavingId] = useState(null);
+  const [notice, setNotice] = useState(null);
 
+  // Changing a filter returns to the first page; page clicks keep the filters.
   const update = (values) =>
     setFilters((previous) => ({
       ...previous,
@@ -63,23 +35,22 @@ function AdminPatients() {
   const search = useDebouncedValue(filters.search, 300);
   const state = useAdminQuery('getAdminPatients', { ...filters, search });
 
-  const { begin, revert, reconcile } = useStatusOverride();
   const data = state.data;
   const options = data?.filters ?? { cities: [] };
   const number = new Intl.NumberFormat(language);
 
-  // Reconcile overrides once the refetched list arrives.
-  if (data?.items) reconcile(data.items);
-
-  const changeStatus = async (id, status) => {
-    begin(id, status);
+  async function changeStatus(id, status) {
+    setSavingId(id);
+    setNotice(null);
     try {
       await callAdmin('setAdminPatientStatus', { id, status });
       state.reload();
-    } catch {
-      revert(id);
+    } catch (failure) {
+      setNotice({ error: true, text: errorText(t, failure) });
+    } finally {
+      setSavingId(null);
     }
-  };
+  }
 
   return (
     <div className="admin-list-page">
@@ -106,9 +77,11 @@ function AdminPatients() {
           aria-label={t('center.status')}
         >
           <option value="">{t('admin.allStatuses')}</option>
-          <option value="active">{t('admin.status.active')}</option>
-          <option value="inactive">{t('admin.status.inactive')}</option>
-          <option value="suspended">{t('admin.status.suspended')}</option>
+          {patientStatuses.map((status) => (
+            <option key={status} value={status}>
+              {t(`admin.status.${status}`)}
+            </option>
+          ))}
         </select>
         <select
           className="admin-select"
@@ -127,12 +100,18 @@ function AdminPatients() {
           className="admin-select"
           value={filters.sort}
           onChange={(e) => update({ sort: e.target.value })}
-          aria-label={t('admin.recentlyActive')}
+          aria-label={t('admin.sort.default')}
         >
-          <option value="">{t('admin.recentlyActive')}</option>
+          <option value="">{t('admin.sort.default')}</option>
           <option value="recent">{t('admin.recentlyActive')}</option>
         </select>
       </div>
+
+      {notice && (
+        <Feedback error={notice.error} onDismiss={() => setNotice(null)}>
+          {notice.text}
+        </Feedback>
+      )}
 
       <QueryState state={state} empty={!data?.items?.length}>
         <div className="admin-table-wrapper">
@@ -160,22 +139,26 @@ function AdminPatients() {
                   <td>{patient.age ?? '—'}</td>
                   <td>{patient.city || '—'}</td>
                   <td>{patient.appointments}</td>
+                  <td>{patient.lastVisit ? formatDate(patient.lastVisit, language) : '—'}</td>
                   <td>
-                    {patient.lastVisit
-                      ? formatDate(patient.lastVisit, language)
-                      : '—'}
+                    <select
+                      className={`admin-badge admin-badge--${patient.status}`}
+                      value={patient.status}
+                      aria-label={t('center.status')}
+                      disabled={savingId === patient.id}
+                      onChange={(e) => changeStatus(patient.id, e.target.value)}
+                    >
+                      {patientStatuses.map((status) => (
+                        <option key={status} value={status}>
+                          {t(`admin.status.${status}`)}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                   <td>
-                    <span className={`admin-badge admin-badge--${patient.status}`}>
-                      {t(`admin.status.${patient.status}`)}
-                    </span>
-                  </td>
-                  <td>
-                    <StatusMenu
-                      patientId={patient.id}
-                      current={patient.status}
-                      onChanged={changeStatus}
-                    />
+                    <button className="admin-icon-button" aria-label={t('center.actions')}>
+                      <FontAwesomeIcon icon={faEllipsisV} />
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -84,6 +84,7 @@ const state = {
   ],
   settings: {
     profile: {
+      fullName: 'Maya Al-Hassan',
       verified: true,
       lastSignIn: hoursAgo(3),
       location: 'Riyadh, Saudi Arabia',
@@ -154,17 +155,6 @@ function paginate(items, params = {}) {
 const unique = (values) => [...new Set(values.filter(Boolean))].sort();
 const centerOptions = () => state.centers.map((center) => ({ id: center.id, name: center.name }));
 
-function centerRow(center) {
-  return {
-    id: center.id,
-    name: center.name,
-    manager: center.manager,
-    location: center.location,
-    therapists: center.therapists,
-    status: center.status,
-  };
-}
-
 function centerDetail(center) {
   return {
     id: center.id,
@@ -217,10 +207,10 @@ export const adminMockApi = {
     const year = String(params?.year || new Date().getFullYear());
     return {
       metrics: state.dashboard.metrics,
-      monthly: state.dashboard.monthlyBookings[year] ?? state.dashboard.monthlyBookings[2026],
+      monthlyBookings: state.dashboard.monthlyBookings[year] ?? state.dashboard.monthlyBookings[2026],
       health: state.dashboard.health,
       notifications: state.dashboard.notifications,
-      pending: state.dashboard.pendingApprovals,
+      pendingApprovals: state.dashboard.pendingApprovals,
       activity: state.dashboard.activity,
     };
   },

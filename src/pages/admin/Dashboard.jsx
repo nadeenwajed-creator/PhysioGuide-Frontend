@@ -79,6 +79,9 @@ function AdminDashboard() {
   const { t, dir, language } = useLanguage();
   const { session } = useAuth();
   const [year, setYear] = useState(String(new Date().getFullYear()));
+  // Relative activity times need a clock; snapshot it once instead of reading
+  // Date.now() during render.
+  const [now] = useState(() => Date.now());
   const state = useAdminQuery('getAdminDashboard', { year });
 
   const number = new Intl.NumberFormat(language);
@@ -101,7 +104,7 @@ function AdminDashboard() {
     if (!value) return '';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    const hours = Math.round((Date.now() - date.getTime()) / 3600000);
+    const hours = Math.round((now - date.getTime()) / 3600000);
     if (hours < 48) return t('admin.dashboard.hoursAgo', { count: Math.max(1, hours) });
     return formatDate(String(value), language);
   };
