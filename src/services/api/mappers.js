@@ -263,25 +263,40 @@ function toCenterRecord(center) {
   };
 }
 
+// A single API string still has to behave like the bilingual labels the
+// interface renders, so it becomes the same value in both languages.
+const bilingual = (value) => (value && typeof value === 'object'
+  ? value
+  : { en: value || '', ar: value || '' });
+
 function toCenterPatient(patient) {
   return {
     ...patient,
     birthDate: patient.dateOfBirth || '',
     status: patient.status || 'active',
-    name: patient.name || '',
+    name: bilingual(patient.name),
     notes: patient.notes || [],
   };
 }
 
 export function toCenterWorkspace(body, preferences) {
+  // Creation forms pick a specialty from this list instead of guessing one
+  // from an existing record.
+  const specialties = (body?.specialties || []).map((item) => ({
+    id: String(item.id),
+    name: bilingual(item.nameEnglish || item.nameArabic),
+  }));
+  const specialtyName = (id, fallback) =>
+    specialties.find((item) => item.id === String(id))?.name || bilingual(fallback);
   return {
     ...body,
     today: body?.today?.date ?? '',
     center: toCenterRecord(body?.center),
+    specialties,
     therapists: (body?.therapists || []).map((item) => ({
       ...item,
-      name: item.name || '',
-      specialty: item.specialty || '',
+      name: bilingual(item.name),
+      specialty: specialtyName(item.specialtyId, item.specialty),
       about: item.about || '',
       status: item.isActive === false ? 'inactive' : 'active',
       availability: item.availability === 'available' ? 'available' : 'unavailable',
@@ -291,13 +306,13 @@ export function toCenterWorkspace(body, preferences) {
     })),
     services: (body?.services || []).map((item) => ({
       ...item,
-      name: item.name || '',
-      description: item.description || '',
+      name: bilingual(item.name),
+      description: bilingual(item.description),
       status: item.isActive === false ? 'inactive' : 'active',
       duration: Number(item.duration) || 0,
       price: Number(item.price) || 0,
       imageUrl: item.imageUrl ?? null,
-      specialty: item.specialty || '',
+      specialty: specialtyName(item.specialtyId, item.specialty),
     })),
     patients: (body?.patients || []).map(toCenterPatient),
     appointments: toAppointments(body?.appointments),

@@ -16,11 +16,13 @@ const therapistStatuses = ['active', 'pending', 'inactive'];
 function AddTherapistModal({ centers, onClose, onAdded }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    licenseId: '',
-    specialty: '',
-    centerId: '',
+    fullName: "",
+    email: "",
+    PhoneNumber: "",
+    licenseId: "",
+    Password: "",
+    specialty: "",
+    centerId: "",
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -49,57 +51,77 @@ function AddTherapistModal({ centers, onClose, onAdded }) {
   return (
     <Modal
       isOpen
-      title={t('admin.therapists.form.title')}
+      title={t("admin.therapists.form.title")}
       onClose={saving ? undefined : onClose}
       footer={
         <>
           <Button variant="outline" disabled={saving} onClick={onClose}>
-            {t('center.cancel')}
+            {t("center.cancel")}
           </Button>
           <Button type="submit" form="add-therapist-form" loading={saving}>
-            {t('admin.therapists.add')}
+            {t("admin.therapists.add")}
           </Button>
         </>
       }
     >
-      <form id="add-therapist-form" className="admin-form" onSubmit={submit} noValidate>
+      <form
+        id="add-therapist-form"
+        className="admin-form"
+        onSubmit={submit}
+        noValidate
+      >
         <FormField
-          label={t('admin.therapists.form.name')}
+          label={t("admin.therapists.form.name")}
           required
           value={form.fullName}
-          onChange={(value) => set('fullName', value)}
+          onChange={(value) => set("fullName", value)}
           disabled={saving}
           autoComplete="name"
         />
         <FormField
-          label={t('admin.therapists.form.email')}
+          label={t("admin.therapists.form.email")}
           type="email"
           required
           value={form.email}
-          onChange={(value) => set('email', value)}
+          onChange={(value) => set("email", value)}
           disabled={saving}
           autoComplete="email"
         />
         <FormField
-          label={t('admin.therapists.form.license')}
+          label={t("admin.therapists.form.phoneNumber")}
+          required
+          value={form.PhoneNumber}
+          onChange={(value) => set("PhoneNumber", value)}
+          disabled={saving}
+        />
+        <FormField
+          label={t("admin.therapists.form.license")}
           required
           value={form.licenseId}
-          onChange={(value) => set('licenseId', value)}
+          onChange={(value) => set("licenseId", value)}
           disabled={saving}
         />
         <FormField
-          label={t('admin.therapists.form.specialty')}
+          label={t("admin.therapists.form.password")}
+          type="password"
+          required
+          value={form.Password}
+          onChange={(value) => set("Password", value)}
+          disabled={saving}
+        />
+        <FormField
+          label={t("admin.therapists.form.specialty")}
           required
           value={form.specialty}
-          onChange={(value) => set('specialty', value)}
+          onChange={(value) => set("specialty", value)}
           disabled={saving}
         />
         <FormField
-          label={t('admin.therapists.form.center')}
+          label={t("admin.therapists.form.center")}
           as="select"
           required
           value={form.centerId}
-          onChange={(value) => set('centerId', value)}
+          onChange={(value) => set("centerId", value)}
           options={centerOptions}
           disabled={saving}
         />

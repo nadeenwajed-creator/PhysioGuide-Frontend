@@ -41,6 +41,10 @@ function RecordForm({
     status: record?.status || 'active',
     specialty: record?.specialty?.en || '',
     specialtyAr: record?.specialty?.ar || '',
+    specialtyId: record?.specialtyId != null
+      ? String(record.specialtyId)
+      : record ? name(record.specialty) : '',
+    password: '',
     experience: record?.experience ?? '0',
     price: record?.price ?? '25',
     duration: record?.duration ?? '45',
@@ -78,17 +82,45 @@ function RecordForm({
     disabled={busy}
     {...options}
   />;
-  const select = (key, options) => <SelectField
+  const select = (key, options, onChange) => <SelectField
     key={key}
     id={`record-${key}`}
     label={tr(key)}
     value={values[key]}
-    onChange={value => set(key, value)}
+    onChange={value => (onChange ? onChange(value) : set(key, value))}
     options={options}
-    required={['patientId', 'therapistId', 'serviceId'].includes(key)}
+    required={['patientId', 'therapistId', 'serviceId', 'specialtyId'].includes(key)}
     disabled={busy}
     error={fields[key] ? tr(`error.${fields[key]}`) : undefined}
   />;
+  // API mode sends the specialty catalogue; the demo derives it from the
+  // therapists it already has so adding a service/therapist still works there.
+  const specialtyOptions = data.specialties?.length
+    ? data.specialties.map(item => ({
+      value: String(item.id),
+      label: name(item.name),
+      name: item.name
+    }))
+    : [...new Map(data.therapists
+      .filter(item => name(item.specialty))
+      .map(item => [name(item.specialty), {
+        value: name(item.specialty),
+        label: name(item.specialty),
+        name: item.specialty
+      }])).values()];
+  // The empty entry keeps the browser from silently showing the first
+  // specialty as chosen while the form value is still empty.
+  const specialtySelectOptions = [{
+    value: '',
+    label: tr('select')
+  }, ...specialtyOptions];
+  function chooseSpecialty(value) {
+    const chosen = specialtyOptions.find(option => option.value === value);
+    // The demo stores the label itself, so keep both representations in sync.
+    set('specialtyId', value);
+    set('specialty', name(chosen?.name || value));
+    set('specialtyAr', chosen?.name?.ar || name(chosen?.name || value));
+  }
   const choices = list => [{
     value: '',
     label: tr('select')
@@ -103,9 +135,10 @@ function RecordForm({
     setError('');
     setFields({});
     try {
+      const professional = ['specialtyId', 'specialty', 'specialtyAr', 'experience', 'availability', 'status', 'imageUrl'];
       const keys = professionalOnly
-        ? ['specialty', 'specialtyAr', 'experience', 'availability']
-        : ['name', 'nameAr', 'email', 'phone', 'specialty', 'specialtyAr', 'experience', 'availability', 'imageUrl'];
+        ? ['name', 'nameAr', ...professional]
+        : ['name', 'nameAr', 'email', 'phone', 'password', ...professional];
       const submitted = kind === 'therapist'
         ? Object.fromEntries(keys.map(key => [key, values[key]]))
         : { ...values };
@@ -165,6 +198,13 @@ function RecordForm({
               required: true,
               dir: 'ltr'
             })}
+            {!record && field('password', {
+              type: 'password',
+              required: true,
+              autoComplete: 'new-password',
+              helperText: tr('passwordHelp'),
+              showPasswordToggle: true
+            })}
           </>}
           {kind === 'patient' && <>
             {field('birthDate', {
@@ -180,12 +220,7 @@ function RecordForm({
             })))}
           </>}
           {kind === 'therapist' && <>
-            {field('specialty', {
-              required: true
-            })}
-            {field('specialtyAr', {
-              dir: 'rtl'
-            })}
+            {select('specialtyId', specialtySelectOptions, chooseSpecialty)}
             {field('experience', {
               type: 'number',
               required: true
@@ -196,6 +231,7 @@ function RecordForm({
             })))}
           </>}
           {kind === 'service' && <>
+            {select('specialtyId', specialtySelectOptions, chooseSpecialty)}
             {field('price', {
               label: tr('servicePrice'),
               type: 'number',

@@ -160,8 +160,10 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
     },
     async saveTherapist(actor, values, id) {
       requireCenter(actor);
-      const professional = ['specialty', 'specialtyAr', 'experience', 'availability', 'serviceIds'];
-      const allowed = id ? professional : [...professional, 'name', 'nameAr', 'email', 'phone', 'imageUrl'];
+      const professional = ['specialtyId', 'specialty', 'specialtyAr', 'experience', 'availability', 'serviceIds'];
+      const allowed = id
+        ? [...professional, 'name', 'nameAr', 'imageUrl', 'status']
+        : [...professional, 'name', 'nameAr', 'email', 'phone', 'imageUrl', 'status', 'password'];
       if (!values || Object.keys(values).some(key => !allowed.includes(key))) fail('forbidden');
       const previous = id ? find('therapists', id) : {
         id: crypto.randomUUID(),
@@ -184,6 +186,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
         specialty: pair(values.specialty, values.specialtyAr),
         experience: Number(values.experience),
         availability: values.availability,
+        status: values.status || previous.status || 'active',
         serviceIds: Object.hasOwn(values, 'serviceIds') ? [...new Set(values.serviceIds)] : previous.serviceIds || [],
       };
       state.therapists = id ? state.therapists.map(item => item.id === id ? record : item) : [...state.therapists, record];

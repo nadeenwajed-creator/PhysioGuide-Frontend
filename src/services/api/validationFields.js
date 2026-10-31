@@ -23,6 +23,7 @@ const aliases = {
 
   // patient account
   dateofbirth: 'dateOfBirth',
+  birthdate: 'birthDate',
   profileimageurl: 'imageUrl',
   imageurl: 'imageUrl',
   language: 'language',

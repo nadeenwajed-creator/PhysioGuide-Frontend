@@ -276,8 +276,10 @@ export const adminOperations = {
         fullName: values?.fullName,
         email: values?.email,
         licenseId: values?.licenseId,
-        specialty: values?.specialty,
+        specialtyId: values?.specialty,
         centerId: values?.centerId,
+        password: values?.Password,
+        phoneNumber: values?.PhoneNumber
       },
     }),
     response: resolved((body) => map.toAdminPhysiotherapist(body)),
@@ -673,17 +675,36 @@ export const centerOperations = {
     },
   },
 
+  savePatient: {
+    execute: async (client, _actor, values, id) => {
+      const payload = {
+        fullName: values?.name,
+        email: values?.email,
+        phoneNumber: values?.phone,
+        gender: values?.gender,
+        dateOfBirth: values?.birthDate || null,
+        profileImageUrl: values?.imageUrl || null,
+        isActive: values?.status !== 'inactive',
+      };
+
+      if (id) {
+        const body = await client.put(`${CENTER_WORKSPACE}/patients/${id}`, { data: payload });
+        return resolveAssets({ ...values, id: String(body?.id ?? id) });
+      }
+
+      // Adding a patient creates their login account as well, so it needs the
+      // temporary password the form collects.
+      const body = await client.post(`${CENTER_WORKSPACE}/patients`, {
+        data: { ...payload, password: values?.password },
+      });
+      return resolveAssets({ ...values, id: String(body?.id ?? '') });
+    },
+  },
+
   saveService: {
     execute: async (client, _actor, values, id) => {
-      // The API stores services under a specialty; the form does not ask for
-      // one, so an existing service's specialty is reused when possible.
-      const specialtyId =
-        values?.specialtyId ??
-        (await (async () => {
-          const workspace = await client.get(CENTER_WORKSPACE).catch(() => null);
-          return workspace?.services?.[0]?.specialtyId;
-        })());
-      if (!specialtyId) throw new ServiceError('unavailable');
+      const specialtyId = Number(values?.specialtyId);
+      if (!specialtyId) throw new ServiceError('validation', { fields: { specialtyId: 'required' } });
 
       const payload = {
         nameEnglish: values?.name,
@@ -692,7 +713,7 @@ export const centerOperations = {
         descriptionArabic: values?.descriptionAr || values?.description,
         price: Number(values?.price) || 0,
         durationMinutes: Number(values?.duration) || 30,
-        specialtyId: Number(specialtyId),
+        specialtyId,
         isActive: values?.status !== 'inactive',
       };
       const body = id
@@ -704,24 +725,37 @@ export const centerOperations = {
 
   saveTherapist: {
     execute: async (client, _actor, values, id) => {
-      // Creating a staff account needs a password the form never collects, so
-      // only editing an existing therapist is supported today.
-      if (!id) throw new ServiceError('unavailable');
-      const body = await client.put(`${CENTER_WORKSPACE}/therapists/${id}`, {
+      const specialtyId = Number(values?.specialtyId);
+      if (!specialtyId) throw new ServiceError('validation', { fields: { specialtyId: 'required' } });
+
+      const professional = {
+        fullName: values?.name,
+        specialtyId,
+        profileImageUrl: values?.imageUrl,
+        yearsOfExperience: values?.experience == null || values?.experience === ''
+          ? null
+          : Number(values.experience),
+        isAvailable: values?.availability !== 'unavailable',
+        isActive: values?.status !== 'inactive',
+        serviceIds: values?.serviceIds?.map(Number),
+      };
+
+      if (id) {
+        const body = await client.put(`${CENTER_WORKSPACE}/therapists/${id}`, { data: professional });
+        return resolveAssets({ ...values, id: String(body?.id ?? id), ...body });
+      }
+
+      // The staff account is created by its own endpoint, which needs the
+      // password the form collects for the new therapist.
+      const body = await client.post('/api/center/therapists', {
         data: {
-          fullName: values?.name,
-          specialtyId: values?.specialtyId,
-          bio: values?.about,
-          profileImageUrl: values?.imageUrl,
-          yearsOfExperience: values?.experience == null ? null : Number(values.experience),
-          qualifications: values?.credentials,
-          languages: values?.languages,
-          isAvailable: values?.availability !== 'unavailable',
-          isActive: values?.status !== 'inactive',
-          serviceIds: values?.serviceIds?.map(Number),
+          ...professional,
+          email: values?.email,
+          password: values?.password,
+          phoneNumber: values?.phone,
         },
       });
-      return resolveAssets({ ...values, id: String(body?.id ?? id), ...body });
+      return resolveAssets({ ...values, id: String(body?.therapistId ?? body?.id ?? '') });
     },
   },
 
@@ -783,10 +817,9 @@ const notImplemented = () => {
 for (const operation of [
   'setPatientFavorite',
   'openPatientConversation',
-  'savePatient',
   'saveAppointment',
 ]) {
   centerOperations[operation] = { execute: notImplemented };
 }
 
-export const transportOptions = {};
+export const transportOptions = {};
