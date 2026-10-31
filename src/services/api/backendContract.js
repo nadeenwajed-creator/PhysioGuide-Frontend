@@ -7,6 +7,7 @@
 import { ServiceError } from './serviceError.js';
 import { loadSession, saveSession, clearSession } from '../auth/session.js';
 import * as map from './mappers.js';
+import { toAssessmentResult } from '../patient/painAssessmentModel.js';
 
 const CENTER_WORKSPACE = '/api/center/workspace';
 const THERAPIST_WORKSPACE = '/api/therapist/workspace';
@@ -463,6 +464,32 @@ export const centerOperations = {
   getPatientAppointments: {
     request: () => ({ method: 'GET', path: `${PATIENT}/appointments` }),
     response: resolved(map.toAppointments),
+  },
+
+  submitAssessment: {
+    request: (_actor, answers) => ({
+      method: 'POST',
+      path: '/api/Assessment',
+      data: {
+        painLocation: answers?.painLocation,
+        painSeverity: answers?.painSeverity,
+        duration: answers?.duration,
+        painDescriptions: answers?.painDescriptions,
+        previousInjurySurgery: answers?.previousInjurySurgery,
+        ...(answers?.otherDescription ? { otherDescription: answers.otherDescription } : {}),
+      },
+    }),
+    response: (body) => toAssessmentResult(body),
+  },
+
+  getAssessmentHistory: {
+    request: () => ({ method: 'GET', path: '/api/Assessment/history' }),
+    response: (body) => (Array.isArray(body) ? body.map(toAssessmentResult) : []),
+  },
+
+  getAssessment: {
+    request: (_actor, id) => ({ method: 'GET', path: `/api/Assessment/${id}` }),
+    response: (body) => toAssessmentResult(body),
   },
 
   getPatientSlots: {

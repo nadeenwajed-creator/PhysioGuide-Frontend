@@ -262,6 +262,10 @@
   color: var(--color-text-secondary);
 }
 
+.pain-validation.is-error {
+  color: var(--color-danger);
+}
+
 .pain-bodies {
   display: flex;
   justify-content: center;
@@ -765,12 +769,17 @@
   margin-block: 10px;
 }
 
-.pain-result-hero > p:last-child {
+.pain-result-help,
+.pain-result-followup {
   color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.6;
   max-inline-size: 700px;
   margin-inline: auto;
+}
+
+.pain-result-followup {
+  margin-block-start: 10px;
 }
 
 .pain-result-centers > h2 {

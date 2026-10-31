@@ -11,12 +11,15 @@ import AdminReviews from '../pages/admin/Reviews.jsx';
 import AdminSettings from '../pages/admin/Settings.jsx';
 import RequireRole from './RequireRole.jsx';
 import PublicLayout from "../layouts/PublicLayout.jsx";
+import AuthShell from "../components/auth/AuthShell.jsx";
 
 
 const adminRoutes = (
   <>
     <Route element={<PublicLayout />}>
-       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route element={<AuthShell />}>
+          <Route path="/admin/login" element={<AdminLogin />} />
+      </Route>
     </Route>
     <Route element={<RequireRole roles={["admin"]} loginPath="/admin/login" />}>
       <Route path="/admin" element={<AdminLayout />}>

@@ -7,6 +7,7 @@ import { createBrowserStore } from '../mock/browserStore.js';
 import { createMockCenterAdapter } from '../center/mockCenterAdapter.js';
 import { ServiceError } from '../api/serviceError.js';
 import { publicCenter, patientIdentity, availableSlots } from './discoveryModel.js';
+import { buildAssessmentResult } from './painAssessmentModel.js';
 
 export function approvedCenterIds() {
   return [...new Set([...mockAccounts, ...(mockAccountStore.read() || [])].filter(a => a.role === 'center' && a.status === 'approved' && a.centerId)
@@ -57,6 +58,20 @@ export async function executePatientOperation(method, actor, values, ...rest) {
       favoriteIds: [...set]
     });
     return [...set];
+  }
+  const assessments = createBrowserStore(`physioguide.mock.assessments.v1:${encodeURIComponent(actor.id)}`);
+  if (method === 'submitAssessment') {
+    const saved = buildAssessmentResult(values, {
+      assessmentId: Date.now()
+    });
+    assessments.write([saved, ...(assessments.read() || [])]);
+    return saved;
+  }
+  if (method === 'getAssessmentHistory') return assessments.read() || [];
+  if (method === 'getAssessment') {
+    const found = (assessments.read() || []).find(item => String(item.assessmentId) === String(values));
+    if (!found) throw new ServiceError('notFound');
+    return found;
   }
   if (method === 'getPatientAppointments') return ids.flatMap(id => {
     const w = readMockCenter(id);

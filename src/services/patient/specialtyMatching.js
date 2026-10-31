@@ -28,15 +28,37 @@ export const careCategories = {
     'Back Pain Physiotherapy',
     'Back & Spine',
     'Back and Spine Physiotherapy',
+    'Spinal Physiotherapy',
+    'Neck and Back Physiotherapy',
     'علاج آلام الظهر',
-    'علاج الظهر والعمود الفقري'
+    'علاج الظهر والعمود الفقري',
+    'العلاج الطبيعي للرقبة والظهر'
   ],
   knee: ['Knee Rehabilitation', 'Knee Physiotherapy', 'تأهيل الركبة'],
   postsurgery: [
     'Post-Surgery Rehabilitation',
     'Post-Surgery Recovery',
     'Postoperative Rehabilitation',
+    'Post-Surgical Rehabilitation',
     'التأهيل بعد الجراحة'
+  ],
+  persistent: [
+    'Persistent Pain Physiotherapy',
+    'Pain Management Physiotherapy',
+    'العلاج الطبيعي للألم المستمر'
+  ],
+  upperLimb: [
+    'Upper Limb Physiotherapy',
+    'Manual Therapy',
+    'العلاج الطبيعي للطرف العلوي',
+    'العلاج اليدوي'
+  ],
+  lowerLimb: [
+    'Lower Limb Physiotherapy',
+    'Knee Rehabilitation',
+    'Knee Physiotherapy',
+    'تأهيل الركبة',
+    'العلاج الطبيعي للطرف السفلي'
   ]
 };
 

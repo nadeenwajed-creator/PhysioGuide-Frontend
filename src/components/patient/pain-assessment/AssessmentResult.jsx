@@ -13,7 +13,7 @@ import { useAuth } from '../../../context/AuthContext.jsx';
 import { useLanguage } from '../../../context/LanguageContext.jsx';
 import { localized } from '../../../utils/centerFormat.js';
 import { getPatientDiscovery, subscribePatientDiscovery } from '../../../services/patientDiscoveryService.js';
-import { matchingCenters } from '../../../services/patient/painAssessmentModel.js';
+import { matchingCareKeys, matchingCenters } from '../../../services/patient/painAssessmentModel.js';
 import { CenterRating, Favorite } from '../DiscoveryUI.jsx';
 import { RecordImage, ConfirmDialog } from '../../center/CenterUI.jsx';
 import Button from '../../shared/Button/Button.jsx';
@@ -127,9 +127,15 @@ function SuggestedCenters({ care, t }) {
   </>;
 }
 
-export default function AssessmentResult({ care, onRestart, t, headingRef }) {
-  // Ask before restarting because it clears the current answers
+export default function AssessmentResult({ result, answers, onRestart, t, headingRef }) {
+  const { language } = useLanguage();
   const [confirm, setConfirm] = useState(false);
+  const care = result?.suggestedCare;
+  const matchKeys = matchingCareKeys(result, answers);
+  const explore = matchKeys[0] || result?.matchKey || 'musculoskeletal';
+  const title = language === 'ar'
+    ? care?.nameArabic || care?.nameEnglish
+    : care?.nameEnglish || care?.nameArabic;
   return <div className="pain-result">
     <section className="pain-result-hero" aria-labelledby="pain-result-title">
       <span className="pain-result-check" aria-hidden="true">
@@ -138,22 +144,23 @@ export default function AssessmentResult({ care, onRestart, t, headingRef }) {
       <p>{t('done')}</p>
       <h1 id="pain-result-title" tabIndex={-1} ref={headingRef}>{t('suggested')}</h1>
       <h2>
-        {t(`care.${care}`)}
+        {title || t(`care.${explore}`)}
       </h2>
-      <p>{t('careHelp')}</p>
+      <p className="pain-result-help">{care?.explanation || t('careHelp')}</p>
+      {care?.followUp && <p className="pain-result-followup">{care.followUp}</p>}
     </section>
     <section className="pain-result-centers" aria-labelledby="pain-centers-title">
       <h2 id="pain-centers-title">{t('centers')} <Link
         className="pd-matching-link"
-        to={`/patient/centers?specialty=${encodeURIComponent(`care:${care}`)}`}
+        to={`/patient/centers?specialty=${encodeURIComponent(`care:${explore}`)}`}
       >
         {t('exploreCenters')}
       </Link></h2>
-      <SuggestedCenters care={care} t={t} />
+      <SuggestedCenters care={matchKeys} t={t} />
     </section>
     <div className="pain-disclaimer">
       <FontAwesomeIcon icon={faCircleInfo} aria-hidden="true" />
-      <p>{t('disclaimer')}</p>
+      <p>{result?.disclaimer || t('disclaimer')}</p>
       <Button icon={faRotateRight} onClick={() => setConfirm(true)}>
         {t('restart')}
       </Button>

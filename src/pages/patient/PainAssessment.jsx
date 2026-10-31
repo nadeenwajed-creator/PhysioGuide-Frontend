@@ -21,6 +21,7 @@ import {
   faPerson
 } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import BodyMap from '../../components/patient/pain-assessment/BodyMap.jsx';
 import PainTexture from '../../components/patient/pain-assessment/PainTexture.jsx';
@@ -34,9 +35,9 @@ import {
   histories,
   validStep,
   completeAssessment,
-  intensityBand,
-  suggestCare
+  intensityBand
 } from '../../services/patient/painAssessmentModel.js';
+import { submitAssessment } from '../../services/patientAssessmentService.js';
 import '../../components/patient/PatientDiscovery.css';
 import '../../components/patient/pain-assessment/PainAssessment.css';
 
@@ -217,10 +218,14 @@ function AssessmentContext({ state, t }) {
 
 export default function PainAssessment() {
   const { t: translate, dir } = useLanguage();
+  const { session: actor } = useAuth();
   const t = (key, vars) => translate(`painAssessment.${key}`, vars);
   // Keep answers and step navigation together in the assessment reducer
   const [state, dispatch] = useReducer(assessmentReducer, undefined, initialAssessment);
   const [moreHelp, setMoreHelp] = useState(false);
+  const [result, setResult] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const heading = useRef(null);
   const firstRender = useRef(true);
   useEffect(() => {
@@ -243,14 +248,35 @@ export default function PainAssessment() {
   });
   const band = intensityBand(state.intensity);
   // Validate this step on Next, and all answers before showing the result
-  const canContinue = state.step === 5 ? completeAssessment(state) : validStep(state);
-  if (state.view === 'result') return <div className="pain-page" dir={dir}>
+  const canContinue = state.step === 5 ? completeAssessment(state) && !submitting : validStep(state);
+  async function finish() {
+    if (!completeAssessment(state) || submitting) return;
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const saved = await submitAssessment(actor, state);
+      setResult(saved);
+      dispatch({
+        type: 'complete'
+      });
+    } catch (error) {
+      setSubmitError(['network', 'unavailable', 'unauthenticated', 'forbidden', 'validation', 'conflict'].includes(error?.code)
+        ? error.code
+        : 'network');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+  if (state.view === 'result' && result) return <div className="pain-page" dir={dir}>
     <AssessmentResult
-      care={suggestCare(state)}
+      result={result}
+      answers={state}
       t={t}
       headingRef={heading}
       onRestart={() => {
         setMoreHelp(false);
+        setResult(null);
+        setSubmitError('');
         dispatch({
           type: 'reset'
         });
@@ -267,8 +293,10 @@ export default function PainAssessment() {
       <form
         onSubmit={event => {
           event.preventDefault();
-          if (canContinue) dispatch({
-            type: state.step === 5 ? 'complete' : 'next'
+          if (!canContinue) return;
+          if (state.step === 5) finish();
+          else dispatch({
+            type: 'next'
           });
         }}
       >
@@ -394,12 +422,15 @@ export default function PainAssessment() {
           >
             {t('back')}
           </Button>
-          <span id="pain-validation" className="pain-validation">{!canContinue && t('required')}</span>
+          <span id="pain-validation" className={`pain-validation${submitError ? ' is-error' : ''}`}>
+            {submitError ? t(`submitError.${submitError}`) : !canContinue && !submitting ? t('required') : submitting ? t('submitting') : ''}
+          </span>
           <Button
             type="submit"
             disabled={!canContinue}
-            aria-describedby={!canContinue ? 'pain-validation' : undefined}
-        >{t(state.step === 5 ? 'complete' : 'next')} <FontAwesomeIcon className="pain-next-arrow" icon={dir === 'rtl' ? faArrowLeft : faArrowRight} /></Button>
+            aria-busy={submitting}
+            aria-describedby={!canContinue || submitError || submitting ? 'pain-validation' : undefined}
+        >{t(state.step === 5 ? (submitting ? 'submitting' : 'complete') : 'next')} <FontAwesomeIcon className="pain-next-arrow" icon={dir === 'rtl' ? faArrowLeft : faArrowRight} /></Button>
         </footer>
       </form>
     </section>
