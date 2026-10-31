@@ -49,6 +49,7 @@ function RecordForm({
     price: record?.price ?? '25',
     duration: record?.duration ?? '45',
     availability: record?.availability || 'available',
+    serviceIds: Array.isArray(record?.serviceIds) ? record.serviceIds.map(String) : [],
     description: record?.description?.en || '',
     descriptionAr: record?.description?.ar || '',
     imageUrl: record?.imageUrl || '',
@@ -135,7 +136,7 @@ function RecordForm({
     setError('');
     setFields({});
     try {
-      const professional = ['specialtyId', 'specialty', 'specialtyAr', 'experience', 'availability', 'status', 'imageUrl'];
+      const professional = ['specialtyId', 'specialty', 'specialtyAr', 'experience', 'availability', 'serviceIds', 'status', 'imageUrl'];
       const keys = professionalOnly
         ? ['name', 'nameAr', ...professional]
         : ['name', 'nameAr', 'email', 'phone', 'password', ...professional];
@@ -229,6 +230,25 @@ function RecordForm({
               value,
               label: tr(value)
             })))}
+            <fieldset className="center-form-checks">
+              <legend>{tr('assignServices')}</legend>
+              <p className="center-form-help">{tr('assignServicesHelp')}</p>
+              {data.services.filter(item => item.status === 'active').length === 0
+                ? <p className="center-form-help">{tr('noServices')}</p>
+                : data.services.filter(item => item.status === 'active').map(service => (
+                  <label className="remaining-check" key={service.id}>
+                    <input
+                      type="checkbox"
+                      checked={values.serviceIds.includes(service.id)}
+                      disabled={busy}
+                      onChange={() => set('serviceIds', values.serviceIds.includes(service.id)
+                        ? values.serviceIds.filter(id => id !== service.id)
+                        : [...values.serviceIds, service.id])}
+                    />
+                    <span>{name(service.name)}</span>
+                  </label>
+                ))}
+            </fieldset>
           </>}
           {kind === 'service' && <>
             {select('specialtyId', specialtySelectOptions, chooseSpecialty)}

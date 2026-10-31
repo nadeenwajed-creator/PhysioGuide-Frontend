@@ -678,6 +678,20 @@ export function toAdminReviews(body) {
   };
 }
 
+// The Schedules API returns C# names and "HH:mm:ss" times; the centre portal
+// works with day numbers (0 = Sunday) and plain "HH:mm" values.
+export function toScheduleWindow(body) {
+  if (!body || typeof body !== 'object') return null;
+  return {
+    id: body.id ?? body.scheduleId ?? null,
+    therapistId: String(body.therapistId ?? ''),
+    day: Number(body.day ?? body.dayOfWeek),
+    start: String(body.start ?? body.startTime ?? '').slice(0, 5),
+    end: String(body.end ?? body.endTime ?? '').slice(0, 5),
+    isAvailable: body.isAvailable !== false,
+  };
+}
+
 export function toAdminSettings(body) {
   const profile = body?.profile ?? {};
   return {

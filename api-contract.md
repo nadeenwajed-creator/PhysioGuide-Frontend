@@ -413,7 +413,7 @@ All under `/api/center`, `Roles = "Center"`.
 | POST | `/workspace/services` | `SaveServiceDto` → `201` |
 | PUT | `/workspace/services/{serviceId}` | `SaveServiceDto` → `200` |
 | DELETE | `/workspace/services/{serviceId}` | – → `204` (deactivates) |
-| POST | `/therapists` | `CreateTherapistDto` (adds `phoneNumber`) → `200`; creates the login account |
+| POST | `/therapists` | `CreateTherapistDto` (adds `phoneNumber`, optional `serviceIds`) → `200`; creates the login account and links the chosen centre services |
 | PUT | `/workspace/therapists/{therapistId}` | `UpdateTherapistDto` |
 | DELETE | `/workspace/therapists/{therapistId}` | – → `204` (deactivates) |
 | GET/POST | `/workspace/patients` | `CreateCenterPatientDto` → `201` on POST |
@@ -447,6 +447,28 @@ both can be referenced by existing appointments and a login account, so the
 row is hidden from public endpoints rather than dropped.
 
 Password change is shared: `POST /api/Auth/change-password`.
+
+#### Therapist weekly schedules
+
+`/api/Schedules`, `Roles = "Center"`; every route resolves the centre from the
+JWT, and `therapistId` must belong to it.
+
+| Method | Path | Body |
+|---|---|---|
+| GET | `/therapists/{therapistId}` | – → `[{scheduleId, therapistId, dayOfWeek, startTime, endTime, isAvailable}]` |
+| POST | `/therapists/{therapistId}` | `{dayOfWeek, startTime, endTime, isAvailable}` → `201` |
+| PUT | `/therapists/{therapistId}/{scheduleId}` | same body |
+| DELETE | `/therapists/{therapistId}/{scheduleId}` | – → `204` |
+
+`dayOfWeek` is the .NET enum as an integer (`0 = Sunday … 6 = Saturday`);
+`startTime`/`endTime` are `HH:mm:ss` in responses and accept `HH:mm` in
+requests. Rules enforced server-side: the window must sit inside the centre's
+`CenterWorkingHours` for that day (`400` with field errors), same-day windows
+must not overlap, and a change that would leave a pending/confirmed appointment
+outside an available window returns `409 {message}`. Centres registered before
+working hours existed receive default hours at registration, and
+`PUT /workspace/hours` now creates any missing day rows instead of silently
+updating none.
 
 ### 6.7 Therapist workspace (phase 2)
 

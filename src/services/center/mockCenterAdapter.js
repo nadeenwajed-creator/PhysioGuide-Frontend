@@ -197,6 +197,55 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(record);
     },
+    async getTherapistSchedule(actor, therapistId) {
+      requireCenter(actor);
+      return clone(find('therapists', therapistId).schedule || []);
+    },
+    async saveTherapistSchedule(actor, therapistId, desired = []) {
+      requireCenter(actor);
+      const therapist = find('therapists', therapistId);
+      const hours = state.center.hours;
+      const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+      const fields = {};
+      for (const window of desired) {
+        if (!Number.isInteger(window.day) || window.day < 0 || window.day > 6) fields.dayOfWeek = 'selection';
+        if (!timePattern.test(window.start) || !timePattern.test(window.end)) {
+          fields.startTime = 'timeOrder';
+          fields.endTime = 'timeOrder';
+        } else if (window.start >= window.end) fields.endTime = 'timeOrder';
+      }
+      if (Object.keys(fields).length) fail('validation', fields);
+      // The same rule as the API: a window must sit inside the centre's hours.
+      if (!hours) fail('validation', { dayOfWeek: 'outsideHours' });
+      for (const window of desired) {
+        const [open, close] = window.day === 5
+          ? [hours.fridayStart, hours.fridayEnd]
+          : [hours.weekStart, hours.weekEnd];
+        if (window.start < open || window.end > close) fail('validation', { startTime: 'outsideHours' });
+      }
+      const days = desired.map((window) => window.day);
+      if (new Set(days).size !== days.length) fail('conflict');
+      // Pending and confirmed appointments must stay inside an available window.
+      const affected = new Set([...days, ...(therapist.schedule || []).map((window) => window.day)]);
+      for (const appointment of state.appointments) {
+        if (appointment.therapistId !== therapistId || !['pending', 'confirmed'].includes(appointment.status)) continue;
+        const day = new Date(`${appointment.date}T12:00:00`).getDay();
+        if (!affected.has(day)) continue;
+        const start = appointment.time;
+        const end = `${String(Number(start.slice(0, 2)) + Math.floor((Number(start.slice(3)) + appointment.durationMinutes) / 60)).padStart(2, '0')}:${String((Number(start.slice(3)) + appointment.durationMinutes) % 60).padStart(2, '0')}`;
+        const covered = desired.some((window) => window.isAvailable !== false && window.day === day && window.start <= start && window.end >= end);
+        if (!covered) fail('conflict');
+      }
+      therapist.schedule = desired.map((window) => ({
+        id: window.id || `schedule-${therapistId}-${window.day}`,
+        day: window.day,
+        start: window.start,
+        end: window.end,
+        isAvailable: window.isAvailable !== false
+      }));
+      emit();
+      return clone(therapist.schedule);
+    },
     async saveService(actor, values, id) {
       requireCenter(actor);
       const fields = {};

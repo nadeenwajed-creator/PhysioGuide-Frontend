@@ -19,6 +19,7 @@ import {
   EmptyState,
 } from '../../components/center/CenterUI.jsx';
 import RecordForm from '../../components/center/RecordForm.jsx';
+import TherapistScheduleForm from '../../components/center/TherapistScheduleForm.jsx';
 import usePagination from '../../components/center/usePagination.js';
 import useCenter from '../../components/center/useCenter.js';
 import { includesQuery, money } from '../../utils/centerFormat.js';
@@ -32,6 +33,7 @@ function Physiotherapists() {
   const [availability, setAvailability] = useState('all');
   const [sort, setSort] = useState('rating');
   const [form, setForm] = useState(null);
+  const [schedule, setSchedule] = useState(null);
   const prices = therapist => therapistServicePrices(therapist, data.services);
   const lowestPrice = therapist => Math.min(...prices(therapist));
   function priceLabel(therapist) {
@@ -148,6 +150,10 @@ function Physiotherapists() {
                     label: tr('edit.therapist'),
                     onClick: () => setForm(therapist),
                   },
+                  {
+                    label: tr('workingHours'),
+                    onClick: () => setSchedule(therapist),
+                  },
                 ]}
               />
             </div>
@@ -205,6 +211,12 @@ function Physiotherapists() {
           kind="therapist"
           record={form.id ? form : undefined}
           onClose={() => setForm(null)}
+        />
+      )}
+      {schedule && (
+        <TherapistScheduleForm
+          therapist={schedule}
+          onClose={() => setSchedule(null)}
         />
       )}
     </div>

@@ -10,6 +10,7 @@ import * as map from './mappers.js';
 import { toAssessmentResult } from '../patient/painAssessmentModel.js';
 
 const CENTER_WORKSPACE = '/api/center/workspace';
+const SCHEDULES = '/api/Schedules';
 const THERAPIST_WORKSPACE = '/api/therapist/workspace';
 const PATIENT = '/api/patient';
 const AUTH = '/api/Auth';
@@ -783,6 +784,49 @@ export const centerOperations = {
         },
       });
       return resolveAssets({ ...values, id: String(body?.therapistId ?? body?.id ?? '') });
+    },
+  },
+
+  getTherapistSchedule: {
+    request: (_actor, therapistId) => ({
+      method: 'GET',
+      path: `${SCHEDULES}/therapists/${therapistId}`,
+    }),
+    response: (body) => (Array.isArray(body) ? body : body?.windows ?? []).map(map.toScheduleWindow),
+  },
+
+  saveTherapistSchedule: {
+    // The API manages one window per request, so the desired week is applied
+    // as a diff: delete removed windows, then update kept ones, then create
+    // new ones. Deletes run first so re-assigned days cannot overlap mid-save.
+    execute: async (client, _actor, therapistId, desired = [], previous = []) => {
+      const existing = new Map(previous.map((window) => [String(window.id), window]));
+      const payload = (window) => ({
+        dayOfWeek: window.day,
+        startTime: window.start,
+        endTime: window.end,
+        isAvailable: window.isAvailable !== false,
+      });
+
+      for (const window of previous) {
+        const kept = desired.some((item) => item.id != null && String(item.id) === String(window.id));
+        if (!kept) await client.delete(`${SCHEDULES}/therapists/${therapistId}/${window.id}`);
+      }
+      for (const window of desired) {
+        if (window.id == null) continue;
+        const before = existing.get(String(window.id));
+        if (!before) continue;
+        if (before.day !== window.day || before.start !== window.start || before.end !== window.end) {
+          await client.put(`${SCHEDULES}/therapists/${therapistId}/${window.id}`, { data: payload(window) });
+        }
+      }
+      for (const window of desired) {
+        if (window.id != null) continue;
+        await client.post(`${SCHEDULES}/therapists/${therapistId}`, { data: payload(window) });
+      }
+
+      const body = await client.get(`${SCHEDULES}/therapists/${therapistId}`);
+      return (Array.isArray(body) ? body : []).map(map.toScheduleWindow);
     },
   },
 
