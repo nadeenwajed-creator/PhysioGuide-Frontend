@@ -801,10 +801,14 @@ export const centerOperations = {
     // new ones. Deletes run first so re-assigned days cannot overlap mid-save.
     execute: async (client, _actor, therapistId, desired = [], previous = []) => {
       const existing = new Map(previous.map((window) => [String(window.id), window]));
+      // The Schedules binder only accepts "HH:mm:ss", while the centre-hours
+      // endpoint requires the opposite ("HH:mm" exactly) — so times are widened
+      // here on the wire, and toScheduleWindow slices them back for the UI.
+      const time = (value) => (/^\d{2}:\d{2}$/.test(String(value)) ? `${value}:00` : value);
       const payload = (window) => ({
         dayOfWeek: window.day,
-        startTime: window.start,
-        endTime: window.end,
+        startTime: time(window.start),
+        endTime: time(window.end),
         isAvailable: window.isAvailable !== false,
       });
 

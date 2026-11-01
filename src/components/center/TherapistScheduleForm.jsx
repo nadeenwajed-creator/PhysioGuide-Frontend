@@ -45,7 +45,7 @@ function TherapistScheduleForm({ therapist, onClose }) {
       })
       .catch((failure) => {
         if (!alive) return;
-        setError(tr(`error.${failure.code || 'network'}`));
+        setError(failure.code || 'network');
         setLoading(false);
       });
     return () => { alive = false; };
@@ -94,12 +94,11 @@ function TherapistScheduleForm({ therapist, onClose }) {
     } catch (failure) {
       // 409 means an appointment or window would be orphaned; 400 covers
       // windows outside the centre's working hours for that day.
-      const code = failure.code === 'conflict'
+      setError(failure.code === 'conflict'
         ? 'scheduleConflict'
         : failure.code === 'validation'
           ? 'outsideHours'
-          : (failure.code || 'network');
-      setError(tr(`error.${code}`));
+          : (failure.code || 'network'));
     } finally {
       setBusy(false);
     }
@@ -167,7 +166,7 @@ function TherapistScheduleForm({ therapist, onClose }) {
             </li>
           ))}
         </ul>
-        <Feedback error>{error}</Feedback>
+        <Feedback error>{error && tr(`error.${error}`)}</Feedback>
       </form>
     </Modal>
   );
