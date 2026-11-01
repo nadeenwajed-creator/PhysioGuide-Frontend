@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import { Feedback } from '../../components/center/CenterUI.jsx';
 import { callAdmin } from '../../services/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
@@ -131,9 +132,16 @@ function AdminPatients() {
               {data?.items?.map((patient) => (
                 <tr key={patient.id}>
                   <td>
-                    <div className="admin-table__primary">
-                      <strong>{patient.name}</strong>
-                      <span>{patient.email}</span>
+                    <div className="admin-table__person">
+                      <Avatar
+                        src={patient.imageUrl}
+                        name={patient.name}
+                        size="sm"
+                      />
+                      <div className="admin-table__primary">
+                        <strong>{patient.name}</strong>
+                        <span>{patient.email}</span>
+                      </div>
                     </div>
                   </td>
                   <td>{patient.age ?? '—'}</td>

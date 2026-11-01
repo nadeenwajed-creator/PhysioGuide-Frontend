@@ -1,4 +1,5 @@
 import { usePatientLabels } from '../../components/patient/usePatientLabels.js';
+import { personImage } from '../../utils/personImage.js';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import Button from '../../components/shared/Button/Button.jsx';
@@ -147,7 +148,7 @@ export default function CenterDetails() {
           {tab === 'therapists' && <div className="pd-grid">
             {!c.therapists.length && <p>{t('empty')}</p>}
             {c.therapists.map(p => <Panel key={p.id} className="pd-therapist-card">
-              <RecordImage className="pd-portrait" src={p.imageUrl} alt={name(p.name)} />
+              <RecordImage className="pd-portrait" src={personImage(p.imageUrl)} alt={name(p.name)} />
               <h2>{name(p.name)}</h2>
               <p>{name(p.specialty)}</p>
               <Button

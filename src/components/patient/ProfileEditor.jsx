@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import Modal from '../shared/Modal/Modal.jsx';
+import { personImage } from '../../utils/personImage.js';
 import Button from '../shared/Button/Button.jsx';
 import FormField from '../shared/FormField/FormField.jsx';
 import { Feedback, RecordImage } from '../center/CenterUI.jsx';
@@ -63,7 +64,7 @@ export default function ProfileEditor({ state, onClose, onSaved }) {
   >
     <form id="patient-profile-form" className="pa-edit-form" onSubmit={submit} noValidate>
       <div className="pa-photo-editor">
-        <RecordImage src={values.imageUrl} alt={values.name} />
+        <RecordImage src={personImage(values.imageUrl)} alt={values.name} />
         <label>
           {tr('changePhoto')}
           <input

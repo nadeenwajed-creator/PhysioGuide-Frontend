@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { personImage } from "../../utils/personImage.js";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   faChevronLeft,
@@ -136,12 +137,12 @@ export default function Appointments() {
                   )}/therapists/${encodeURIComponent(row.therapistId)}`}
                   aria-label={name(row.therapistName)}
                 >
-                  <RecordImage src={row.therapistImage} alt="" />
+                  <RecordImage src={personImage(row.therapistImage)} alt="" />
                 </Link>
               ) : (
                 <RecordImage
                   className="pa-therapist-photo"
-                  src={row.therapistImage}
+                  src={personImage(row.therapistImage)}
                   alt={name(row.therapistName)}
                 />
               )}

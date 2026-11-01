@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 import { useLanguage } from '../../../context/LanguageContext.jsx';
+import { PERSON_PLACEHOLDER_IMAGE } from '../../../utils/personImage.js';
 
 import './Avatar.css';
 
@@ -20,14 +21,14 @@ function Avatar({
 
   const [imageState, setImageState] = useState({
     src,
-    failed: false,
+    failed: [],
   });
 
   // Reset the image error when the source changes.
   if (imageState.src !== src) {
     setImageState({
       src,
-      failed: false,
+      failed: [],
     });
   }
 
@@ -40,8 +41,17 @@ function Avatar({
     ? statusLabel ?? t(`avatar.${status}`)
     : undefined;
 
-  const showImage = Boolean(src) &&
-    !(imageState.src === src && imageState.failed);
+  // People without a profile photo get a generated face from
+  // thispersondoesnotexist.com; the initials stay as the last resort when even
+  // that image cannot be loaded.
+  const failed = imageState.failed;
+  const resolvedSrc = src && !failed.includes(src)
+    ? src
+    : !failed.includes(PERSON_PLACEHOLDER_IMAGE)
+      ? PERSON_PLACEHOLDER_IMAGE
+      : null;
+
+  const showImage = Boolean(resolvedSrc);
 
   const nameParts = displayName ? displayName.split(/\s+/) : [];
   const initials = nameParts.length === 0
@@ -66,15 +76,15 @@ function Avatar({
       <span className="pg-avatar__visual">
         {showImage ? (
           <img
-            key={src}
+            key={resolvedSrc}
             className="pg-avatar__image"
-            src={src}
+            src={resolvedSrc}
             alt={accessibleLabel}
             onError={() => {
-              setImageState({
+              setImageState((previous) => ({
                 src,
-                failed: true,
-              });
+                failed: [...previous.failed, resolvedSrc],
+              }));
             }}
           />
         ) : (

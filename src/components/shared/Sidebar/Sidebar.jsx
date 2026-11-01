@@ -5,7 +5,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faXmark } from '@fortawesome/free-solid-svg-icons';
 
-import { useLanguage } from '../../../context/LanguageContext.jsx';
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './Sidebar.css';
 

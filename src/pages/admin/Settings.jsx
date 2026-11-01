@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PERSON_PLACEHOLDER_IMAGE } from '../../utils/personImage.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
@@ -178,7 +179,9 @@ function AdminSettings() {
             <div className="admin-card">
               <h2>{t('admin.settingsPage.profileInfo')}</h2>
               <div className="admin-profile">
-                <div className="admin-profile__avatar" />
+                <div className="admin-profile__avatar">
+                  <img src={PERSON_PLACEHOLDER_IMAGE} alt="" />
+                </div>
                 <div className="admin-profile__info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <strong>{profile.name || '—'}</strong>

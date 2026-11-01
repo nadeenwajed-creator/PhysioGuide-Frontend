@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faPlus, faSearch, faStar } from '@fortawesome/free-solid-svg-icons';
+import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import FormField from '../../components/shared/FormField/FormField.jsx';
 import Modal from '../../components/shared/Modal/Modal.jsx';
@@ -260,9 +261,16 @@ function AdminPhysiotherapists() {
               {data?.items?.map((therapist) => (
                 <tr key={therapist.id}>
                   <td>
-                    <div className="admin-table__primary">
-                      <strong>{therapist.name}</strong>
-                      <span>{therapist.license || therapist.id}</span>
+                    <div className="admin-table__person">
+                      <Avatar
+                        src={therapist.imageUrl}
+                        name={therapist.name}
+                        size="sm"
+                      />
+                      <div className="admin-table__primary">
+                        <strong>{therapist.name}</strong>
+                        <span>{therapist.license || therapist.id}</span>
+                      </div>
                     </div>
                   </td>
                   <td>{therapist.specialty || '—'}</td>

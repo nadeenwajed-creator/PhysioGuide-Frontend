@@ -13,6 +13,7 @@ import SearchBar from '../components/shared/SearchBar/SearchBar.jsx';
 import Button from '../components/shared/Button/Button.jsx';
 import { ConfirmDialog, Feedback } from '../components/center/CenterUI.jsx';
 import { useLanguage } from '../context/LanguageContext.jsx';
+import { personImage } from '../utils/personImage.js';
 import ThemeContext from '../context/ThemeContext.jsx';
 import { getCenterWorkspace, subscribeCenter } from '../services/centerPortalService.js';
 import { getMessagingWorkspace } from '../services/messageService.js';
@@ -110,7 +111,11 @@ function CenterLayout({ portal = 'center' }) {
   const account = patientPortal ? data?.patientProfile || data?.patients.find(item => item.id === actor.patientId) || actor : therapistPortal ? data?.therapists.find(item => item.id === actor.therapistId) : data?.center;
   const user = {
     name: name(account?.name),
-    avatar: account?.imageUrl
+    // Patients and therapists get the generated face when they have no photo;
+    // the center's own account keeps the icon fallback.
+    avatar: patientPortal || therapistPortal
+      ? personImage(account?.imageUrl)
+      : account?.imageUrl
   };
   const results = search.trim() ? items.filter(item => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())) : [];
   const notifications = (data?.notifications || [])

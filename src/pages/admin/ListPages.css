@@ -81,6 +81,13 @@
   border-top: none;
 }
 
+/* Person cells: circular profile photo left of the name block. */
+.admin-table__person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .admin-table__primary {
   display: flex;
   flex-direction: column;

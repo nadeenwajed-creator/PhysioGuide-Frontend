@@ -1,4 +1,5 @@
 import { usePatientLabels } from '../../components/patient/usePatientLabels.js';
+import { personImage } from '../../utils/personImage.js';
 import { useCallback, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -61,7 +62,7 @@ function Details({ state, center, person }) {
     </nav>
     <div className="pd-therapist-top">
       <Panel className="pd-professional">
-        <RecordImage src={person.imageUrl} alt={name(person.name)} />
+        <RecordImage src={personImage(person.imageUrl)} alt={name(person.name)} />
         <div className="pd-professional-summary">
           <p className="pd-eyebrow">{name(person.specialty)}</p>
           <h1>{name(person.name)}</h1>

@@ -9,7 +9,7 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 
-import { useLanguage } from '../../../context/LanguageContext.jsx';
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './ProfileMenu.css';
 

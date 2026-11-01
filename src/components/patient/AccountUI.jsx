@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faPhone } from '@fortawesome/free-solid-svg-icons';
 import Button from '../shared/Button/Button.jsx';
+import { personImage } from '../../utils/personImage.js';
 import { Feedback, RecordImage } from '../center/CenterUI.jsx';
 
 // Keep loading and service errors consistent across account pages
@@ -79,7 +80,7 @@ export function AccountTabs({
 export function PatientIdentity({ profile, name, tr, children }) {
   return <div className="pa-identity">
     <div className="pa-avatar">
-      <RecordImage src={profile.imageUrl} alt={name(profile.name)} />
+      <RecordImage src={personImage(profile.imageUrl)} alt={name(profile.name)} />
       {children}
     </div>
     <div className="pa-identity__text">
