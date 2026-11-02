@@ -17,6 +17,7 @@ import { personImage } from '../utils/personImage.js';
 import ThemeContext from '../context/ThemeContext.jsx';
 import { getCenterWorkspace, subscribeCenter } from '../services/centerPortalService.js';
 import { getMessagingWorkspace } from '../services/messageService.js';
+import { startMessagingRealtime } from '../services/messagingRealtime.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { logout as signOut } from '../services/authService.js';
 import { markNotificationsRead } from '../services/notificationService.js';
@@ -108,6 +109,12 @@ function CenterLayout({ portal = 'center' }) {
     }, 20000);
     return () => window.clearInterval(timer);
   }, [pathname]);
+  // Server push replaces waiting for the poll: each hub event schedules one
+  // short coalesced refresh, so the other side's message lands instantly.
+  useEffect(() => {
+    if (!actor?.id) return undefined;
+    return startMessagingRealtime(() => refreshRef.current?.());
+  }, [actor]);
   const data = workspace?.actorId === actor.id && workspace.role === role && workspace.centerId === actor.centerId && workspace.therapistId === actor.therapistId && workspace.patientId === actor.patientId ? workspace.data : null;
   const navigation = patientPortal ? [['dashboard', faHouse], ['centers', faLocationDot], ['pain-assessment', faClipboardList], ['appointments', faCalendarDays], ['messages', faComments], ['profile', faUser], ['settings', faGear]] : therapistPortal ? [['messages', faComments], ['profile', faUser]] : centerNavigation;
   const profilePath = patientPortal ? '/patient/profile' : therapistPortal ? '/center/physiotherapist/profile' : '/center/profile';
