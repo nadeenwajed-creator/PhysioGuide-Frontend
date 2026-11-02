@@ -148,7 +148,7 @@ export default function CenterDetails() {
           {tab === 'therapists' && <div className="pd-grid">
             {!c.therapists.length && <p>{t('empty')}</p>}
             {c.therapists.map(p => <Panel key={p.id} className="pd-therapist-card">
-              <RecordImage className="pd-portrait" src={personImage(p.imageUrl)} alt={name(p.name)} />
+              <RecordImage className="pd-portrait" src={personImage(p.imageUrl, name(p.name), p.email)} alt={name(p.name)} />
               <h2>{name(p.name)}</h2>
               <p>{name(p.specialty)}</p>
               <Button

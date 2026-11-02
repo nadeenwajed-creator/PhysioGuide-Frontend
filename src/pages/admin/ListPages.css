@@ -16,6 +16,15 @@
   color: var(--color-text-secondary);
 }
 
+/* Header with a page-level action (add therapist, new appointment, save). */
+.admin-list-page__header--actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .admin-list-page__filters {
   display: flex;
   flex-wrap: wrap;
@@ -23,39 +32,51 @@
   align-items: center;
 }
 
-.admin-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  border-radius: 12px;
+/* Shared SearchBar grows to fill the row; the shared FilterSelect and the
+   date fields keep their intrinsic width (their components default to 100%). */
+.admin-list-page__filters .pg-search-bar {
+  flex: 1 1 260px;
+}
+
+.admin-list-page__filters .pg-filter-select,
+.admin-list-page__filters .admin-date {
+  flex: 0 1 auto;
+  inline-size: auto;
+  max-inline-size: 100%;
+}
+
+/* Native date fields styled to sit beside the shared filter controls. */
+.admin-date {
+  min-block-size: max(44px, calc(1lh + 20px));
+  padding: 9px 12px;
   border: 1px solid var(--color-border);
+  border-radius: 8px;
   background: var(--color-surface);
-  flex: 1 1 280px;
-  min-width: 240px;
-}
-
-.admin-search input {
-  border: none;
-  background: transparent;
-  flex: 1;
-  font: inherit;
   color: var(--color-text-primary);
+  font: inherit;
+  font-size: 16px;
+  line-height: normal;
 }
 
-.admin-search input:focus {
-  outline: none;
+.admin-date:focus-visible {
+  border-color: var(--color-primary-light);
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
 }
 
 .admin-table-wrapper {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  overflow: hidden;
+  /* Wide admin tables scroll horizontally instead of crushing their columns
+     on narrow screens; the rounded corners still clip the scroll area. */
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .admin-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
 }
 
@@ -96,6 +117,13 @@
 .admin-table__primary span {
   color: var(--color-text-secondary);
   font-size: 13px;
+}
+
+/* Rating cell: shared stars left of the value and review count. */
+.admin-table__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .admin-badge {
@@ -139,41 +167,15 @@
   text-decoration: none;
 }
 
-.admin-icon-button {
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
+/* Range label beside the shared Pagination control; wraps on small screens. */
 .admin-pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
   padding: 16px 20px;
   color: var(--color-text-secondary);
-}
-
-.admin-pagination__pages {
-  display: flex;
-  gap: 8px;
-}
-
-.admin-pagination__pages button {
-  border: 1px solid transparent;
-  background: transparent;
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-
-.admin-pagination__pages button.is-active {
-  background: var(--color-surface-mint);
-  color: var(--color-primary);
-}
-
-.admin-pagination__pages button:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 /* Loading / error block shared by every admin query state. */
@@ -239,124 +241,25 @@ select.admin-badge option {
   gap: 16px;
 }
 
-/* Dropdown menu for status changes. */
-.admin-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  z-index: 20;
-  min-width: 160px;
-  padding: 6px 0;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
+/* Narrow screens: tighter cells and stacked page headers. */
+@media (max-width: 767px) {
+  .admin-table th,
+  .admin-table td {
+    padding: 12px;
+  }
 
-[dir='rtl'] .admin-dropdown {
-  right: auto;
-  left: 0;
-}
+  .admin-list-page__header--actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.admin-dropdown__item {
-  display: block;
-  width: 100%;
-  padding: 10px 16px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  font: inherit;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: background 0.15s;
-}
+  .admin-list-page__header--actions .pg-button {
+    align-self: flex-start;
+  }
 
-[dir='rtl'] .admin-dropdown__item {
-  text-align: right;
-}
-
-.admin-dropdown__item:hover {
-  background: var(--color-bg-light);
-}
-
-/* Modal overlay. */
-.admin-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
-}
-
-.admin-modal {
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: var(--color-surface);
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-}
-
-.admin-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px 0;
-}
-
-.admin-modal__header h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.admin-modal__form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 20px 24px 24px;
-}
-
-.admin-modal__form label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
-.admin-modal__form input,
-.admin-modal__form select {
-  padding: 10px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  font: inherit;
-  color: var(--color-text-primary);
-  background: var(--color-bg-light);
-}
-
-.admin-modal__form input:focus,
-.admin-modal__form select:focus {
-  outline: 2px solid var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.admin-modal__error {
-  color: var(--color-danger);
-  font-size: 14px;
-  margin: 0;
-}
-
-.admin-modal__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding-top: 8px;
+  .admin-pagination {
+    padding: 16px 12px;
+  }
 }
 
 /* Document lists and photo grids for center detail. */

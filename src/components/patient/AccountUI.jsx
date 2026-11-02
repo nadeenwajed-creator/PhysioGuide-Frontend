@@ -80,7 +80,7 @@ export function AccountTabs({
 export function PatientIdentity({ profile, name, tr, children }) {
   return <div className="pa-identity">
     <div className="pa-avatar">
-      <RecordImage src={personImage(profile.imageUrl)} alt={name(profile.name)} />
+      <RecordImage src={personImage(profile.imageUrl, name(profile.name), profile.email)} alt={name(profile.name)} />
       {children}
     </div>
     <div className="pa-identity__text">

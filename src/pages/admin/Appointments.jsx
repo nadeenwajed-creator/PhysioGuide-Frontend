@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisV, faPlus, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV, faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
+import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import FormField from '../../components/shared/FormField/FormField.jsx';
 import Modal from '../../components/shared/Modal/Modal.jsx';
+import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
+import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import { Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
@@ -198,10 +200,7 @@ function AdminAppointments() {
 
   return (
     <div className="admin-list-page">
-      <header
-        className="admin-list-page__header"
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
-      >
+      <header className="admin-list-page__header admin-list-page__header--actions">
         <div>
           <h1>{t('admin.appointments.title')}</h1>
           <p>{t('admin.appointments.subtitle')}</p>
@@ -212,55 +211,49 @@ function AdminAppointments() {
       </header>
 
       <div className="admin-list-page__filters">
-        <div className="admin-search">
-          <FontAwesomeIcon icon={faSearch} />
-          <input
-            value={filters.search}
-            onChange={(e) => update({ search: e.target.value })}
-            placeholder={t('admin.appointments.search')}
-          />
-        </div>
-        <select
-          className="admin-select"
+        <SearchBar
+          value={filters.search}
+          onChange={(value) => update({ search: value })}
+          placeholder={t('admin.appointments.search')}
+          ariaLabel={t('admin.appointments.search')}
+        />
+        <FilterSelect
           value={filters.status}
-          onChange={(e) => update({ status: e.target.value })}
-          aria-label={t('center.status')}
-        >
-          <option value="">{t('admin.allStatuses')}</option>
-          {appointmentStatuses.map((status) => (
-            <option key={status} value={status}>
-              {t(`admin.status.${status}`)}
-            </option>
-          ))}
-        </select>
-        <select
-          className="admin-select"
+          onChange={(value) => update({ status: value })}
+          ariaLabel={t('center.status')}
+          options={[
+            { value: '', label: t('admin.allStatuses') },
+            ...appointmentStatuses.map((status) => ({
+              value: status,
+              label: t(`admin.status.${status}`),
+            })),
+          ]}
+        />
+        <FilterSelect
           value={filters.center}
-          onChange={(e) => update({ center: e.target.value })}
-          aria-label={t('admin.allCenters')}
-        >
-          <option value="">{t('admin.allCenters')}</option>
-          {options.centers.map((center) => (
-            <option key={center.id} value={center.id}>
-              {center.name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          className="admin-select"
-          value={filters.from}
-          onChange={(e) => update({ from: e.target.value })}
-          aria-label={t('admin.appointments.from')}
-          style={{ padding: '10px 12px' }}
+          onChange={(value) => update({ center: value })}
+          ariaLabel={t('admin.allCenters')}
+          options={[
+            { value: '', label: t('admin.allCenters') },
+            ...options.centers.map((center) => ({
+              value: center.id,
+              label: center.name,
+            })),
+          ]}
         />
         <input
           type="date"
-          className="admin-select"
+          className="admin-date"
+          value={filters.from}
+          onChange={(e) => update({ from: e.target.value })}
+          aria-label={t('admin.appointments.from')}
+        />
+        <input
+          type="date"
+          className="admin-date"
           value={filters.to}
           onChange={(e) => update({ to: e.target.value })}
           aria-label={t('admin.appointments.to')}
-          style={{ padding: '10px 12px' }}
         />
       </div>
 
@@ -297,14 +290,18 @@ function AdminAppointments() {
                   <td>{appointment.service || '—'}</td>
                   <td>{formatDateTime(appointment.datetime)}</td>
                   <td>
-                    <span className={`admin-badge admin-badge--${appointment.status}`}>
+                    <StatusBadge status={appointment.status}>
                       {t(`admin.status.${appointment.status}`)}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td>
-                    <button className="admin-icon-button" aria-label={t('center.actions')}>
-                      <FontAwesomeIcon icon={faEllipsisV} />
-                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconOnly
+                      icon={faEllipsisV}
+                      aria-label={t('center.actions')}
+                    />
                   </td>
                 </tr>
               ))}

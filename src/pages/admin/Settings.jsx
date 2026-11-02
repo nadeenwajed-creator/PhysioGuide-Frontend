@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { PERSON_PLACEHOLDER_IMAGE } from '../../utils/personImage.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import FormField from '../../components/shared/FormField/FormField.jsx';
 import Modal from '../../components/shared/Modal/Modal.jsx';
+import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import { Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
@@ -154,10 +155,7 @@ function AdminSettings() {
 
   return (
     <div className="admin-settings">
-      <header
-        className="admin-list-page__header"
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
-      >
+      <header className="admin-list-page__header admin-list-page__header--actions">
         <div>
           <h1>{t('admin.settingsPage.title')}</h1>
           <p>{t('admin.settingsPage.subtitle')}</p>
@@ -180,16 +178,16 @@ function AdminSettings() {
               <h2>{t('admin.settingsPage.profileInfo')}</h2>
               <div className="admin-profile">
                 <div className="admin-profile__avatar">
-                  <img src={PERSON_PLACEHOLDER_IMAGE} alt="" />
+                  <Avatar name={profile.name} email={profile.email} size="lg" />
                 </div>
                 <div className="admin-profile__info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <strong>{profile.name || '—'}</strong>
                     {profile.verified && (
-                      <span className="admin-badge admin-badge--active">
+                      <StatusBadge status="active">
                         <FontAwesomeIcon icon={faCheckCircle} />{' '}
                         {profile.role || t('admin.settingsPage.superAdmin')}
-                      </span>
+                      </StatusBadge>
                     )}
                   </div>
                   <span>

@@ -16,6 +16,14 @@ function StatusBadge({
     'pending',
     'completed',
     'cancelled',
+    // Admin moderation vocabulary (centers, patients, therapists, reviews).
+    'approved',
+    'rejected',
+    'active',
+    'inactive',
+    'suspended',
+    'published',
+    'reported',
   ];
 
   const badgeStatus = allowedStatuses.includes(status)

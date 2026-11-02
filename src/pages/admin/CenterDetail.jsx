@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faCheck, faTimes, faMinus } from '@fortawesome/free-solid-svg-icons';
+import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
+import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import { ConfirmDialog } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
@@ -45,23 +47,21 @@ function AdminCenterDetail() {
         <QueryState state={state}>
           <div className="admin-center-detail__title-row">
             <div className="admin-center-detail__title">
-              {center?.imageUrl ? (
-                <img
-                  src={center.imageUrl}
-                  alt={center.name}
-                  className="admin-center-detail__image"
-                />
-              ) : (
-                <div className="admin-center-detail__image" />
-              )}
+              <Avatar
+                src={center?.imageUrl}
+                name={center?.name}
+                email={center?.email}
+                size="lg"
+                className="admin-center-detail__image"
+              />
               <div>
                 <h1>{center?.name}</h1>
                 <span>{t('admin.center.id', { id: center?.id ?? id })}</span>
               </div>
             </div>
-            <span className={`admin-badge admin-badge--${center?.status}`}>
+            <StatusBadge status={center?.status ?? 'pending'}>
               {t(`admin.status.${center?.status ?? 'pending'}`)}
-            </span>
+            </StatusBadge>
           </div>
         </QueryState>
       </header>

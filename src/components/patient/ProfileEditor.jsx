@@ -64,7 +64,7 @@ export default function ProfileEditor({ state, onClose, onSaved }) {
   >
     <form id="patient-profile-form" className="pa-edit-form" onSubmit={submit} noValidate>
       <div className="pa-photo-editor">
-        <RecordImage src={personImage(values.imageUrl)} alt={values.name} />
+        <RecordImage src={personImage(values.imageUrl, values.name, values.email)} alt={values.name} />
         <label>
           {tr('changePhoto')}
           <input

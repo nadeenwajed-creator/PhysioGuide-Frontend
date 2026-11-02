@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisV, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
+import Button from '../../components/shared/Button/Button.jsx';
+import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
+import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import { Feedback } from '../../components/center/CenterUI.jsx';
 import { callAdmin } from '../../services/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
@@ -63,49 +65,42 @@ function AdminPatients() {
       </header>
 
       <div className="admin-list-page__filters">
-        <div className="admin-search">
-          <FontAwesomeIcon icon={faSearch} />
-          <input
-            value={filters.search}
-            onChange={(e) => update({ search: e.target.value })}
-            placeholder={t('admin.patients.search')}
-          />
-        </div>
-        <select
-          className="admin-select"
+        <SearchBar
+          value={filters.search}
+          onChange={(value) => update({ search: value })}
+          placeholder={t('admin.patients.search')}
+          ariaLabel={t('admin.patients.search')}
+        />
+        <FilterSelect
           value={filters.status}
-          onChange={(e) => update({ status: e.target.value })}
-          aria-label={t('center.status')}
-        >
-          <option value="">{t('admin.allStatuses')}</option>
-          {patientStatuses.map((status) => (
-            <option key={status} value={status}>
-              {t(`admin.status.${status}`)}
-            </option>
-          ))}
-        </select>
-        <select
-          className="admin-select"
+          onChange={(value) => update({ status: value })}
+          ariaLabel={t('center.status')}
+          options={[
+            { value: '', label: t('admin.allStatuses') },
+            ...patientStatuses.map((status) => ({
+              value: status,
+              label: t(`admin.status.${status}`),
+            })),
+          ]}
+        />
+        <FilterSelect
           value={filters.city}
-          onChange={(e) => update({ city: e.target.value })}
-          aria-label={t('admin.allCities')}
-        >
-          <option value="">{t('admin.allCities')}</option>
-          {options.cities.map((city) => (
-            <option key={city} value={city}>
-              {city}
-            </option>
-          ))}
-        </select>
-        <select
-          className="admin-select"
+          onChange={(value) => update({ city: value })}
+          ariaLabel={t('admin.allCities')}
+          options={[
+            { value: '', label: t('admin.allCities') },
+            ...options.cities.map((city) => ({ value: city, label: city })),
+          ]}
+        />
+        <FilterSelect
           value={filters.sort}
-          onChange={(e) => update({ sort: e.target.value })}
-          aria-label={t('admin.sort.default')}
-        >
-          <option value="">{t('admin.sort.default')}</option>
-          <option value="recent">{t('admin.recentlyActive')}</option>
-        </select>
+          onChange={(value) => update({ sort: value })}
+          ariaLabel={t('admin.sort.default')}
+          options={[
+            { value: '', label: t('admin.sort.default') },
+            { value: 'recent', label: t('admin.recentlyActive') },
+          ]}
+        />
       </div>
 
       {notice && (
@@ -136,6 +131,7 @@ function AdminPatients() {
                       <Avatar
                         src={patient.imageUrl}
                         name={patient.name}
+                        email={patient.email}
                         size="sm"
                       />
                       <div className="admin-table__primary">
@@ -164,9 +160,13 @@ function AdminPatients() {
                     </select>
                   </td>
                   <td>
-                    <button className="admin-icon-button" aria-label={t('center.actions')}>
-                      <FontAwesomeIcon icon={faEllipsisV} />
-                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconOnly
+                      icon={faEllipsisV}
+                      aria-label={t('center.actions')}
+                    />
                   </td>
                 </tr>
               ))}

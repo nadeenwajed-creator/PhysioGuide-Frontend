@@ -794,6 +794,8 @@ export const centerOperations = {
 
       const professional = {
         fullName: values?.name,
+        fullNameAr: values?.nameAr,
+        bioAr: values?.aboutAr,
         specialtyId,
         profileImageUrl: values?.imageUrl,
         yearsOfExperience: values?.experience == null || values?.experience === ''
@@ -878,8 +880,10 @@ export const centerOperations = {
       const body = await client.put('/api/Therapist/profile', {
         data: {
           fullName: values?.name,
+          fullNameAr: values?.nameAr,
           specialtyId: current?.specialty?.specialtyId,
           bio: values?.about,
+          bioAr: values?.aboutAr,
           profileImageUrl: values?.imageUrl,
           yearsOfExperience: current?.yearsOfExperience ?? null,
           qualifications: current?.qualifications,

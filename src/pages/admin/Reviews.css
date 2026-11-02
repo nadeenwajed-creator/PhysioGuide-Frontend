@@ -78,7 +78,13 @@
 
 .admin-review-card__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+/* Status badge stays on its own line above the actions. */
+.admin-review-card__status {
+  align-self: flex-start;
 }
 
 @media (max-width: 1199px) {

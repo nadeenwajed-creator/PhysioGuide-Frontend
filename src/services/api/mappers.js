@@ -122,6 +122,7 @@ export function toAppointment(item) {
     duration,
     durationMinutes: duration,
     note: item?.note ?? '',
+    therapistName: bilingual(item?.therapistName, item?.therapistNameAr),
     // Only patients can request through the API, so a pending item always
     // came from one; everything else is managed by the centre.
     origin: status === 'pending' ? 'patient' : 'center',
@@ -139,6 +140,11 @@ export function toDiscovery(centers) {
       ...center,
       dataSource: 'api',
       approvalStatus: 'approved',
+      therapists: (center.therapists || []).map((therapist) => ({
+        ...therapist,
+        name: bilingual(therapist.name, therapist.nameAr),
+        about: bilingual(therapist.about, therapist.bioAr),
+      })),
     })),
     // Favourites have no backend endpoint yet.
     favoriteIds: [],
@@ -235,7 +241,11 @@ export function toMessagingWorkspace(body, viewer) {
     patientProfile: body?.patientProfile ? toProfile(body.patientProfile) : undefined,
     notificationPreferences: toPatientPreferences(body?.notificationPreferences),
     patients: (body?.patients || []).map((patient) => ({ ...patient })),
-    therapists: (body?.therapists || []).map((therapist) => ({ ...therapist })),
+    therapists: (body?.therapists || []).map((therapist) => ({
+      ...therapist,
+      name: bilingual(therapist.name, therapist.nameAr),
+      about: bilingual(therapist.about, therapist.bioAr),
+    })),
     conversations: (body?.conversations || []).map((item) => toConversation(item, viewer)),
     notifications: (body?.notifications || []).map(toNotification),
   };
@@ -265,9 +275,12 @@ function toCenterRecord(center) {
 
 // A single API string still has to behave like the bilingual labels the
 // interface renders, so it becomes the same value in both languages.
-const bilingual = (value) => (value && typeof value === 'object'
+// An optional Arabic copy (therapist name/bio carry one) replaces that
+// fallback on the `ar` side; `localized` still falls back to `en` when the
+// Arabic copy is empty.
+const bilingual = (value, arabic) => (value && typeof value === 'object'
   ? value
-  : { en: value || '', ar: value || '' });
+  : { en: value || '', ar: arabic ?? value ?? '' });
 
 function toCenterPatient(patient) {
   return {
@@ -295,9 +308,9 @@ export function toCenterWorkspace(body, preferences) {
     specialties,
     therapists: (body?.therapists || []).map((item) => ({
       ...item,
-      name: bilingual(item.name),
+      name: bilingual(item.name, item.nameAr),
       specialty: specialtyName(item.specialtyId, item.specialty),
-      about: item.about || '',
+      about: bilingual(item.about, item.bioAr),
       status: item.isActive === false ? 'inactive' : 'active',
       availability: item.availability === 'available' ? 'available' : 'unavailable',
       serviceIds: item.serviceIds || [],
@@ -356,13 +369,13 @@ export function toTherapistWorkspace(body, preferences, conversations, viewer) {
       : { id: '', name: '' },
     therapists: [{
       id: therapist.id,
-      name: therapist.name,
+      name: bilingual(therapist.name, therapist.nameAr),
       imageUrl: therapist.imageUrl,
       phone: therapist.phone,
       email: therapist.email,
       specialty: therapist.specialty,
       experience: therapist.experience,
-      about: therapist.bio,
+      about: bilingual(therapist.bio, therapist.bioAr),
       credentials: therapist.credentials,
       languages: therapist.languages,
       availability: therapist.availability,

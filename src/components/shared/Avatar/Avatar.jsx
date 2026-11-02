@@ -4,13 +4,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 import { useLanguage } from '../../../context/LanguageContext.jsx';
-import { PERSON_PLACEHOLDER_IMAGE } from '../../../utils/personImage.js';
+import { personFace } from '../../../utils/personImage.js';
 
 import './Avatar.css';
 
 function Avatar({
   src,
   name = '',
+  email = '',
   alt,
   size = 'md',
   status = 'none',
@@ -41,14 +42,16 @@ function Avatar({
     ? statusLabel ?? t(`avatar.${status}`)
     : undefined;
 
-  // People without a profile photo get a generated face from
-  // thispersondoesnotexist.com; the initials stay as the last resort when even
+  // People without a profile photo get a deterministic DiceBear face seeded
+  // from their initials plus email domain, so the face stays unique and never
+  // changes between reloads; the initials stay as the last resort when even
   // that image cannot be loaded.
+  const face = personFace(displayName, email);
   const failed = imageState.failed;
   const resolvedSrc = src && !failed.includes(src)
     ? src
-    : !failed.includes(PERSON_PLACEHOLDER_IMAGE)
-      ? PERSON_PLACEHOLDER_IMAGE
+    : !failed.includes(face)
+      ? face
       : null;
 
   const showImage = Boolean(resolvedSrc);

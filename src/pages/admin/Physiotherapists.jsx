@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisV, faPlus, faSearch, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV, faPlus } from '@fortawesome/free-solid-svg-icons';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
+import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import FormField from '../../components/shared/FormField/FormField.jsx';
 import Modal from '../../components/shared/Modal/Modal.jsx';
+import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
+import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import { Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
@@ -175,10 +177,7 @@ function AdminPhysiotherapists() {
 
   return (
     <div className="admin-list-page">
-      <header
-        className="admin-list-page__header"
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
-      >
+      <header className="admin-list-page__header admin-list-page__header--actions">
         <div>
           <h1>{t('admin.therapists.title')}</h1>
           <p>{t('admin.therapists.subtitle')}</p>
@@ -189,53 +188,48 @@ function AdminPhysiotherapists() {
       </header>
 
       <div className="admin-list-page__filters">
-        <div className="admin-search">
-          <FontAwesomeIcon icon={faSearch} />
-          <input
-            value={filters.search}
-            onChange={(e) => update({ search: e.target.value })}
-            placeholder={t('admin.therapists.search')}
-          />
-        </div>
-        <select
-          className="admin-select"
+        <SearchBar
+          value={filters.search}
+          onChange={(value) => update({ search: value })}
+          placeholder={t('admin.therapists.search')}
+          ariaLabel={t('admin.therapists.search')}
+        />
+        <FilterSelect
           value={filters.specialty}
-          onChange={(e) => update({ specialty: e.target.value })}
-          aria-label={t('admin.allSpecialties')}
-        >
-          <option value="">{t('admin.allSpecialties')}</option>
-          {options.specialties.map((specialty) => (
-            <option key={specialty} value={specialty}>
-              {specialty}
-            </option>
-          ))}
-        </select>
-        <select
-          className="admin-select"
+          onChange={(value) => update({ specialty: value })}
+          ariaLabel={t('admin.allSpecialties')}
+          options={[
+            { value: '', label: t('admin.allSpecialties') },
+            ...options.specialties.map((specialty) => ({
+              value: specialty,
+              label: specialty,
+            })),
+          ]}
+        />
+        <FilterSelect
           value={filters.center}
-          onChange={(e) => update({ center: e.target.value })}
-          aria-label={t('admin.allCenters')}
-        >
-          <option value="">{t('admin.allCenters')}</option>
-          {options.centers.map((center) => (
-            <option key={center.id} value={center.id}>
-              {center.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="admin-select"
+          onChange={(value) => update({ center: value })}
+          ariaLabel={t('admin.allCenters')}
+          options={[
+            { value: '', label: t('admin.allCenters') },
+            ...options.centers.map((center) => ({
+              value: center.id,
+              label: center.name,
+            })),
+          ]}
+        />
+        <FilterSelect
           value={filters.status}
-          onChange={(e) => update({ status: e.target.value })}
-          aria-label={t('admin.allStatuses')}
-        >
-          <option value="">{t('admin.allStatuses')}</option>
-          {therapistStatuses.map((status) => (
-            <option key={status} value={status}>
-              {t(`admin.status.${status}`)}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => update({ status: value })}
+          ariaLabel={t('admin.allStatuses')}
+          options={[
+            { value: '', label: t('admin.allStatuses') },
+            ...therapistStatuses.map((status) => ({
+              value: status,
+              label: t(`admin.status.${status}`),
+            })),
+          ]}
+        />
       </div>
 
       {notice && (
@@ -265,6 +259,7 @@ function AdminPhysiotherapists() {
                       <Avatar
                         src={therapist.imageUrl}
                         name={therapist.name}
+                        email={therapist.email}
                         size="sm"
                       />
                       <div className="admin-table__primary">
@@ -276,8 +271,8 @@ function AdminPhysiotherapists() {
                   <td>{therapist.specialty || '—'}</td>
                   <td>{therapist.center || '—'}</td>
                   <td>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <FontAwesomeIcon icon={faStar} style={{ color: '#f59e0b' }} />
+                    <span className="admin-table__rating">
+                      <RatingStars rating={therapist.rating ?? 0} />
                       {therapist.rating ?? '—'}
                       {therapist.reviews ? ` (${therapist.reviews})` : ''}
                     </span>
@@ -298,9 +293,13 @@ function AdminPhysiotherapists() {
                     </select>
                   </td>
                   <td>
-                    <button className="admin-icon-button" aria-label={t('center.actions')}>
-                      <FontAwesomeIcon icon={faEllipsisV} />
-                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconOnly
+                      icon={faEllipsisV}
+                      aria-label={t('center.actions')}
+                    />
                   </td>
                 </tr>
               ))}

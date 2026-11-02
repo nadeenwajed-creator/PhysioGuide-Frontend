@@ -27,12 +27,19 @@ import { saveOwnTherapistProfile } from '../../services/therapistService.js';
 import { money } from '../../utils/centerFormat.js';
 import './Profile.css';
 
+// The workspace carries name/about as { en, ar } labels; plain strings from
+// older payloads still read as the English copy.
+const english = (value) =>
+  typeof value === 'string' ? value : (value?.en || '');
+const arabic = (value) =>
+  typeof value === 'string' ? '' : (value?.ar || '');
+
 const personalValues = (person) => ({
-  name: person.name?.en || '',
-  nameAr: person.name?.ar || '',
+  name: english(person.name),
+  nameAr: arabic(person.name),
   phone: person.phone || '',
-  about: person.about?.en || '',
-  aboutAr: person.about?.ar || '',
+  about: english(person.about),
+  aboutAr: arabic(person.about),
   imageUrl: person.imageUrl || '',
 });
 

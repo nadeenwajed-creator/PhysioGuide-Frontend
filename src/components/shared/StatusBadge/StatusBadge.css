@@ -81,6 +81,34 @@
   );
 }
 
+/* Approved / active / published share the success treatment the admin
+   tables used for these states. */
+.pg-status-badge--approved,
+.pg-status-badge--active,
+.pg-status-badge--published {
+  background-color: var(--color-success-bg, #E4F7F1);
+  color: var(--color-success, #167C65);
+}
+
+/* Rejected / suspended share the danger treatment. */
+.pg-status-badge--rejected,
+.pg-status-badge--suspended {
+  background-color: var(--color-danger-bg, #FDE8EA);
+  color: var(--color-danger, #B83A47);
+}
+
+/* Inactive reads as neutral. */
+.pg-status-badge--inactive {
+  background-color: var(--color-bg-soft, #F1F3F5);
+  color: var(--color-text-secondary, #5B6570);
+}
+
+/* Reported keeps the warning treatment. */
+.pg-status-badge--reported {
+  background-color: var(--color-warning-bg, #FFF3D8);
+  color: var(--color-warning, #93600F);
+}
+
 /* Tablet */
 @media (min-width: 768px) and (max-width: 991px) {
   .pg-status-badge {

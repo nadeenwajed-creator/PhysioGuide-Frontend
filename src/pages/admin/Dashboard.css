@@ -138,13 +138,10 @@
   align-items: center;
 }
 
-.admin-select {
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  font: inherit;
+/* The shared FilterSelect defaults to full width; here it keeps the year
+   picker's intrinsic size beside the panel title. */
+.admin-panel__header-actions .pg-filter-select {
+  inline-size: auto;
 }
 
 .admin-chart {

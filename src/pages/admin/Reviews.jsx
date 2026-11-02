@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faStar, faFlag, faComment, faFileAlt } from '@fortawesome/free-solid-svg-icons';
+import { faFlag, faComment, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
+import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
+import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
+import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
+import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import { ConfirmDialog } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
@@ -62,15 +66,7 @@ function AdminReviews() {
           <div className="admin-summary-card">
             <span>{t('admin.reviews.overallRating')}</span>
             <strong>{decimal.format(summary.score ?? 0)}</strong>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <FontAwesomeIcon
-                  key={i}
-                  icon={faStar}
-                  style={{ color: '#f59e0b', fontSize: '14px' }}
-                />
-              ))}
-            </div>
+            <RatingStars rating={summary.score ?? 0} />
             <small>
               {t('admin.reviews.reviewsCount', {
                 count: number.format(summary.total ?? 0),
@@ -96,50 +92,46 @@ function AdminReviews() {
         </div>
 
         <div className="admin-list-page__filters">
-          <div className="admin-search">
-            <FontAwesomeIcon icon={faSearch} />
-            <input
-              value={filters.search}
-              onChange={(e) => update({ search: e.target.value })}
-              placeholder={t('admin.reviews.search')}
-            />
-          </div>
-          <select
-            className="admin-select"
+          <SearchBar
+            value={filters.search}
+            onChange={(value) => update({ search: value })}
+            placeholder={t('admin.reviews.search')}
+            ariaLabel={t('admin.reviews.search')}
+          />
+          <FilterSelect
             value={filters.rating}
-            onChange={(e) => update({ rating: e.target.value })}
-            aria-label={t('admin.allRatings')}
-          >
-            <option value="">{t('admin.allRatings')}</option>
-            {[5, 4, 3, 2, 1].map((rating) => (
-              <option key={rating} value={rating}>
-                {'★'.repeat(rating)} ({rating})
-              </option>
-            ))}
-          </select>
-          <select
-            className="admin-select"
+            onChange={(value) => update({ rating: value })}
+            ariaLabel={t('admin.allRatings')}
+            options={[
+              { value: '', label: t('admin.allRatings') },
+              ...[5, 4, 3, 2, 1].map((rating) => ({
+                value: String(rating),
+                label: `${'★'.repeat(rating)} (${rating})`,
+              })),
+            ]}
+          />
+          <FilterSelect
             value={filters.status}
-            onChange={(e) => update({ status: e.target.value })}
-            aria-label={t('admin.allStatuses')}
-          >
-            <option value="">{t('admin.allStatuses')}</option>
-            {reviewStatuses.map((status) => (
-              <option key={status} value={status}>
-                {t(`admin.status.${status}`)}
-              </option>
-            ))}
-          </select>
-          <select
-            className="admin-select"
+            onChange={(value) => update({ status: value })}
+            ariaLabel={t('admin.allStatuses')}
+            options={[
+              { value: '', label: t('admin.allStatuses') },
+              ...reviewStatuses.map((status) => ({
+                value: status,
+                label: t(`admin.status.${status}`),
+              })),
+            ]}
+          />
+          <FilterSelect
             value={filters.sort}
-            onChange={(e) => update({ sort: e.target.value })}
-            aria-label={t('admin.newest')}
-          >
-            <option value="">{t('admin.newest')}</option>
-            <option value="oldest">{t('admin.oldest')}</option>
-            <option value="highest">{t('admin.highestRating')}</option>
-          </select>
+            onChange={(value) => update({ sort: value })}
+            ariaLabel={t('admin.newest')}
+            options={[
+              { value: '', label: t('admin.newest') },
+              { value: 'oldest', label: t('admin.oldest') },
+              { value: 'highest', label: t('admin.highestRating') },
+            ]}
+          />
         </div>
 
         <div className="admin-reviews__list">
@@ -151,8 +143,7 @@ function AdminReviews() {
                   {review.context && <span>{review.context}</span>}
                 </div>
                 <span className="admin-review-card__rating">
-                  <FontAwesomeIcon icon={faStar} style={{ color: '#f59e0b' }} />
-                  {review.rating}
+                  <RatingStars rating={review.rating} showValue />
                 </span>
               </div>
               <p className="admin-review-card__text">"{review.text}"</p>
@@ -161,12 +152,9 @@ function AdminReviews() {
                   {formatDate(review.createdAt, language)}
                 </small>
               )}
-              <span
-                className={`admin-badge admin-badge--${review.status}`}
-                style={{ alignSelf: 'flex-start' }}
-              >
+              <StatusBadge status={review.status} className="admin-review-card__status">
                 {t(`admin.status.${review.status}`)}
-              </span>
+              </StatusBadge>
               <div className="admin-review-card__actions">
                 <Button
                   variant="outline"

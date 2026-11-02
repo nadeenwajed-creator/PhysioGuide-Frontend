@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import { Panel } from '../../components/center/CenterUI.jsx';
 import { localized, formatDate } from '../../utils/centerFormat.js';
 import useAdminQuery from './useAdminQuery.js';
@@ -149,10 +150,15 @@ function AdminDashboard() {
         <div className="admin-dashboard__grid">
           <Panel title={t('admin.dashboard.appointmentOverview')} className="admin-panel">
             <div className="admin-panel__header-actions">
-              <select value={year} onChange={(e) => setYear(e.target.value)} className="admin-select">
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
-              </select>
+              <FilterSelect
+                value={year}
+                onChange={setYear}
+                ariaLabel={t('admin.dashboard.appointmentOverview')}
+                options={[
+                  { value: '2026', label: '2026' },
+                  { value: '2025', label: '2025' },
+                ]}
+              />
             </div>
             <div className="admin-chart">
               <svg viewBox="0 0 400 200" aria-label="Monthly bookings chart">

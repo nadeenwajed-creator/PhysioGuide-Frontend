@@ -137,12 +137,12 @@ export default function Appointments() {
                   )}/therapists/${encodeURIComponent(row.therapistId)}`}
                   aria-label={name(row.therapistName)}
                 >
-                  <RecordImage src={personImage(row.therapistImage)} alt="" />
+                  <RecordImage src={personImage(row.therapistImage, name(row.therapistName), row.therapistEmail)} alt="" />
                 </Link>
               ) : (
                 <RecordImage
                   className="pa-therapist-photo"
-                  src={personImage(row.therapistImage)}
+                  src={personImage(row.therapistImage, name(row.therapistName), row.therapistEmail)}
                   alt={name(row.therapistName)}
                 />
               )}

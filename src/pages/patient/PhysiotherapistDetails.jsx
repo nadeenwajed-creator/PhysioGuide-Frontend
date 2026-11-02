@@ -62,7 +62,7 @@ function Details({ state, center, person }) {
     </nav>
     <div className="pd-therapist-top">
       <Panel className="pd-professional">
-        <RecordImage src={personImage(person.imageUrl)} alt={name(person.name)} />
+        <RecordImage src={personImage(person.imageUrl, name(person.name), person.email)} alt={name(person.name)} />
         <div className="pd-professional-summary">
           <p className="pd-eyebrow">{name(person.specialty)}</p>
           <h1>{name(person.name)}</h1>

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisV, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import Button from '../../components/shared/Button/Button.jsx';
+import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
+import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
+import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import './ListPages.css';
@@ -43,52 +46,45 @@ function AdminCenters() {
       </header>
 
       <div className="admin-list-page__filters">
-        <div className="admin-search">
-          <FontAwesomeIcon icon={faSearch} />
-          <input
-            value={filters.search}
-            onChange={(e) => update({ search: e.target.value })}
-            placeholder={t('admin.centers.search')}
-          />
-        </div>
-        <select
-          className="admin-select"
+        <SearchBar
+          value={filters.search}
+          onChange={(value) => update({ search: value })}
+          placeholder={t('admin.centers.search')}
+          ariaLabel={t('admin.centers.search')}
+        />
+        <FilterSelect
           value={filters.status}
-          onChange={(e) => update({ status: e.target.value })}
-          aria-label={t('center.status')}
-        >
-          <option value="">{t('admin.allStatuses')}</option>
-          <option value="pending">{t('admin.status.pending')}</option>
-          <option value="approved">{t('admin.status.approved')}</option>
-          <option value="rejected">{t('admin.status.rejected')}</option>
-          <option value="suspended">{t('admin.status.suspended')}</option>
-        </select>
-        <select
-          className="admin-select"
+          onChange={(value) => update({ status: value })}
+          ariaLabel={t('center.status')}
+          options={[
+            { value: '', label: t('admin.allStatuses') },
+            { value: 'pending', label: t('admin.status.pending') },
+            { value: 'approved', label: t('admin.status.approved') },
+            { value: 'rejected', label: t('admin.status.rejected') },
+            { value: 'suspended', label: t('admin.status.suspended') },
+          ]}
+        />
+        <FilterSelect
           value={filters.specialty}
-          onChange={(e) => update({ specialty: e.target.value })}
-          aria-label={t('admin.allSpecialties')}
-        >
-          <option value="">{t('admin.allSpecialties')}</option>
-          {options.specialties.map((specialty) => (
-            <option key={specialty} value={specialty}>
-              {specialty}
-            </option>
-          ))}
-        </select>
-        <select
-          className="admin-select"
+          onChange={(value) => update({ specialty: value })}
+          ariaLabel={t('admin.allSpecialties')}
+          options={[
+            { value: '', label: t('admin.allSpecialties') },
+            ...options.specialties.map((specialty) => ({
+              value: specialty,
+              label: specialty,
+            })),
+          ]}
+        />
+        <FilterSelect
           value={filters.city}
-          onChange={(e) => update({ city: e.target.value })}
-          aria-label={t('admin.allCities')}
-        >
-          <option value="">{t('admin.allCities')}</option>
-          {options.cities.map((city) => (
-            <option key={city} value={city}>
-              {city}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => update({ city: value })}
+          ariaLabel={t('admin.allCities')}
+          options={[
+            { value: '', label: t('admin.allCities') },
+            ...options.cities.map((city) => ({ value: city, label: city })),
+          ]}
+        />
       </div>
 
       <QueryState state={state} empty={!state.data?.items?.length}>
@@ -117,18 +113,22 @@ function AdminCenters() {
                   <td>{center.location}</td>
                   <td>{center.therapists}</td>
                   <td>
-                    <span className={`admin-badge admin-badge--${center.status}`}>
+                    <StatusBadge status={center.status}>
                       {t(`admin.status.${center.status}`)}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td>
                     <div className="admin-table__actions">
                       <Link to={`/admin/centers/${center.id}`} className="admin-link">
                         {t('center.view')}
                       </Link>
-                      <button className="admin-icon-button" aria-label={t('center.actions')}>
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                      </button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        iconOnly
+                        icon={faEllipsisV}
+                        aria-label={t('center.actions')}
+                      />
                     </div>
                   </td>
                 </tr>

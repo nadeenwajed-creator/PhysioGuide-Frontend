@@ -13,7 +13,7 @@ import { useLanguage } from '../context/LanguageContext.jsx';
 import ThemeContext from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { logout as signOut } from '../services/authService.js';
-import { PERSON_PLACEHOLDER_IMAGE } from '../utils/personImage.js';
+import { personFace } from '../utils/personImage.js';
 import { ConfirmDialog } from '../components/center/CenterUI.jsx';
 import logo from '../assets/logo/physioguide-icon.svg';
 import './CenterLayout.css';
@@ -59,7 +59,9 @@ function AdminLayout() {
 
   const user = {
     name: session?.name || 'Admin',
-    avatar: PERSON_PLACEHOLDER_IMAGE,
+    // Deterministic face from initials + email domain: unique per admin and
+    // stable across reloads.
+    avatar: personFace(session?.name || 'Admin', session?.email),
   };
 
   const results = search.trim()

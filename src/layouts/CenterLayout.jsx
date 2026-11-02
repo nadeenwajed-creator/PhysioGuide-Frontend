@@ -137,7 +137,7 @@ function CenterLayout({ portal = 'center' }) {
     // Patients and therapists get the generated face when they have no photo;
     // the center's own account keeps the icon fallback.
     avatar: patientPortal || therapistPortal
-      ? personImage(account?.imageUrl)
+      ? personImage(account?.imageUrl, name(account?.name), account?.email)
       : account?.imageUrl
   };
   const results = search.trim() ? items.filter(item => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())) : [];
