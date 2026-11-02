@@ -166,7 +166,7 @@ function AdminAppointments() {
     from: '',
     to: '',
     page: 1,
-    pageSize: 5,
+    pageSize: 10,
   });
   const [showNew, setShowNew] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -315,6 +315,7 @@ function AdminAppointments() {
               total: number.format(data?.total ?? 0),
             })}
             onChange={(page) => update({ page })}
+            onPageSizeChange={(value) => update({ pageSize: Number(value) })}
           />
         </div>
       </QueryState>

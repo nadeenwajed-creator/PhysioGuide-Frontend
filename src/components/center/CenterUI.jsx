@@ -116,7 +116,10 @@ export function Pager({
   total,
   onChange,
   pageSize,
-  onPageSizeChange
+  onPageSizeChange,
+  // Callers with their own range copy (e.g. admin's "of 6 patients") pass it;
+  // otherwise the shared "{start}–{end} of {total}" label is used.
+  rangeLabel
 }) {
   const { t, language } = useLanguage();
   const id = useId();
@@ -128,7 +131,7 @@ export function Pager({
       <FilterSelect id={id} ariaLabel={t('center.rowsPerPage')} value={String(pageSize)}
         onChange={onPageSizeChange} options={pageSizes.map(value => ({ value: String(value), label: number.format(value) }))} />
     </div>
-    <span className="center-pagination__range" role="status">{t('center.visibleRange', {
+    <span className="center-pagination__range" role="status">{rangeLabel ?? t('center.visibleRange', {
       start: number.format(total ? (page - 1) * pageSize + 1 : 0),
       end: number.format(Math.min(page * pageSize, total)), total: number.format(total),
     })}</span>

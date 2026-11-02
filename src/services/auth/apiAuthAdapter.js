@@ -3,7 +3,8 @@ import { clearSession, loadSession, saveSession } from './session.js';
 
 // Backend endpoints provided by the API.
 const REGISTER_PATIENT_PATH = '/api/Auth/register/patient';
-const LOGIN_PATH = '/api/Auth/login';
+// Each portal names its role so the backend refuses another portal's account.
+const loginPath = (role) => `/api/Auth/login?role=${encodeURIComponent(role)}`;
 
 // A slow backend must not leave the form in a permanent loading state.
 const REQUEST_TIMEOUT_MS = 15000;
@@ -237,7 +238,7 @@ export function createApiAuthAdapter(baseUrl) {
     async loginPatient(credentials) {
       const body = await post(
         root,
-        LOGIN_PATH,
+        loginPath('patient'),
         {
           email: credentials.email,
           password: credentials.password,
@@ -267,7 +268,7 @@ export function createApiAuthAdapter(baseUrl) {
     async loginCenter(credentials) {
       const body = await post(
         root,
-        LOGIN_PATH,
+        loginPath('center'),
         {
           email: credentials.email,
           password: credentials.password,
@@ -294,7 +295,7 @@ export function createApiAuthAdapter(baseUrl) {
     async loginAdmin(credentials) {
       const body = await post(
         root,
-        LOGIN_PATH,
+        loginPath('admin'),
         {
           email: credentials.email,
           password: credentials.password,

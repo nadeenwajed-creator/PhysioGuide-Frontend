@@ -71,6 +71,7 @@
   /* Wide admin tables scroll horizontally instead of crushing their columns
      on narrow screens; the rounded corners still clip the scroll area. */
   overflow-x: auto;
+  padding: 20px;
   overflow-y: hidden;
 }
 
@@ -167,17 +168,6 @@
   text-decoration: none;
 }
 
-/* Range label beside the shared Pagination control; wraps on small screens. */
-.admin-pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 16px 20px;
-  color: var(--color-text-secondary);
-}
-
 /* Loading / error block shared by every admin query state. */
 .admin-state {
   display: flex;
@@ -255,10 +245,6 @@ select.admin-badge option {
 
   .admin-list-page__header--actions .pg-button {
     align-self: flex-start;
-  }
-
-  .admin-pagination {
-    padding: 16px 12px;
   }
 }
 

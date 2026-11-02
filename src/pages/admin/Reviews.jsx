@@ -24,7 +24,7 @@ function AdminReviews() {
     status: '',
     sort: '',
     page: 1,
-    pageSize: 5,
+    pageSize: 10,
   });
   const [pending, setPending] = useState(null);
 
@@ -183,6 +183,7 @@ function AdminReviews() {
             total: number.format(data?.total ?? 0),
           })}
           onChange={(page) => update({ page })}
+          onPageSizeChange={(value) => update({ pageSize: Number(value) })}
         />
       </QueryState>
 

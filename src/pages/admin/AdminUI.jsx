@@ -1,6 +1,5 @@
 import Button from '../../components/shared/Button/Button.jsx';
-import Pagination from '../../components/shared/Pagination/Pagination.jsx';
-import { Feedback, EmptyState } from '../../components/center/CenterUI.jsx';
+import { Feedback, EmptyState, Pager } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { errorText } from './useAdminQuery.js';
 
@@ -33,9 +32,17 @@ export function QueryState({ state, empty = false, children }) {
   return children;
 }
 
-// Range label plus the shared Pagination control, all from the list total the
-// backend reports. `totalLabel` is the localized, formatted total.
-export function AdminPagination({ page, pageSize, total, totalLabel, onChange }) {
+// The center pages' Pager (rows-per-page select, range label, shared
+// Pagination control) with the admin's own noun-specific range copy, e.g.
+// "Showing 1–10 of 42 patients", all from the list total the backend reports.
+export function AdminPagination({
+  page,
+  pageSize,
+  total,
+  totalLabel,
+  onChange,
+  onPageSizeChange,
+}) {
   const { t } = useLanguage();
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const current = Math.min(Math.max(1, page), pages);
@@ -43,13 +50,13 @@ export function AdminPagination({ page, pageSize, total, totalLabel, onChange })
   const end = Math.min(current * pageSize, total);
 
   return (
-    <div className="admin-pagination">
-      <span>{t('admin.showing', { start, end, total: totalLabel })}</span>
-      <Pagination
-        currentPage={current}
-        totalPages={pages}
-        onPageChange={onChange}
-      />
-    </div>
+    <Pager
+      page={current}
+      total={total}
+      onChange={onChange}
+      pageSize={pageSize}
+      onPageSizeChange={onPageSizeChange}
+      rangeLabel={t('admin.showing', { start, end, total: totalLabel })}
+    />
   );
 }

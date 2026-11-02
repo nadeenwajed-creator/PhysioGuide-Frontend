@@ -63,10 +63,13 @@ function signIn(body, credentials) {
   return session;
 }
 
-const login = () => ({
+// Every portal names the role it serves (patient / center / admin), so the
+// backend refuses an account that belongs to another portal: an admin cannot
+// sign in on the patient form or vice versa.
+const login = (role) => ({
   request: (credentials) => ({
     method: 'POST',
-    path: `${AUTH}/login`,
+    path: `${AUTH}/login?role=${encodeURIComponent(role)}`,
     data: { email: credentials?.email, password: credentials?.password },
     auth: false,
   }),
@@ -82,11 +85,11 @@ const login = () => ({
 });
 
 export const authOperations = {
-  loginPatient: login(),
-  loginCenter: login(),
-  // The hidden admin entry uses the same credential endpoint; only the
-  // response role separates it from the other portals.
-  loginAdmin: login(),
+  loginPatient: login('patient'),
+  loginCenter: login('center'),
+  // The hidden admin entry shares the credential endpoint but names its own
+  // role, so only an admin account can complete it.
+  loginAdmin: login('admin'),
 
   registerPatient: {
     request: (data) => ({
