@@ -173,6 +173,19 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
         about: pair('', '')
       };
       if (Object.hasOwn(values, 'serviceIds') && (!Array.isArray(values.serviceIds) || values.serviceIds.some(serviceId => !state.services.some(service => service.id === serviceId)))) fail('validation', { serviceIds: 'selection' });
+      // The edit form resends the personal fields unchanged (they are hidden
+      // for existing therapists), so a personal value that differs from the
+      // stored record is a tampered payload, not a legitimate centre edit.
+      if (id) {
+        const personalSameAsStored = {
+          name: clean(values.name) === clean(previous.name?.en),
+          nameAr: clean(values.nameAr) === clean(previous.name?.ar),
+          imageUrl: clean(values.imageUrl) === clean(previous.imageUrl),
+        };
+        for (const key of Object.keys(personalSameAsStored)) {
+          if (Object.hasOwn(values, key) && !personalSameAsStored[key]) fail('forbidden');
+        }
+      }
       validatePerson(id ? { ...values, name: previous.name.en, email: previous.email, phone: previous.phone } : values, true);
       if (!id && (reservedEmails().includes(clean(values.email).toLowerCase()) || state.therapists.some(item => item.email.toLowerCase() === clean(values.email).toLowerCase()))) fail('duplicateEmail');
       const record = {

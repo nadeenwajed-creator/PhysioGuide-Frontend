@@ -10,8 +10,9 @@ const apiBaseUrl = import.meta.env?.VITE_API_BASE_URL ?? '';
 // Every role talks to the same API through the shared operation contract.
 const liveAdapter = apiBaseUrl ? createOperationAdapter(httpClient, authOperations) : null;
 
-// Mock authentication exists only in mock mode; API mode never falls back to it.
-const demoAdapter = mockEnabled && import.meta.env?.DEV == true ? createMockAuthAdapter() : null;
+// The demo adapter is assembled in the "new ones" section below, next to the
+// shared account/session stores it must persist through. API mode never falls
+// back to it once it exists.
 
 function adapterFor(role) {
   // Patient sign-in has always used the real backend when one is configured.
@@ -21,9 +22,6 @@ function adapterFor(role) {
   if (mockEnabled) return demoAdapter;
   return liveAdapter ?? demoAdapter;
 }
-
-export const authMode = liveAdapter?.mode ?? demoAdapter?.mode ?? 'unavailable';
-export const isAuthDemo = authMode === 'demo';
 
 // Executes one adapter method and converts failures into service errors.
 async function execute(adapter, method, request) {
@@ -89,6 +87,20 @@ export const registerPatient = (data) =>
   callAuth('patient', 'registerPatient', data);
 export const registerCenter = (data) =>
   callAuth('center', 'registerCenter', data);
+
+// A Google credential response already contains the session fields the backend
+// returns on password login, so it is stored and published identically.
+export async function loginWithGoogle(body) {
+  if (!liveAdapter) throw new AuthServiceError('unavailable');
+  const current = ++generation;
+  const result = await execute(liveAdapter, 'completeGoogleSession', body);
+  if (result.status !== 'authenticated' || !result.session || result.role !== result.session.role) {
+    throw new AuthServiceError('unexpected');
+  }
+  getAuthenticatedDestination(result.role);
+  if (current === generation) publish(result.session);
+  return result;
+}
 
 export function getAuthenticatedDestination(role) {
   if (role === 'patient') return '/patient/dashboard';
@@ -159,13 +171,30 @@ export function getAuthenticatedDestination(role) {
 // import { AuthServiceError, normalizeAuthError } from './auth/authErrors.js';
 // import { createMockAuthAdapter } from './auth/mockAuthAdapter.js';
 import { createBrowserStore } from './mock/browserStore.js';
-// import { readMockCenter, activateMockCenter, getMockTherapists } from './mock/centerRepository.js';
+import { readMockCenter, activateMockCenter, getMockTherapists } from './mock/centerRepository.js';
 import { mockAccountStore } from './mock/accountRepository.js';
 // import { createOperationAdapter } from './api/operationAdapter.js';
 // import { authOperations } from './api/backendContract.js';
 
 const sessionStore = createBrowserStore('physioguide.mock.session.v1');
 const accountStore = mockAccountStore;
+
+// Mock authentication exists only in mock mode; API mode never falls back to
+// it. Vite always defines DEV; plain-Node test runs have no import.meta.env at
+// all, so only an actual production build (DEV === false) is excluded. The
+// adapter persists through the app's shared account/session stores so
+// registrations, profile saves and session restores stay consistent, and it
+// resolves therapist/centre identities from the mock repositories.
+const demoAdapter = mockEnabled && import.meta.env?.DEV !== false ? createMockAuthAdapter({
+  accountStore,
+  sessionStore,
+  getTherapists: getMockTherapists,
+  getCenter: (id) => readMockCenter(id).center,
+  activateCenter: activateMockCenter,
+}) : null;
+
+export const authMode = liveAdapter?.mode ?? demoAdapter?.mode ?? 'unavailable';
+export const isAuthDemo = authMode === 'demo';
 // const adapter = mockEnabled ? createMockAuthAdapter({
 //   accountStore, sessionStore, getTherapists: getMockTherapists,
 //   getCenter: id => readMockCenter(id).center, activateCenter: activateMockCenter,

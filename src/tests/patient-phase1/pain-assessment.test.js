@@ -68,10 +68,14 @@ test('navigation retains answers; completion validates every step; reset creates
 
 test('care rules are deterministic, conservative and respond to answers', () => {
   assert.equal(suggestCare(answered()), 'back');
-  assert.equal(suggestCare(answered({ painAreas: ['knee'] })), 'knee');
-  assert.equal(suggestCare(answered({ painAreas: ['shoulder'] })), 'musculoskeletal');
+  // Knee-only pain maps to lower-limb physiotherapy under the API's shared
+  // care rules; the knee-specific key still drives centre matching.
+  assert.equal(suggestCare(answered({ painAreas: ['knee'] })), 'lowerLimb');
+  assert.equal(suggestCare(answered({ painAreas: ['shoulder'] })), 'upperLimb');
   assert.equal(suggestCare(answered({ relatedHistory: 'previous_surgery' })), 'postsurgery');
-  for (const override of [{ intensity: 0 }, { intensity: 9 }, { descriptions: ['tingling'] }, { relatedHistory: 'recent_injury' }, { painAreas: ['neck'], duration: 'months_3_plus' }]) assert.equal(suggestCare(answered(override)), 'general');
+  for (const override of [{ intensity: 0 }, { intensity: 9 }, { descriptions: ['tingling'] }, { relatedHistory: 'recent_injury' }]) assert.equal(suggestCare(answered(override)), 'general');
+  // Longer-duration pain without red flags follows the persistent-pain track.
+  assert.equal(suggestCare(answered({ painAreas: ['neck'], duration: 'months_3_plus' })), 'persistent');
 });
 
 test('entire assessment completes and calculates care with network and storage forbidden', () => {

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { faHouse, faCalendarDays, faUsers, faUserDoctor, faBriefcaseMedical, faStar, faBuilding, faGear, faComments, faUser, faLocationDot, faClipboardList } from '@fortawesome/free-solid-svg-icons';
 import Navbar from '../components/shared/Navbar/Navbar.jsx';
@@ -55,6 +55,8 @@ function CenterLayout({ portal = 'center' }) {
   const [workspace, setWorkspace] = useState(null);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
+  const refreshRef = useRef(null);
+  const hasDataRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [flash, setFlash] = useState(null);
@@ -64,11 +66,13 @@ function CenterLayout({ portal = 'center' }) {
   useEffect(() => {
     let active = true;
     let request = 0;
+    hasDataRef.current = false;
     async function refresh() {
       const current = ++request;
       try {
         const result = await (patientPortal ? getMessagingWorkspace(actor) : getCenterWorkspace(actor));
         if (active && current === request) {
+          hasDataRef.current = true;
           setWorkspace({
             actorId: actor.id,
             role,
@@ -80,11 +84,14 @@ function CenterLayout({ portal = 'center' }) {
           setError('');
         }
       } catch (failure) {
-        if (active && current === request) setError(failure.code || 'network');
+        // A transient failure (poll, focus) must not blank a page that already
+        // has content; only the first load reports the error state.
+        if (active && current === request && !hasDataRef.current) setError(failure.code || 'network');
       }
     }
     const unsubscribe = subscribeCenter(refresh);
     window.addEventListener('focus', refresh);
+    refreshRef.current = refresh;
     refresh();
     return () => {
       active = false;
@@ -92,6 +99,15 @@ function CenterLayout({ portal = 'center' }) {
       window.removeEventListener('focus', refresh);
     };
   }, [actor, role, retry, patientPortal]);
+  // While a messaging page is open and visible, poll for messages the other
+  // side sent without any local action; focus and mutations still refresh too.
+  useEffect(() => {
+    if (!pathname.includes('/messages')) return undefined;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') refreshRef.current?.();
+    }, 20000);
+    return () => window.clearInterval(timer);
+  }, [pathname]);
   const data = workspace?.actorId === actor.id && workspace.role === role && workspace.centerId === actor.centerId && workspace.therapistId === actor.therapistId && workspace.patientId === actor.patientId ? workspace.data : null;
   const navigation = patientPortal ? [['dashboard', faHouse], ['centers', faLocationDot], ['pain-assessment', faClipboardList], ['appointments', faCalendarDays], ['messages', faComments], ['profile', faUser], ['settings', faGear]] : therapistPortal ? [['messages', faComments], ['profile', faUser]] : centerNavigation;
   const profilePath = patientPortal ? '/patient/profile' : therapistPortal ? '/center/physiotherapist/profile' : '/center/profile';

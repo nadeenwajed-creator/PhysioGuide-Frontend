@@ -7,14 +7,25 @@ export const markConversationRead = (actor, id, messageIds) =>
 export const sendMessage = (actor, id, payload) =>
   callCenter('sendMessage', actor, id, payload);
 
+// Attachments live on the API origin, not the SPA origin, so both are allowed
+// for the same-origin download path; data: URLs come from the demo mode.
+const apiOrigin = () => {
+  const root = String(import.meta.env?.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+  if (!root) return '';
+  try {
+    return new URL(root, window.location.origin).origin;
+  } catch {
+    return '';
+  }
+};
+
 export async function downloadMessageAttachment(file) {
   const url = new URL(file.url, window.location.origin);
+  const allowed = new Set([window.location.origin, apiOrigin()].filter(Boolean));
   const local =
-    url.origin === window.location.origin &&
+    allowed.has(url.origin) &&
     ['http:', 'https:', 'blob:'].includes(url.protocol);
-  const data = /^data:(application\/octet-stream|text\/plain);base64,/i.test(
-    file.url
-  );
+  const data = file.url.startsWith('data:');
   if (!local && !data) throw new Error('attachment');
   const response = await fetch(url);
   if (!response.ok) throw new Error('attachment');

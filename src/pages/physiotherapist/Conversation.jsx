@@ -161,6 +161,14 @@ export default function Conversation() {
   const conversation = data.conversations.find(
     (item) => item.id === conversationId
   );
+  // A conversation just opened on another page lands in the workspace one
+  // refresh later; show a brief loading state before declaring it missing.
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    if (conversation || settled) return undefined;
+    const timer = window.setTimeout(() => setSettled(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [conversation, settled]);
   return (
     <div className="portal-conversation">
       <h1 className="visually-hidden">{t('messaging.title')}</h1>
@@ -173,8 +181,10 @@ export default function Conversation() {
           key={`${actor.id}:${conversation.id}`}
           conversation={conversation}
         />
-      ) : (
+      ) : settled ? (
         <Feedback error>{t('messaging.notFound')}</Feedback>
+      ) : (
+        <p role="status">{t('messaging.loading')}</p>
       )}
     </div>
   );

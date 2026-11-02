@@ -17,13 +17,31 @@ import {
   loginAdmin,
   registerPatient,
   registerCenter,
+  loginWithGoogle,
   getAuthenticatedDestination,
+  authMode,
 } from '../../services/authService.js';
+
+import {
+  GOOGLE_CLIENT_ID,
+  createFlowValues,
+  isFlowResetError,
+  registerGoogleCenter,
+  registerGooglePatient,
+  requestChallenge,
+  signInWithGoogle,
+  waitForGis,
+} from '../../services/auth/googleAuth.js';
+import { cityFromAddress } from '../../services/api/backendContract.js';
 
 import { normalizeAuthError } from '../../services/auth/authErrors.js';
 import { centerLocationService } from '../../services/auth/centerLocation.js';
 import { searchCenterAddress } from '../../services/centerLocationService.js';
-import { createAuthRequest, validateAuthForm } from '../../utils/authValidation.js';
+import {
+  createAuthRequest,
+  normalizePhone,
+  validateAuthForm,
+} from '../../utils/authValidation.js';
 import './AuthForm.css';
 
 const operations = {
@@ -65,6 +83,7 @@ const knownFieldErrors = [
 const knownErrors = [
   'invalidCredentials',
   'network',
+  'timeout',
   'rateLimited',
   'validation',
   'unavailable',
@@ -74,6 +93,12 @@ const knownErrors = [
   'accountPending',
   'accountRejected',
   'unsupportedRole',
+  // Google sign-in states, each with its own guidance.
+  'googleCredentials',
+  'googleTicket',
+  'googleConflict',
+  'centerNotApproved',
+  'accountUnavailable',
 ];
 
 function AuthForm({ role, mode }) {
@@ -116,6 +141,19 @@ function AuthForm({ role, mode }) {
   const [locationChoices, setLocationChoices] = useState([]);
   const formRef = useRef(null);
 
+  // Google sign-in: a non-null value means the server issued a registration
+  // ticket and the form is collecting the missing profile fields.
+  const [googleRegistration, setGoogleRegistration] = useState(null);
+  // Whether the real Google button rendered; the disabled fallback shows when
+  // the script is blocked, the API is unreachable, or demo mode is active.
+  const [googleFailed, setGoogleFailed] = useState(false);
+  // Bumped to restart the flow with a fresh challenge after a single-use
+  // challenge or ticket has been consumed.
+  const [googleFlowRestart, setGoogleFlowRestart] = useState(0);
+  const googleButtonRef = useRef(null);
+  const googleFlowRef = useRef(null);
+  const credentialHandlerRef = useRef(null);
+
   // References the heading so keyboard and screen-reader users
   // can be moved to the beginning of the form.
   const headingRef = useRef(null);
@@ -154,6 +192,249 @@ function AuthForm({ role, mode }) {
       lookupRef.current?.abort();
     };
   }, []);
+
+  // --- Google Identity Services flow ----------------------------------------
+  // One flow = one server challenge. The verifier stays in the browser; only
+  // its SHA-256 binding is sent, and the server's nonce goes into the ID token
+  // so it can only be redeemed for this exact attempt.
+  useEffect(() => {
+    if (role === 'admin' || authMode !== 'api') return undefined;
+    let cancelled = false;
+    let generation = 0;
+
+    async function startFlow() {
+      const attempt = ++generation;
+      try {
+        const flowValues = await createFlowValues();
+        const challenge = await requestChallenge(flowValues.binding);
+        if (cancelled || attempt !== generation) return;
+        googleFlowRef.current = {
+          verifier: flowValues.verifier,
+          challengeId: challenge.challengeId,
+        };
+
+        await waitForGis();
+        if (cancelled || attempt !== generation || !googleButtonRef.current) return;
+
+        const google = globalThis.google;
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          nonce: challenge.nonce,
+          callback: (response) => {
+            if (!cancelled && attempt === generation) {
+              credentialHandlerRef.current?.(response?.credential);
+            }
+          },
+        });
+        // A restart replaces any previously rendered button.
+        googleButtonRef.current.innerHTML = '';
+        google.accounts.id.renderButton(googleButtonRef.current, {
+          theme: 'outline',
+          size: 'large',
+          text: 'continue_with',
+        });
+        setGoogleFailed(false);
+      } catch {
+        // Script blocked, offline, or API unreachable: keep the form usable
+        // and show the disabled fallback instead of a dead button.
+        if (!cancelled && attempt === generation) {
+          googleFlowRef.current = null;
+          setGoogleFailed(true);
+        }
+      }
+    }
+
+    startFlow();
+
+    return () => {
+      cancelled = true;
+      generation += 1;
+      googleFlowRef.current = null;
+    };
+    // authMode is a module constant (API vs demo) and never changes.
+  }, [role, googleFlowRestart]);
+
+  // Keep the credential callback bound to the latest render's state.
+  useEffect(() => {
+    credentialHandlerRef.current = handleGoogleCredential;
+  });
+
+  // Converts any Google failure into the same feedback + field-error shape
+  // the password form uses, so one code path renders both.
+  function reportGoogleError(failure) {
+    const error = normalizeAuthError(failure);
+    const fieldErrors = {};
+    Object.entries(error.fieldErrors).forEach(([field, code]) => {
+      if (Object.hasOwn(initialValues, field)) {
+        fieldErrors[field] = knownFieldErrors.includes(code) ? code : 'invalid';
+      }
+    });
+    setErrors(fieldErrors);
+    setFeedback({
+      kind: 'error',
+      key: `auth.error.${
+        knownErrors.includes(error.code) ? error.code : 'unexpected'
+      }`,
+    });
+    focusError(fieldErrors);
+    return error.code;
+  }
+
+  // Single-use challenges and tickets die with their attempt; a rejected
+  // click restarts the flow so the next one starts from a fresh challenge.
+  function restartGoogleFlow() {
+    setGoogleFlowRestart((value) => value + 1);
+  }
+
+  // The fallback button must never be a silent no-op: it says why Google is
+  // unavailable and, in API mode, restarts the flow so a transient failure
+  // (offline, API restarting) recovers with one click.
+  function handleGoogleFallbackClick() {
+    setFeedback({ kind: 'error', key: 'auth.googleUnavailable' });
+    focusError({});
+    if (authMode === 'api' && !submittingRef.current) restartGoogleFlow();
+  }
+
+  // Abandons the registration step: the ticket is discarded locally and the
+  // button returns with a fresh challenge for the next attempt.
+  function cancelGoogleRegistration() {
+    setGoogleRegistration(null);
+    setFeedback(null);
+    restartGoogleFlow();
+    requestAnimationFrame(() => headingRef.current?.focus({ preventScroll: true }));
+  }
+
+  // Exchanges the Google ID token for a session, or opens the profile step.
+  async function handleGoogleCredential(idToken) {
+    const flow = googleFlowRef.current;
+    if (!idToken || !flow || submittingRef.current) return;
+
+    submittingRef.current = true;
+    setPending(true);
+    setFeedback(null);
+    const requestId = ++requestRef.current;
+    try {
+      const body = await signInWithGoogle({
+        idToken,
+        challengeId: flow.challengeId,
+        flowVerifier: flow.verifier,
+      });
+      if (requestId !== requestRef.current) return;
+
+      if (body?.requiresRegistration) {
+        setGoogleRegistration({
+          registrationTicket: body.registrationTicket,
+          flowVerifier: flow.verifier,
+          email: body.email || '',
+        });
+        // The profile step replaces the form; start it at its heading.
+        requestAnimationFrame(() => headingRef.current?.focus({ preventScroll: true }));
+        return;
+      }
+
+      const result = await loginWithGoogle(body);
+      if (requestId !== requestRef.current) return;
+      navigate(getAuthenticatedDestination(result.role), { replace: true });
+    } catch (failure) {
+      if (requestId !== requestRef.current) return;
+      const code = reportGoogleError(failure);
+      if (isFlowResetError(code)) restartGoogleFlow();
+    } finally {
+      if (requestId === requestRef.current) {
+        submittingRef.current = false;
+        setPending(false);
+      }
+    }
+  }
+
+  // Profile fields required by the Google registration endpoints.
+  function validateGoogleProfile() {
+    const validation = {};
+    if (!values.name?.trim()) validation.name = 'required';
+    const phone = normalizePhone(values.phone || '');
+    if (!phone) {
+      validation.phone = 'required';
+    } else if (
+      !/^\+?[\d\s()-]+$/.test(phone) ||
+      !/^\d{7,15}$/.test(phone.replace(/\D/g, ''))
+    ) {
+      validation.phone = 'phone';
+    }
+    if (role === 'patient' && !values.gender) validation.gender = 'required';
+    // Coordinates stay optional for Google centres; the address is required.
+    if (role === 'center' && !values.location?.trim()) validation.location = 'required';
+    return validation;
+  }
+
+  // Completes a Google registration with the profile fields the chosen role
+  // needs; a patient receives a session, a centre goes to review.
+  async function handleGoogleRegistrationSubmit(event) {
+    event.preventDefault();
+    if (submittingRef.current || locationBusy || !googleRegistration) return;
+
+    const validation = validateGoogleProfile();
+    setErrors(validation);
+    setFeedback(null);
+    if (Object.keys(validation).length) {
+      focusError(validation);
+      return;
+    }
+
+    submittingRef.current = true;
+    setPending(true);
+    const requestId = ++requestRef.current;
+    const ticket = googleRegistration;
+    try {
+      let body;
+      if (role === 'center') {
+        body = await registerGoogleCenter({
+          registrationTicket: ticket.registrationTicket,
+          flowVerifier: ticket.flowVerifier,
+          phoneNumber: normalizePhone(values.phone),
+          centerName: values.name.trim(),
+          city: cityFromAddress(values.location.trim()),
+          location: values.location.trim(),
+          latitude: coordinates?.latitude ?? null,
+          longitude: coordinates?.longitude ?? null,
+        });
+      } else {
+        body = await registerGooglePatient({
+          registrationTicket: ticket.registrationTicket,
+          flowVerifier: ticket.flowVerifier,
+          phoneNumber: normalizePhone(values.phone),
+          fullName: values.name.trim(),
+          gender: values.gender || null,
+        });
+      }
+      if (requestId !== requestRef.current) return;
+
+      // Only patient registration returns tokens; centres await review.
+      if (body?.accessToken) {
+        const result = await loginWithGoogle(body);
+        if (requestId !== requestRef.current) return;
+        navigate(getAuthenticatedDestination(result.role), { replace: true });
+        return;
+      }
+
+      setGoogleRegistration(null);
+      setFeedback({ kind: 'info', key: 'auth.pendingReview' });
+      // The ticket is consumed either way; hand the button a fresh challenge.
+      restartGoogleFlow();
+      focusError({});
+    } catch (failure) {
+      if (requestId !== requestRef.current) return;
+      const code = reportGoogleError(failure);
+      if (isFlowResetError(code)) {
+        setGoogleRegistration(null);
+        restartGoogleFlow();
+      }
+    } finally {
+      if (requestId === requestRef.current) {
+        submittingRef.current = false;
+        setPending(false);
+      }
+    }
+  }
 
   // Updates a field and clears its previous error.
   // Editing the location also cancels any outstanding location lookup.
@@ -400,12 +681,118 @@ function AuthForm({ role, mode }) {
 
       {/* The heading changes according to login or registration mode. */}
       <h1 ref={headingRef} tabIndex={-1}>
-        {t(registering ? "auth.createTitle" : "auth.loginTitle")}
+        {t(
+          googleRegistration
+            ? "auth.googleProfileTitle"
+            : registering
+              ? "auth.createTitle"
+              : "auth.loginTitle"
+        )}
       </h1>
 
       {/* Decorative divider; hidden from assistive technology. */}
       <span className="auth-form__rule" aria-hidden="true" />
 
+      {/* A pending Google registration replaces the password form with the
+          profile step the chosen role still needs. The ticket and verifier
+          stay untouched; only the fields below are collected. */}
+      {googleRegistration && (
+        <form
+          ref={formRef}
+          onSubmit={handleGoogleRegistrationSubmit}
+          // Custom validation renders translated messages; no native UI.
+          noValidate
+          aria-busy={pending}
+        >
+          <p className="auth-form__google-hint">{t("auth.googleProfileHint")}</p>
+
+          {/* The verified Google email; the backend ignores any email field. */}
+          {googleRegistration.email && (
+            <p className="auth-form__google-email" role="status">
+              {t("auth.googleVerifiedEmail", { email: googleRegistration.email })}
+            </p>
+          )}
+
+          <div className="auth-form__fields">
+            {field(
+              "name",
+              role === "center" ? "auth.centerName" : "auth.fullName",
+              "text",
+              role === "center" ? "organization" : "name"
+            )}
+
+            {/* The patient endpoint takes a gender; centres have none. */}
+            {role === "patient" &&
+              field("gender", "auth.gender", "text", "off", {
+                as: "select",
+                options: [
+                  { value: "", label: t("auth.gender.select") },
+                  { value: "Male", label: t("auth.gender.male") },
+                  { value: "Female", label: t("auth.gender.female") },
+                ],
+              })}
+
+            {field("phone", "auth.phone", "tel", "tel")}
+
+            {/* Centre registration still needs its address; coordinates
+                stay optional and ride along when already confirmed. */}
+            {role === "center" && (
+              <div className="auth-form__location">
+                {field("location", "auth.location", "text", "street-address")}
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  icon={faLocationCrosshairs}
+                  onClick={() => findLocation(true)}
+                  loading={locationBusy}
+                  disabled={pending}
+                >
+                  {t("auth.currentLocation")}
+                </Button>
+
+                <p className="auth-form__location-status" role="status">
+                  {locationStatus && t(locationStatus)}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            size="lg"
+            fullWidth
+            loading={pending}
+            disabled={locationBusy}
+          >
+            {t("auth.googleContinue")}
+            <FontAwesomeIcon
+              icon={faArrowRight}
+              className="auth-form__arrow public-directional"
+              aria-hidden="true"
+            />
+          </Button>
+
+          {pending && (
+            <p className="auth-form__pending" role="status">
+              {t("auth.submitting")}
+            </p>
+          )}
+
+          {/* The ticket belongs to that verified account; switching starts
+              a brand-new Google flow instead of editing the email. */}
+          <p className="auth-form__switch">
+            <Button
+              variant="ghost"
+              onClick={cancelGoogleRegistration}
+              disabled={pending || locationBusy}
+            >
+              {t("auth.googleSwitch")}
+            </Button>
+          </p>
+        </form>
+      )}
+
+      {!googleRegistration && (
       <form
         ref={formRef}
         onSubmit={handleSubmit}
@@ -512,6 +899,7 @@ function AuthForm({ role, mode }) {
           </p>
         )}
       </form>
+      )}
 
       {locationChoices.length > 0 && (
         <Modal
@@ -551,7 +939,10 @@ function AuthForm({ role, mode }) {
         </div>
       )}
 
-      {role != "admin" &&
+      {/* Social sign-in is hidden while the Google profile step owns the
+          form; the switch link below is replaced by "use a different
+          account" inside that step. */}
+      {role != "admin" && !googleRegistration &&
       (
         <>
           {/* Social authentication section. */}
@@ -559,42 +950,54 @@ function AuthForm({ role, mode }) {
             <p className="auth-form__divider">{t("auth.continueWith")}</p>
 
             <div className="auth-form__social-buttons">
-              {/* Google stays unavailable until OAuth is connected. */}
-              <Button
-                variant="outline"
-                size="lg"
-                className="auth-form__google"
-                disabled
-                aria-label={t("auth.googleUnavailable")}
-                title={t("auth.googleUnavailable")}
-              >
-                {/* Inline SVG renders the Google logo without an image dependency. */}
-                <svg
-                  className="auth-form__google-icon"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  focusable="false"
+              {/* The live GIS button renders into this slot once the flow
+                  is ready; before that (script blocked, API unreachable,
+                  demo mode) the disabled fallback explains the state. */}
+              {googleFailed || authMode !== "api" ? (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="auth-form__google"
+                  onClick={handleGoogleFallbackClick}
+                  disabled={pending}
+                  aria-label={t("auth.googleUnavailable")}
+                  title={t("auth.googleUnavailable")}
                 >
-                  <path
-                    fill="#4285F4"
-                    d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.36Z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M6.41 13.92A6 6 0 0 1 6.1 12c0-.67.11-1.31.31-1.92V7.49H3.07A10 10 0 0 0 2 12c0 1.61.38 3.14 1.07 4.51l3.34-2.59Z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.96c1.47 0 2.79.51 3.82 1.51l2.86-2.86A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59A6 6 0 0 1 12 5.96Z"
-                  />
-                </svg>
+                  {/* Inline SVG renders the Google logo without an image dependency. */}
+                  <svg
+                    className="auth-form__google-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.9-1.75 2.98-4.33 2.98-7.36Z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M6.41 13.92A6 6 0 0 1 6.1 12c0-.67.11-1.31.31-1.92V7.49H3.07A10 10 0 0 0 2 12c0 1.61.38 3.14 1.07 4.51l3.34-2.59Z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.96c1.47 0 2.79.51 3.82 1.51l2.86-2.86A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59A6 6 0 0 1 12 5.96Z"
+                    />
+                  </svg>
 
-                <span>Google</span>
-              </Button>
+                  <span>Google</span>
+                </Button>
+              ) : null}
+
+              {/* GIS appends its own iframe here; the slot stays mounted
+                  even while the fallback shows so a restart can render. */}
+              <div
+                ref={googleButtonRef}
+                className="auth-form__google-live"
+              />
             </div>
           </div>
 

@@ -117,6 +117,15 @@ const codeAliases = {
   account_rejected: 'accountRejected',
   account_suspended: 'accountRejected',
   center_profile_missing: 'accountPending',
+
+  // Google sign-in states, each carrying its own guidance
+  invalid_google_credentials: 'googleCredentials',
+  invalid_registration_ticket: 'googleTicket',
+  account_conflict: 'googleConflict',
+  center_not_approved: 'centerNotApproved',
+  account_unavailable: 'accountUnavailable',
+  rate_limit_exceeded: 'rateLimited',
+  google_auth_unavailable: 'unavailable',
 };
 
 export function uiErrorCode(body, fallback) {

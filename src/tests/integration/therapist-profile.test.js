@@ -5,6 +5,7 @@ import { createMockAuthAdapter } from '../../services/auth/mockAuthAdapter.js';
 import { MOCK_PASSWORD } from '../../services/auth/mockAccounts.js';
 import {
   assignedTherapistServices,
+  defaultTherapistSchedule,
   therapistServicePrices,
 } from '../../services/center/therapistRecords.js';
 
@@ -45,6 +46,9 @@ function setup() {
       experience: 3,
       availability: 'available',
       price: 999,
+      // The adapter normalizes a missing week to the demo schedule, so the
+      // seed carries it too and store snapshots match workspace output.
+      schedule: defaultTherapistSchedule(id),
     })),
     services: [
       {

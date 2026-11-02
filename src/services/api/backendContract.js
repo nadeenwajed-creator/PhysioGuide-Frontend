@@ -44,7 +44,7 @@ function passwordPair(values) {
 
 // Centres register with a single free-text location but the API stores a city
 // separately; the city is the last component of the address before the country.
-function cityFromAddress(address) {
+export function cityFromAddress(address) {
   const parts = String(address || '').split(',').map((part) => part.trim()).filter(Boolean);
   if (parts.length <= 1) return parts[0] || 'Unknown';
   return parts.length === 2 ? parts[0] : parts[parts.length - 2];
@@ -127,6 +127,15 @@ export const authOperations = {
     },
     // A new centre is created Pending, so the form reports the review notice.
     response: () => ({ mode: 'api', status: 'pending-review', role: 'center' }),
+  },
+
+  // A Google sign-in response carries the same fields as password login, so
+  // the session is stored and shaped exactly the same way.
+  completeGoogleSession: {
+    execute: async (_client, body) => {
+      const session = signIn(body);
+      return { mode: 'api', status: 'authenticated', role: session.role, session };
+    },
   },
 
   // The session lives in localStorage; restoring it never touches the network.
@@ -671,35 +680,62 @@ export const centerOperations = {
   },
 
   markConversationRead: {
-    request: (_actor, id, messageIds) => ({
+    // The backend rejects an empty id list (MinLength 1), so an all-read
+    // conversation skips the request instead of failing the read effect.
+    execute: async (client, _actor, id, messageIds) => {
+      const ids = [...new Set(messageIds || [])];
+      if (!ids.length) return null;
+      await client.post(`/api/conversations/${id}/read`, { data: { messageIds: ids } });
+      return null;
+    },
+  },
+
+  // Opening a conversation finds the patient+therapist pair or creates it.
+  openPatientConversation: {
+    request: (_actor, values) => ({
       method: 'POST',
-      path: `/api/conversations/${id}/read`,
-      data: { messageIds: messageIds || [] },
+      path: '/api/conversations',
+      data: { therapistId: Number(values?.therapistId) },
     }),
-    response: () => null,
+    response: (body) => ({
+      id: String(body?.id ?? ''),
+      patientId: String(body?.patientId ?? ''),
+      therapistId: String(body?.therapistId ?? ''),
+    }),
   },
 
   sendMessage: {
-    request: (actor, id, payload) => ({
-      method: 'POST',
-      path: `/api/conversations/${id}/messages`,
-      data: {
-        text: payload?.text || '',
-        attachment: payload?.attachments?.[0]?.url,
-      },
-    }),
-    response: (body, actor) => {
-      return resolveAssets({
-        ...body,
-        attachments: body?.attachment
-          ? [{ url: body.attachment, name: String(body.attachment).split('/').pop() }]
-          : [],
-        direction: 'outgoing',
-        status: 'sent',
-        isRead: false,
-        senderRole: actor?.role,
-        senderId: actor?.patientId || actor?.therapistId || '',
+    // Composed files are local Blobs, so each one is uploaded to the role's
+    // image endpoint first; the message then carries the returned URL. Extra
+    // attachments follow as their own messages because the API stores one
+    // attachment URL per message.
+    execute: async (client, actor, id, payload) => {
+      const text = payload?.text || '';
+      const files = (payload?.attachments || []).filter((item) => item?.sourceFile || item?.file);
+      const uploadPath =
+        actor?.role === 'physiotherapist'
+          ? '/api/therapist/workspace/images'
+          : `${PATIENT}/account/image`;
+
+      const urls = [];
+      for (const file of files) {
+        const source = file.sourceFile || file.file;
+        const form = new FormData();
+        form.append('file', source, file.name || source.name || 'upload');
+        const uploaded = await client.post(uploadPath, { data: form });
+        if (uploaded?.url) urls.push(uploaded.url);
+      }
+
+      const first = await client.post(`/api/conversations/${id}/messages`, {
+        data: { text, attachment: urls[0] },
       });
+      for (const url of urls.slice(1)) {
+        await client.post(`/api/conversations/${id}/messages`, {
+          data: { text: '', attachment: url },
+        });
+      }
+
+      return mapSentMessage(first, actor);
     },
   },
 
@@ -883,6 +919,22 @@ export const centerOperations = {
   },
 };
 
+// The message the composer gets back: shaped like the messages the workspace
+// reloads, so an optimistic render and the refreshed list agree.
+function mapSentMessage(body, actor) {
+  return resolveAssets({
+    ...body,
+    attachments: body?.attachment
+      ? [{ url: body.attachment, name: String(body.attachment).split('/').pop() }]
+      : [],
+    direction: 'outgoing',
+    status: 'sent',
+    isRead: false,
+    senderRole: actor?.role,
+    senderId: actor?.patientId || actor?.therapistId || '',
+  });
+}
+
 // Operations the API contract does not expose yet. They fail loudly rather
 // than silently succeeding so the interface can show its unavailable state.
 const notImplemented = () => {
@@ -891,7 +943,6 @@ const notImplemented = () => {
 
 for (const operation of [
   'setPatientFavorite',
-  'openPatientConversation',
   'saveAppointment',
 ]) {
   centerOperations[operation] = { execute: notImplemented };

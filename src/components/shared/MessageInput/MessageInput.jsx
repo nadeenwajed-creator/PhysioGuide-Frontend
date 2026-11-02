@@ -8,7 +8,10 @@ import { useLanguage } from '../../../context/LanguageContext.jsx';
 import './MessageInput.css';
 
 const MAX_ATTACHMENTS = 5;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MiB per file.
+// The API caps uploads at 2 MB and message text at 2000 characters; failing
+// here gives the user a precise reason instead of a server rejection.
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
+const MAX_TEXT_LENGTH = 2000;
 const ALLOWED_EXTENSIONS = /\.(jpe?g|png|pdf|docx?)$/i;
 const FILE_ACCEPT = '.jpg,.jpeg,.png,.pdf,.doc,.docx';
 
@@ -159,7 +162,7 @@ function MessageInput({ onSend, disabled = false, className = '', enableEmoji = 
             ref={textAreaRef}
             className="pg-message-input__textarea"
             rows={1}
-            maxLength={10000}
+            maxLength={MAX_TEXT_LENGTH}
             dir="auto"
             value={text}
             onChange={(event) => {

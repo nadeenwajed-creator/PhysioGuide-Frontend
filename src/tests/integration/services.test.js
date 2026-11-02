@@ -14,7 +14,14 @@ function storage() {
   const values = new Map();
   return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key), values };
 }
-const response = (data, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => data });
+// Mirrors the real fetch Response surface the gateway uses: parseBody reads
+// text() first and falls back to JSON.parse, so the mock must provide it too.
+const response = (data, status = 200) => ({
+  ok: status >= 200 && status < 300,
+  status,
+  json: async () => data,
+  text: async () => (data == null ? '' : JSON.stringify(data)),
+});
 const credentials = email => ({ email, password: 'PhysioGuide123!' });
 const center = { id: 'account-center', role: 'center', centerId: 'center-demo' };
 const clock = () => new Date(2030, 0, 10, 12);
@@ -72,7 +79,7 @@ test('timeouts cover session headers, fetch and response-body reading; caller ca
   const hanging = () => new Promise(() => {});
   const waitingForSession = createHttpClient({ baseUrl: 'https://api.example.test', getHeaders: hanging, timeoutMs: 15 });
   await assert.rejects(waitingForSession.get('/test'), { code: 'timeout' });
-  for (const fetcher of [hanging, async () => ({ ok: true, status: 200, json: hanging })]) {
+  for (const fetcher of [hanging, async () => ({ ok: true, status: 200, json: hanging, text: hanging })]) {
     const client = createHttpClient({ baseUrl: 'https://api.example.test', fetcher, timeoutMs: 15 });
     await assert.rejects(client.get('/test'), { code: 'timeout' });
   }

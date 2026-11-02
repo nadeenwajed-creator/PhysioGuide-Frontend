@@ -220,3 +220,13 @@
 .auth-form__google-icon { flex-shrink: 0; inline-size: 18px; block-size: 18px; }
 .auth-form .auth-form__google:hover:not(:disabled) { background: var(--color-bg-light); border-color: var(--color-primary); }
 .auth-form .auth-form__google:focus-visible { outline: 2px solid var(--color-primary-light); outline-offset: 3px; }
+
+/* Google Identity Services renders its own iframe into this slot. The slot
+   stays mounted (even while the fallback shows) so a flow restart can render
+   into it; while empty it collapses so the fallback stands alone. */
+.auth-form__google-live { display: flex; justify-content: center; inline-size: min(100%, 240px); margin-inline: auto; }
+.auth-form__google-live:empty { min-block-size: 0; }
+
+/* Profile step after Google sign-in: hint, verified email, account switch. */
+.auth-form__google-hint { font-size: 12px; color: var(--color-text-secondary); margin-block-end: 4px; }
+.auth-form__google-email { font-size: 12px; color: var(--color-text-secondary); margin-block-end: 14px; word-break: break-word; }

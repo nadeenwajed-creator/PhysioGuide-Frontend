@@ -116,6 +116,9 @@ export function createGateway({
     const aborted = new Promise((_, reject) => {
       rejectAbort = reject;
     });
+    // An abort that lands after the request already settled has no race left
+    // to deliver it to; swallow it so it never becomes an unhandled rejection.
+    aborted.catch(() => {});
     const onAbort = () => rejectAbort(new ServiceError('cancelled'));
     controller.signal.addEventListener('abort', onAbort, { once: true });
     const abort = () => controller.abort();
@@ -150,14 +153,19 @@ export function createGateway({
         }),
       ]);
 
-      if (response.ok) return await parseBody(response);
+      // Reading the body is covered by the same timeout/abort race as the
+      // fetch itself: a stalled response stream must fail as timeout or
+      // cancellation, never hang the caller forever.
+      if (response.ok) return await Promise.race([aborted, parseBody(response)]);
 
       const body = await Promise.race([aborted, parseBody(response)]).catch(() => null);
       const apiCode = typeof body?.code === 'string' ? body.code : null;
 
       // Expired access token: refresh once and replay the original request.
+      // The refresh exchange shares this request's timeout/abort race so a
+      // stalled refresh fails the caller instead of freezing it forever.
       if (response.status === 401 && apiCode === 'token_expired' && retry && auth) {
-        if (await runRefresh()) {
+        if (await Promise.race([aborted, runRefresh()])) {
           return await send(method, path, { ...options, retry: false });
         }
       }
