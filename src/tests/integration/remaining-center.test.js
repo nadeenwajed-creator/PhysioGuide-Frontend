@@ -32,9 +32,17 @@ test('remaining mutations enforce Center roles and workspace ownership', async (
     ['updateReview', 'r1', { reply: 'Reply' }], ['saveCenter', profile],
     ['saveNotificationPreferences', { reviews: false }], ['changeCenterPassword', {}],
   ];
+  // Therapists manage their own notification switches from their settings
+  // page, so that one operation accepts their role as well as the centre's.
+  const therapistAllowed = new Set(['saveNotificationPreferences']);
   for (const [method, ...args] of operations) {
     assert.doesNotThrow(() => authorizeCenterOperation(actor, method));
     for (const role of ['patient', 'physiotherapist', 'admin']) {
+      if (therapistAllowed.has(method) && role === 'physiotherapist') {
+        assert.doesNotThrow(() => authorizeCenterOperation({ ...actor, role }, method));
+        await adapter[method]({ ...actor, role }, ...args);
+        continue;
+      }
       assert.throws(() => authorizeCenterOperation({ ...actor, role }, method), { code: 'forbidden' });
       await assert.rejects(adapter[method]({ ...actor, role }, ...args), { code: 'forbidden' });
     }

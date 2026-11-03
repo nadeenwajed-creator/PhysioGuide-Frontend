@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { faHouse, faBuilding, faUsers, faUserDoctor, faCalendarDays, faStar, faGear } from '@fortawesome/free-solid-svg-icons';
 import Navbar from '../components/shared/Navbar/Navbar.jsx';
+import NotificationsDropdown from '../components/shared/NotificationsDropdown/NotificationsDropdown.jsx';
 import Sidebar from '../components/shared/Sidebar/Sidebar.jsx';
 import Footer from '../components/shared/Footer/Footer.jsx';
 import ThemeToggle from '../components/shared/ThemeToggle/ThemeToggle.jsx';
@@ -13,10 +14,23 @@ import { useLanguage } from '../context/LanguageContext.jsx';
 import ThemeContext from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { logout as signOut } from '../services/authService.js';
+import { callAdmin } from '../services/adminService.js';
+import { markNotificationsRead } from '../services/notificationService.js';
+import { startMessagingRealtime } from '../services/messagingRealtime.js';
 import { personFace } from '../utils/personImage.js';
+import { localized } from '../utils/centerFormat.js';
 import { ConfirmDialog } from '../components/center/CenterUI.jsx';
 import logo from '../assets/logo/physioguide-icon.svg';
 import './CenterLayout.css';
+
+// Types the admin settings page can toggle; any other type falls back to
+// the system-alerts switch. Each type also says where a click should land.
+const adminBellTypes = {
+  centerApproval: { preference: 'approvalRequests', to: '/admin/centers' },
+  appointmentCancelled: { preference: 'appointmentUpdates', to: '/admin/appointments' },
+  reviewReported: { preference: 'reportedReviews', to: '/admin/reviews' },
+  therapistVerified: { preference: 'approvalRequests', to: '/admin/physiotherapists' },
+};
 
 const adminNavigation = [
   ['dashboard', faHouse],
@@ -31,7 +45,7 @@ const adminNavigation = [
 function AdminLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { t, dir } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const { session } = useAuth();
   const [open, setOpen] = useState(false);
@@ -67,6 +81,74 @@ function AdminLayout() {
   const results = search.trim()
     ? items.filter(item => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))
     : [];
+
+  // The navbar bell is the official notifications surface for the admin —
+  // there is no dedicated notifications page, like every other role.
+  const [bell, setBell] = useState({ notifications: [], notificationPreferences: {} });
+  const refreshBell = useCallback(
+    () =>
+      callAdmin('getAdminNotifications')
+        .then((result) => {
+          setBell({
+            notifications: result?.notifications || [],
+            notificationPreferences: result?.notificationPreferences || {},
+          });
+        })
+        .catch(() => {
+          // A transient failure keeps the last list; focus and push will retry.
+        }),
+    []
+  );
+
+  useEffect(() => {
+    let live = true;
+    const load = () => {
+      callAdmin('getAdminNotifications')
+        .then((result) => {
+          if (live) {
+            setBell({
+              notifications: result?.notifications || [],
+              notificationPreferences: result?.notificationPreferences || {},
+            });
+          }
+        })
+        .catch(() => {
+          // A transient failure keeps the last list; focus and push will retry.
+        });
+    };
+    load();
+    window.addEventListener('focus', load);
+    return () => {
+      live = false;
+      window.removeEventListener('focus', load);
+    };
+  }, [pathname]);
+
+  // Server push: an event for this admin refreshes the bell immediately.
+  useEffect(() => startMessagingRealtime(refreshBell), [refreshBell]);
+
+  const adminNotifications = bell.notifications
+    .filter(item =>
+      bell.notificationPreferences[adminBellTypes[item.type]?.preference ?? 'systemAlerts'] !== false
+    )
+    .map(item => {
+      const known = adminBellTypes[item.type];
+      return {
+        ...item,
+        title: known ? t(`admin.notification.${item.type}`) : localized(item.title, language),
+        message: known ? t(`admin.notification.${item.type}Body`) : localized(item.message, language),
+        to: known?.to,
+      };
+    });
+
+  async function markRead(id) {
+    try {
+      await markNotificationsRead(session, id);
+      await refreshBell();
+    } catch {
+      // The bell retries on the next focus or push event.
+    }
+  }
 
   return (
     <div className="center-layout" dir={dir}>
@@ -112,6 +194,7 @@ function AdminLayout() {
         themeToggle={<ThemeToggle />}
         languageSwitcher={<LanguageSwitcher />}
         quickSettings={<QuickSettings languageSwitcher={<LanguageSwitcher variant="mobile" />} themeToggle={<ThemeToggle />} />}
+        notifications={<NotificationsDropdown notifications={adminNotifications} onMarkAsRead={markRead} onMarkAllAsRead={() => markRead()} />}
         profileMenu={({ compact }) => (
           <ProfileMenu
             user={user}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFlag, faComment, faFileAlt } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faFileAlt, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
@@ -14,7 +14,9 @@ import { QueryState, AdminPagination } from './AdminUI.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
 import './Reviews.css';
 
-const reviewStatuses = ['published', 'pending', 'reported'];
+// The backend models moderation as one flag: a review is either public or
+// hidden from patients, and "reported"/"pending" have no data source.
+const reviewStatuses = ['published', 'hidden'];
 
 function AdminReviews() {
   const { t, language } = useLanguage();
@@ -80,14 +82,14 @@ function AdminReviews() {
             <span>{t('admin.reviews.published')}</span>
           </div>
           <div className="admin-summary-card">
-            <FontAwesomeIcon icon={faComment} />
-            <strong>{number.format(summary.pending ?? 0)}</strong>
-            <span>{t('admin.reviews.pending')}</span>
+            <FontAwesomeIcon icon={faEyeSlash} />
+            <strong>{number.format(summary.hidden ?? 0)}</strong>
+            <span>{t('admin.reviews.hidden')}</span>
           </div>
           <div className="admin-summary-card">
-            <FontAwesomeIcon icon={faFlag} />
-            <strong>{number.format(summary.reported ?? 0)}</strong>
-            <span>{t('admin.reviews.reported')}</span>
+            <FontAwesomeIcon icon={faComment} />
+            <strong>{number.format(summary.replied ?? 0)}</strong>
+            <span>{t('admin.reviews.replied')}</span>
           </div>
         </div>
 
@@ -159,9 +161,18 @@ function AdminReviews() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPending({ id: review.id, action: 'approve' })}
+                  onClick={() =>
+                    setPending({
+                      id: review.id,
+                      action: review.status === 'hidden' ? 'show' : 'hide',
+                    })
+                  }
                 >
-                  {t('admin.reviews.moderate')}
+                  {t(
+                    review.status === 'hidden'
+                      ? 'admin.reviews.publish'
+                      : 'admin.reviews.hide',
+                  )}
                 </Button>
                 <Button
                   variant="danger"
@@ -189,11 +200,19 @@ function AdminReviews() {
 
       {pending && (
         <ConfirmDialog
-          title={pending.action === 'remove' ? t('admin.reviews.remove') : t('admin.reviews.moderate')}
+          title={
+            pending.action === 'remove'
+              ? t('admin.reviews.remove')
+              : pending.action === 'hide'
+                ? t('admin.reviews.hide')
+                : t('admin.reviews.publish')
+          }
           description={
             pending.action === 'remove'
               ? t('admin.reviews.confirmRemove')
-              : t('admin.reviews.confirmModerate')
+              : pending.action === 'hide'
+                ? t('admin.reviews.confirmHide')
+                : t('admin.reviews.confirmModerate')
           }
           danger={pending.action === 'remove'}
           onClose={() => setPending(null)}

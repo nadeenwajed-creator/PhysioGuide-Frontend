@@ -78,9 +78,9 @@ const state = {
     { id: 'SVC-4', name: 'Neuro rehab' },
   ],
   reviews: [
-    { id: 'REV-9001', name: 'Ahmed Al-Masri', context: 'Reviewed Dr. Lina Haddad - MotionCare Center', text: 'Excellent treatment and professional care. Highly recommended!', rating: 5, status: 'published', createdAt: daysAgo(2) },
-    { id: 'REV-9002', name: 'Layla Hassan', context: 'Reviewed Dr. Karim Nasser - Al Noor Rehabilitation', text: 'Great experience, very attentive physiotherapist.', rating: 4.5, status: 'pending', createdAt: daysAgo(5) },
-    { id: 'REV-9003', name: 'Mohammed Saleh', context: 'Reviewed Dr. Sara Ali - Healing Hands Clinic', text: 'Amazing results after only three sessions, my knee feels new!', rating: 5, status: 'reported', createdAt: daysAgo(1) },
+    { id: 'REV-9001', patient: { id: 'PAT-1001', name: 'Ahmed Al-Masri' }, center: { id: 'CTR-4822', name: 'MotionCare Center' }, therapistName: 'Dr. Lina Haddad', rating: 5, comment: 'Excellent treatment and professional care. Highly recommended!', reply: null, isVisible: true, createdAt: daysAgo(2) },
+    { id: 'REV-9002', patient: { id: 'PAT-1002', name: 'Layla Hassan' }, center: { id: 'CTR-4821', name: 'Al Noor Rehabilitation' }, therapistName: 'Dr. Karim Nasser', rating: 4, comment: 'Great experience, very attentive physiotherapist.', reply: null, isVisible: false, createdAt: daysAgo(5) },
+    { id: 'REV-9003', patient: { id: 'PAT-1003', name: 'Mohammed Saleh' }, center: { id: 'CTR-4823', name: 'Healing Hands Clinic' }, therapistName: 'Dr. Sara Ali', rating: 5, comment: 'Amazing results after only three sessions, my knee feels new!', reply: 'Thank you for your kind words.', isVisible: true, createdAt: daysAgo(1) },
   ],
   settings: {
     profile: {
@@ -110,10 +110,10 @@ const state = {
     },
     health: { percent: 94, approvalResponse: 2.4, satisfaction: 4.8 },
     notifications: [
-      { id: 1, text: { en: 'Center approval required', ar: 'مطلوب اعتماد مركز' }, unread: true },
-      { id: 2, text: { en: 'Appointment cancelled', ar: 'تم إلغاء موعد' }, unread: true },
-      { id: 3, text: { en: 'Review reported', ar: 'تم الإبلاغ عن تقييم' }, unread: true },
-      { id: 4, text: { en: 'Physiotherapist verified', ar: 'تم التحقق من أخصائي علاجي' }, unread: false },
+      { id: 1, text: { en: 'Center approval required', ar: 'مطلوب اعتماد مركز' }, unread: true, createdAt: hoursAgo(1) },
+      { id: 2, text: { en: 'Appointment cancelled', ar: 'تم إلغاء موعد' }, unread: true, createdAt: hoursAgo(3) },
+      { id: 3, text: { en: 'Review reported', ar: 'تم الإبلاغ عن تقييم' }, unread: true, createdAt: hoursAgo(5) },
+      { id: 4, text: { en: 'Physiotherapist verified', ar: 'تم التحقق من أخصائي علاجي' }, unread: false, createdAt: hoursAgo(9) },
     ],
     pendingApprovals: { total: 17, centers: 7, therapists: 6, reportedReviews: 4 },
     activity: [
@@ -182,21 +182,19 @@ function therapistRow(therapist) {
 function reviewSummary() {
   const ratings = state.reviews.map((review) => Number(review.rating) || 0);
   const score = ratings.length ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : 0;
-  const reported = state.reviews.filter((review) => review.status === 'reported').length;
-  const distribution = [1, 2, 3, 4, 5].map(
-    (star) => state.reviews.filter((review) => Math.round(Number(review.rating)) === star).length
-  );
-  const flagged = state.reviews.length
-    ? Math.round((reported / state.reviews.length) * 1000) / 10
-    : 0;
+  const visible = state.reviews.filter((review) => review.isVisible).length;
+  const ratingDistribution = [1, 2, 3, 4, 5].map((star) => ({
+    rating: star,
+    count: state.reviews.filter((review) => Math.round(Number(review.rating)) === star).length,
+  }));
+  // Same summary object the API returns so the mapper serves both modes.
   return {
-    score: Math.round(score * 10) / 10,
     total: state.reviews.length,
-    flaggedPercent: `${flagged}%`,
-    distribution,
-    published: state.reviews.filter((review) => review.status === 'published').length,
-    pending: state.reviews.filter((review) => review.status === 'pending').length,
-    reported,
+    visible,
+    hidden: state.reviews.length - visible,
+    replied: state.reviews.filter((review) => review.reply).length,
+    averageRating: Math.round(score * 10) / 10,
+    ratingDistribution,
   };
 }
 
@@ -213,6 +211,40 @@ export const adminMockApi = {
       pendingApprovals: state.dashboard.pendingApprovals,
       activity: state.dashboard.activity,
     };
+  },
+
+  // The navbar bell reads the same demo notifications with their types so
+  // the settings toggles filter them exactly like the API does.
+  async getAdminNotifications(actor) {
+    await wait();
+    requireAdmin(actor);
+    const types = ['centerApproval', 'appointmentCancelled', 'reviewReported', 'therapistVerified'];
+    const settings = state.settings.notifications;
+    return {
+      notifications: state.dashboard.notifications.map((item, index) => ({
+        id: String(item.id),
+        type: item.type ?? types[index],
+        title: item.text,
+        isRead: !item.unread,
+        createdAt: item.createdAt ?? null,
+        relatedId: null,
+      })),
+      // UI keys travel as the four generic flags, like the API stores them.
+      preferences: {
+        emailEnabled: settings.approvalRequests !== false,
+        inAppEnabled: settings.appointmentUpdates !== false,
+        appointmentReminders: settings.reportedReviews !== false,
+        marketing: settings.systemAlerts === true,
+      },
+    };
+  },
+
+  async markNotificationsRead(actor, id) {
+    requireAdmin(actor);
+    state.dashboard.notifications.forEach((item) => {
+      if (id === undefined || id === null || String(item.id) === String(id)) item.unread = false;
+    });
+    return undefined;
   },
 
   async getAdminCenters(actor, params = {}) {
@@ -411,9 +443,14 @@ export const adminMockApi = {
     requireAdmin(actor);
     const filtered = state.reviews.filter(
       (review) =>
-        matches(review, params.search, [review.name, review.context, review.text]) &&
+        matches(review, params.search, [
+          review.patient?.name,
+          review.center?.name,
+          review.therapistName,
+          review.comment,
+        ]) &&
         (!params.rating || Math.round(Number(review.rating)) === Number(params.rating)) &&
-        (!params.status || review.status === params.status)
+        (!params.status || (params.status === 'published' ? review.isVisible : !review.isVisible))
     );
     if (params.sort === 'oldest') {
       filtered.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
@@ -433,15 +470,15 @@ export const adminMockApi = {
   async moderateAdminReview(actor, { id, action } = {}) {
     await wait();
     requireAdmin(actor);
-    if (!['approve', 'remove'].includes(action)) throw new ServiceError('validation');
+    if (!['hide', 'show', 'remove'].includes(action)) throw new ServiceError('validation');
     const review = state.reviews.find((item) => item.id === id);
     if (!review) throw new ServiceError('notFound');
     if (action === 'remove') {
       state.reviews = state.reviews.filter((item) => item.id !== id);
-      return { ...review };
+      return { id, action };
     }
-    review.status = 'published';
-    return { ...review };
+    review.isVisible = action === 'show';
+    return { id, isVisible: review.isVisible, action };
   },
 
   async getAdminSettings(actor) {

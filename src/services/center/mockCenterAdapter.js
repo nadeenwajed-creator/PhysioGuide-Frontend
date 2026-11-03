@@ -463,7 +463,8 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       return url;
     },
     async saveNotificationPreferences(actor, values) {
-      requireCenter(actor);
+      // Therapists edit the same switches from their own settings page.
+      requireActor(actor);
       const keys = ['appointments', 'appointmentChanges', 'patients', 'reviews'];
       if (!values || typeof values !== 'object' || Array.isArray(values)) fail('validation');
       const provided = keys.filter(key => Object.hasOwn(values, key));

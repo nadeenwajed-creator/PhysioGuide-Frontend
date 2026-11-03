@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBell,
+  faBriefcaseMedical,
   faBuilding,
   faCalendarDays,
   faComments,
@@ -13,6 +14,7 @@ import {
   faGear,
   faStar,
   faUserDoctor,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 
 import { useLanguage } from '../../../context/LanguageContext.jsx';
@@ -23,9 +25,19 @@ import './NotificationsDropdown.css';
 const notificationTypes = {
   center: { icon: faBuilding, tone: 'danger' },
   appointment: { icon: faCalendarDays, tone: 'warning' },
+  appointmentRequest: { icon: faCalendarDays, tone: 'warning' },
+  appointmentChange: { icon: faCalendarDays, tone: 'warning' },
+  appointmentReminder: { icon: faCalendarDays, tone: 'warning' },
+  appointmentCancelled: { icon: faCalendarDays, tone: 'danger' },
   review: { icon: faStar, tone: 'warning' },
+  reviewReported: { icon: faStar, tone: 'warning' },
   therapist: { icon: faUserDoctor, tone: 'info' },
+  therapistVerified: { icon: faUserDoctor, tone: 'info' },
+  professional: { icon: faUserDoctor, tone: 'info' },
+  services: { icon: faBriefcaseMedical, tone: 'info' },
   message: { icon: faComments, tone: 'info' },
+  patient: { icon: faUsers, tone: 'info' },
+  centerApproval: { icon: faBuilding, tone: 'warning' },
   system: { icon: faGear, tone: 'info' },
 };
 

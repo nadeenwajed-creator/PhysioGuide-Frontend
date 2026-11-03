@@ -97,8 +97,9 @@
   color: var(--color-danger, #B83A47);
 }
 
-/* Inactive reads as neutral. */
-.pg-status-badge--inactive {
+/* Inactive / hidden read as neutral. */
+.pg-status-badge--inactive,
+.pg-status-badge--hidden {
   background-color: var(--color-bg-soft, #F1F3F5);
   color: var(--color-text-secondary, #5B6570);
 }

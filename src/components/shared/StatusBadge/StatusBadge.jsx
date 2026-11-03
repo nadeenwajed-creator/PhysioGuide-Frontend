@@ -23,6 +23,7 @@ function StatusBadge({
     'inactive',
     'suspended',
     'published',
+    'hidden',
     'reported',
   ];
 

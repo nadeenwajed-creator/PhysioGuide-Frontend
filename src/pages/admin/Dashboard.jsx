@@ -4,8 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowUp,
   faArrowDown,
-  faArrowRight,
-  faArrowLeft,
   faHospital,
   faUsers,
   faUserDoctor,
@@ -77,7 +75,7 @@ function MiniLineChart() {
 }
 
 function AdminDashboard() {
-  const { t, dir, language } = useLanguage();
+  const { t, language } = useLanguage();
   const { session } = useAuth();
   const [year, setYear] = useState(String(new Date().getFullYear()));
   // Relative activity times need a clock; snapshot it once instead of reading
@@ -236,14 +234,13 @@ function AdminDashboard() {
               {(data?.notifications ?? []).map((n) => (
                 <li key={n.id} className="admin-notifications__item">
                   <span className={`admin-notifications__dot ${n.unread ? 'admin-notifications__dot--unread' : ''}`} />
-                  <span className="admin-notifications__text">{localized(n.text, language)}</span>
+                  <span className="admin-notifications__text">
+                    {n.type ? t(`admin.notification.${n.type}`) : localized(n.text, language)}
+                  </span>
                 </li>
               ))}
             </ul>
-            <Link to="/admin/notifications" className="admin-panel__link">
-              {t('admin.dashboard.viewAllNotifications')}
-              <FontAwesomeIcon icon={dir === 'rtl' ? faArrowLeft : faArrowRight} />
-            </Link>
+            {/* The navbar bell is the official notifications view: no dedicated page. */}
           </Panel>
 
           <Panel title={t('admin.dashboard.pendingApprovals')} className="admin-panel">

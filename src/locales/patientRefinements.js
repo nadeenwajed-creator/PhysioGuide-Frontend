@@ -26,6 +26,16 @@ const copy = {
   'center.therapistNotifications.appointmentUpdateBody': ['Your appointment details or status have changed.', 'تغيّرت تفاصيل موعدك أو حالته.'],
   'center.therapistNotifications.appointmentReminderTitle': ['Upcoming appointment', 'موعد قادم'],
   'center.therapistNotifications.appointmentReminderBody': ['You have a confirmed appointment within the next 24 hours.', 'لديك موعد مؤكد خلال الساعات الأربع والعشرين القادمة.'],
+  'center.therapistNotifications.appointmentRequestTitle': ['New appointment request', 'طلب موعد جديد'],
+  'center.therapistNotifications.appointmentRequestBody': ['A patient requested a new appointment.', 'طلب مريض موعدًا جديدًا.'],
+  'center.therapistNotifications.patientTitle': ['Patient record added', 'أُضيف سجل مريض'],
+  'center.therapistNotifications.patientBody': ['A new patient is linked to your center.', 'تم ربط مريض جديد بمركزك.'],
+  'center.therapistNotifications.reviewTitle': ['New patient review', 'تقييم جديد من مريض'],
+  'center.therapistNotifications.reviewBody': ['Read the latest feedback from your patients.', 'اطّلع على أحدث آراء مرضاك.'],
+  'center.therapistNotifications.centerStatusTitle': ['Center status update', 'تحديث حالة المركز'],
+  'center.therapistNotifications.centerStatusBody': ['Your center status was updated by the administration.', 'تم تحديث حالة المركز من قبل الإدارة.'],
+  'center.therapistNotifications.systemTitle': ['Account status updated', 'تم تحديث حالة الحساب'],
+  'center.therapistNotifications.systemBody': ['Your account status was updated by the administration.', 'تم تحديث حالة حسابك من قبل الإدارة.'],
 };
 export const patientRefinementsEn = Object.fromEntries(Object.entries(copy).map(([key, value]) => [key, value[0]]));
 export const patientRefinementsAr = Object.fromEntries(Object.entries(copy).map(([key, value]) => [key, value[1]]));

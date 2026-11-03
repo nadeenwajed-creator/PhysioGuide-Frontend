@@ -343,9 +343,17 @@ export const adminOperations = {
       path: `${ADMIN}/reviews`,
       query: {
         search: params?.search,
-        rating: params?.rating,
-        status: params?.status,
-        sort: params?.sort,
+        // The list page picks one rating; the API narrows with a min/max pair.
+        minRating: params?.rating || undefined,
+        maxRating: params?.rating || undefined,
+        // Published maps to the API's visibility flag; hidden is its inverse.
+        visibility:
+          params?.status === 'published'
+            ? 'visible'
+            : params?.status === 'hidden'
+              ? 'hidden'
+              : undefined,
+        sort: params?.sort || undefined,
         page: params?.page,
         pageSize: params?.pageSize,
       },
@@ -372,18 +380,44 @@ export const adminOperations = {
       method: 'PUT',
       path: `${ADMIN}/settings`,
       data: {
-        ...(values?.profile
-          ? {
-              profile: {
-                fullName: values.profile.name,
-                location: values.profile.location,
-              },
-            }
-          : {}),
-        notifications: values?.notifications,
+        ...(values?.profile ? { adminFullName: values.profile.name } : {}),
+        // UI toggles travel as the four generic flags the API stores.
+        notifications: values?.notifications
+          ? map.adminPreferencesRequest(values.notifications)
+          : undefined,
       },
     }),
     response: resolved(map.toAdminSettings),
+  },
+
+  // The navbar bell: the full list plus the preferences that filter it.
+  getAdminNotifications: {
+    request: () => ({ method: 'GET', path: `${ADMIN}/notifications` }),
+    response: (body) => ({
+      notifications: (body?.notifications || []).map((item) => map.toNotification(item)),
+      notificationPreferences: map.toAdminPreferences(body?.preferences),
+    }),
+  },
+
+  // "Mark one" posts the id; "mark all" walks the unread list like the
+  // other portals do through their workspaces.
+  markNotificationsRead: {
+    execute: async (client, _actor, id) => {
+      if (id !== undefined && id !== null) {
+        await client.post('/api/notifications/read', { data: { id } });
+        return undefined;
+      }
+      const body = await client.get(`${ADMIN}/notifications`);
+      const ids = (body?.notifications || [])
+        .filter((item) => !item.isRead)
+        .map((item) => item.id);
+      await Promise.all(
+        ids.map((item) =>
+          client.post('/api/notifications/read', { data: { id: item } }).catch(() => undefined)
+        )
+      );
+      return undefined;
+    },
   },
 
   // The admin settings page reuses the shared credential endpoint.
@@ -659,9 +693,10 @@ export const centerOperations = {
   },
 
   saveNotificationPreferences: {
-    request: (_actor, values) => ({
+    request: (actor, values) => ({
       method: 'PUT',
-      path: `${CENTER_WORKSPACE}/preferences`,
+      // The therapist portal keeps its preferences on its own workspace.
+      path: `${actor?.role === 'physiotherapist' ? THERAPIST_WORKSPACE : CENTER_WORKSPACE}/preferences`,
       data: map.centerPreferencesRequest(values),
     }),
     response: (body) => map.toCenterPreferences(body),

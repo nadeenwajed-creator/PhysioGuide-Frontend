@@ -59,6 +59,15 @@ const centerPreferenceMap = {
   reviews: 'emailEnabled',
 };
 
+// The admin toggles ride the same four flags. The mapping lines up with the
+// seeded defaults: system alerts off is the marketing flag (false by default).
+const adminPreferenceMap = {
+  approvalRequests: 'emailEnabled',
+  appointmentUpdates: 'inAppEnabled',
+  reportedReviews: 'appointmentReminders',
+  systemAlerts: 'marketing',
+};
+
 export function toPreferences(api, map = patientPreferenceMap) {
   const result = {};
   for (const [uiKey, apiKey] of Object.entries(map)) {
@@ -82,6 +91,9 @@ export const patientPreferencesRequest = (values) =>
 export const toCenterPreferences = (api) => toPreferences(api, centerPreferenceMap);
 export const centerPreferencesRequest = (values) =>
   preferencesRequest(values, centerPreferenceMap);
+export const toAdminPreferences = (api) => toPreferences(api, adminPreferenceMap);
+export const adminPreferencesRequest = (values) =>
+  preferencesRequest(values, adminPreferenceMap);
 
 // --- patient account -------------------------------------------------------
 
@@ -224,6 +236,27 @@ export function toConversation(conversation, viewer) {
   };
 }
 
+// API notifications carry only a type and a related id; the bell rebuilds its
+// navigation target from them. Mock records keep their explicit target.
+function notificationTarget(notification) {
+  if (notification.target) return notification.target;
+  const id = notification.relatedId ?? null;
+  switch (notification.type) {
+    case 'message':
+      return id ? { kind: 'conversation', id } : undefined;
+    case 'appointment':
+    case 'appointmentChange':
+    case 'appointmentRequest':
+    case 'appointmentReminder':
+      return id ? { kind: 'appointment', id } : undefined;
+    case 'professional':
+    case 'services':
+      return { kind: 'professional' };
+    default:
+      return undefined;
+  }
+}
+
 export function toNotification(notification) {
   return {
     id: String(notification.id),
@@ -231,8 +264,9 @@ export function toNotification(notification) {
     title: notification.title,
     message: notification.message,
     isRead: Boolean(notification.isRead),
-    createdAt: notification.date,
+    createdAt: notification.date ?? notification.createdAt ?? null,
     relatedId: notification.relatedId ?? null,
+    target: notificationTarget(notification),
   };
 }
 
@@ -484,8 +518,10 @@ export function toAdminDashboard(body) {
     notifications: (Array.isArray(body?.notifications) ? body.notifications : []).map(
       (item, index) => ({
         id: item?.id ?? index,
-        text: item?.text ?? '',
-        unread: item?.unread !== false,
+        type: item?.type,
+        text: item?.text ?? item?.title ?? '',
+        unread: item?.unread ?? item?.isRead === false,
+        createdAt: item?.createdAt ?? null,
       })
     ),
     pending: {
@@ -664,7 +700,12 @@ export function toAdminReview(item) {
     context,
     text: label(item?.text ?? item?.comment),
     rating: num(item?.rating, 0),
-    status: lower(item?.status, 'published'),
+    // The API stores moderation as the isVisible flag; a hidden review is the
+    // only state besides published. An explicit legacy status still wins.
+    status:
+      item?.isVisible === false
+        ? 'hidden'
+        : lower(item?.status, 'published'),
     createdAt: item?.createdAt ?? null,
   };
 }
@@ -672,22 +713,27 @@ export function toAdminReview(item) {
 export function toAdminReviews(body) {
   const list = adminList(body);
   const summary = body?.summary ?? {};
-  const flagged = summary?.flaggedPercent ?? 0;
+  const total = num(summary?.total ?? summary?.reviewCount ?? list.total);
+  const hidden = num(summary?.hidden ?? summary?.reported);
+  // Flagged = share of reviews an admin has taken out of public view.
+  const flagged = total ? Math.round((hidden / total) * 1000) / 10 : 0;
+  const distribution = Array.isArray(summary?.ratingDistribution)
+    ? summary.ratingDistribution.map((entry) => num(entry?.count ?? entry))
+    : Array.isArray(summary?.distribution)
+      ? summary.distribution.map((value) => num(value))
+      : [];
   return {
     total: list.total,
     filters: list.filters,
     summary: {
-      score: num(summary?.score ?? summary?.overallRating),
-      total: num(summary?.total ?? summary?.reviewCount),
+      score: num(summary?.score ?? summary?.overallRating ?? summary?.averageRating),
+      total,
       // The summary card prints a ready-made "0.1%", numbers included.
-      flaggedPercent: typeof flagged === 'number' ? `${flagged}%` : String(flagged || '0%'),
-      distribution: (Array.isArray(summary?.distribution)
-        ? summary.distribution
-        : []
-      ).map((value) => num(value)),
-      published: num(summary?.published),
-      pending: num(summary?.pending),
-      reported: num(summary?.reported),
+      flaggedPercent: `${flagged}%`,
+      distribution,
+      published: num(summary?.published ?? summary?.visible),
+      hidden,
+      replied: num(summary?.replied),
     },
     items: list.items.map(toAdminReview),
   };
@@ -708,7 +754,19 @@ export function toScheduleWindow(body) {
 }
 
 export function toAdminSettings(body) {
-  const profile = body?.profile ?? {};
+  // The mock stores UI keys under `profile`; the API answers with flat
+  // adminFullName/email fields at the top level.
+  const profile = body?.profile ?? body ?? {};
+  const rawNotifications = body?.notifications;
+  // Mock settings store the four UI keys; the API returns the generic flags.
+  const notifications = rawNotifications && 'emailEnabled' in rawNotifications
+    ? toPreferences(rawNotifications, adminPreferenceMap)
+    : {
+        approvalRequests: rawNotifications?.approvalRequests === true,
+        appointmentUpdates: rawNotifications?.appointmentUpdates === true,
+        reportedReviews: rawNotifications?.reportedReviews === true,
+        systemAlerts: rawNotifications?.systemAlerts === true,
+      };
   return {
     profile: {
       name: label(profile?.fullName ?? profile?.name),
@@ -719,11 +777,6 @@ export function toAdminSettings(body) {
       adminId: profile?.adminId == null ? '' : String(profile.adminId),
     },
     security: { twoFactorEnabled: body?.security?.twoFactorEnabled === true },
-    notifications: {
-      approvalRequests: body?.notifications?.approvalRequests === true,
-      appointmentUpdates: body?.notifications?.appointmentUpdates === true,
-      reportedReviews: body?.notifications?.reportedReviews === true,
-      systemAlerts: body?.notifications?.systemAlerts === true,
-    },
+    notifications,
   };
 }

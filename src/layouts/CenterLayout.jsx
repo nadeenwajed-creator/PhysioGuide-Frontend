@@ -116,7 +116,7 @@ function CenterLayout({ portal = 'center' }) {
     return startMessagingRealtime(() => refreshRef.current?.());
   }, [actor]);
   const data = workspace?.actorId === actor.id && workspace.role === role && workspace.centerId === actor.centerId && workspace.therapistId === actor.therapistId && workspace.patientId === actor.patientId ? workspace.data : null;
-  const navigation = patientPortal ? [['dashboard', faHouse], ['centers', faLocationDot], ['pain-assessment', faClipboardList], ['appointments', faCalendarDays], ['messages', faComments], ['profile', faUser], ['settings', faGear]] : therapistPortal ? [['messages', faComments], ['profile', faUser]] : centerNavigation;
+  const navigation = patientPortal ? [['dashboard', faHouse], ['centers', faLocationDot], ['pain-assessment', faClipboardList], ['appointments', faCalendarDays], ['messages', faComments], ['profile', faUser], ['settings', faGear]] : therapistPortal ? [['messages', faComments], ['profile', faUser], ['settings', faGear]] : centerNavigation;
   const profilePath = patientPortal ? '/patient/profile' : therapistPortal ? '/center/physiotherapist/profile' : '/center/profile';
   const items = navigation.map(([id, icon]) => ({
     id,
@@ -141,18 +141,62 @@ function CenterLayout({ portal = 'center' }) {
       : account?.imageUrl
   };
   const results = search.trim() ? items.filter(item => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())) : [];
+  // API notifications store plain strings; derive the translation key from
+  // the type so Arabic UIs show localized copy. Explicit keys (mock) and
+  // bilingual mock titles keep their existing path.
+  const copyKeys = patientPortal ? {
+    message: 'therapistMessage',
+    appointment: 'appointmentUpdate',
+    appointmentChange: 'appointmentUpdate',
+    appointmentReminder: 'appointmentReminder',
+  } : therapistPortal ? {
+    message: 'message',
+    professional: 'professional',
+    services: 'services',
+    system: 'system',
+    appointment: 'appointmentUpdate',
+    appointmentChange: 'appointmentUpdate',
+    appointmentRequest: 'appointmentRequest',
+    appointmentReminder: 'appointmentReminder',
+  } : {
+    appointment: 'appointmentRequest',
+    appointmentRequest: 'appointmentRequest',
+    appointmentChange: 'appointmentUpdate',
+    patient: 'patient',
+    review: 'review',
+    center: 'centerStatus',
+  };
   const notifications = (data?.notifications || [])
     .filter(item => data.notificationPreferences?.[patientPortal ? notificationPreference(item) : notificationPreferences[item.type]] !== false)
-    .map(item => ({
-      ...item,
-      title: (therapistPortal || patientPortal) && item.titleKey ? tr(`therapistNotifications.${item.titleKey}`) : name(item.title),
-      message: (therapistPortal || patientPortal) && item.messageKey ? tr(`therapistNotifications.${item.messageKey}`) : name(item.message),
-      to: (therapistPortal || patientPortal) ? item.target?.kind === 'professional' && therapistPortal
-        ? '/center/physiotherapist/profile?tab=professional'
-        : item.target?.kind === 'conversation' && data.conversations?.some(conversation => conversation.id === item.target.id)
-          ? `${messagesBase}/${encodeURIComponent(item.target.id)}`
-          : item.target?.kind === 'appointment' && patientPortal ? `/patient/appointments?appointment=${encodeURIComponent(item.target.id)}` : undefined : undefined,
-    }));
+    .map(item => {
+      const base = item.titleKey
+        ? item.titleKey.replace(/Title$/, '')
+        : typeof item.title === 'string' ? copyKeys[item.type] : undefined;
+      let to;
+      if (patientPortal || therapistPortal) {
+        to = item.target?.kind === 'professional' && therapistPortal
+          ? '/center/physiotherapist/profile?tab=professional'
+          : item.target?.kind === 'conversation' && data.conversations?.some(conversation => conversation.id === item.target.id)
+            ? `${messagesBase}/${encodeURIComponent(item.target.id)}`
+            : item.target?.kind === 'appointment' && patientPortal
+              ? `/patient/appointments?appointment=${encodeURIComponent(item.target.id)}`
+              : undefined;
+      } else if (['appointment', 'appointmentRequest', 'appointmentChange'].includes(item.type)) {
+        to = '/center/appointments';
+      } else if (item.type === 'center') {
+        to = '/center/dashboard';
+      } else if (item.type === 'review') {
+        to = '/center/reviews';
+      } else if (item.type === 'patient') {
+        to = '/center/patients';
+      }
+      return {
+        ...item,
+        title: base ? tr(`therapistNotifications.${base}Title`) : name(item.title),
+        message: base ? tr(`therapistNotifications.${base}Body`) : name(item.message),
+        to,
+      };
+    });
 
   function notify(message, { error = false } = {}) {
     // A repeated save starts a fresh timer even when the translated text is identical.
