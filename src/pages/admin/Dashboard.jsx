@@ -294,11 +294,13 @@ function AdminDashboard() {
         <div className="admin-dashboard__grid">
           <Panel
             title={t("admin.dashboard.recentActivity")}
+            action={
+              <button className="admin-panel__link-button">
+                {t("center.viewAll")}
+              </button>
+            }
             className="admin-panel"
           >
-            <button className="admin-panel__link-button">
-              {t("center.viewAll")}
-            </button>
             <ul className="admin-activity">
               {(data?.activity ?? []).map((a) => (
                 <li key={a.id} className="admin-activity__item">
@@ -335,7 +337,10 @@ function AdminDashboard() {
               <div className="admin-approvals__breakdown">
                 <div>
                   <span>
-                    <Link to="/admin/centers" style={{ textDecoration: "none", "color": "inherit" }}>
+                    <Link
+                      to="/admin/centers"
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
                       {t("admin.dashboard.centers")}
                     </Link>
                   </span>
@@ -343,7 +348,10 @@ function AdminDashboard() {
                 </div>
                 <div>
                   <span>
-                    <Link to="/admin/physiotherapists" style={{ textDecoration: "none", "color": "inherit" }}>
+                    <Link
+                      to="/admin/physiotherapists"
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
                       {t("admin.dashboard.therapists")}
                     </Link>
                   </span>
@@ -352,9 +360,12 @@ function AdminDashboard() {
                   </strong>
                 </div>
                 <div>
-                    <Link to="/admin/reviews" style={{ textDecoration: "none", "color": "inherit" }}>
-                      {t("admin.dashboard.reportedReviews")}
-                    </Link>
+                  <Link
+                    to="/admin/reviews"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    {t("admin.dashboard.reportedReviews")}
+                  </Link>
                   <strong>{number.format(data?.pending?.reviews ?? 0)}</strong>
                 </div>
               </div>

@@ -28,7 +28,8 @@ export function Panel({
   title,
   action,
   children,
-  className = ''
+  className = '',
+  viewAllLink = null
 }) {
   return <section className={`center-panel ${className}`}>
     {(title || action) && <div className="center-panel__heading">
