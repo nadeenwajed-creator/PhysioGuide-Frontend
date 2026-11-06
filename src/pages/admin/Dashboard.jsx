@@ -44,32 +44,48 @@ function MetricCard({ icon, label, value, change, chart }) {
   );
 }
 
-function MiniBarChart() {
+// Both sparklines plot the metric's real monthly series. The peak month fills
+// the box so the shape stays readable whatever the absolute numbers are.
+function MiniBarChart({ values = [] }) {
+  const peak = Math.max(1, ...values);
+  const step = 100 / Math.max(1, values.length);
   return (
     <svg className="admin-mini-chart" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="2" y="15" width="8" height="12" rx="2" />
-      <rect x="14" y="10" width="8" height="17" rx="2" />
-      <rect x="26" y="12" width="8" height="15" rx="2" />
-      <rect x="38" y="8" width="8" height="19" rx="2" />
-      <rect x="50" y="12" width="8" height="15" rx="2" />
-      <rect x="62" y="6" width="8" height="21" rx="2" />
-      <rect x="74" y="10" width="8" height="17" rx="2" />
-      <rect x="86" y="14" width="8" height="13" rx="2" />
+      {values.map((value, index) => {
+        const height = Math.max(1, (value / peak) * 26);
+        return (
+          <rect
+            key={index}
+            x={index * step + step * 0.15}
+            y={28 - height}
+            width={step * 0.7}
+            height={height}
+            rx="1"
+          />
+        );
+      })}
     </svg>
   );
 }
 
-function MiniLineChart() {
+function MiniLineChart({ values = [] }) {
+  const peak = Math.max(1, ...values);
+  const step = values.length > 1 ? 100 / (values.length - 1) : 100;
+  const points = values
+    .map((value, index) => `${index * step},${28 - (value / peak) * 24}`)
+    .join(' ');
   return (
     <svg className="admin-mini-chart" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
-      <polyline
-        points="2,18 14,12 26,15 38,8 50,12 62,6 74,10 86,14"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {values.length > 1 && (
+        <polyline
+          points={points}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
     </svg>
   );
 }
@@ -77,10 +93,15 @@ function MiniLineChart() {
 function AdminDashboard() {
   const { t, language } = useLanguage();
   const { session } = useAuth();
-  const [year, setYear] = useState(String(new Date().getFullYear()));
-  // Relative activity times need a clock; snapshot it once instead of reading
-  // Date.now() during render.
+  // Relative activity times and the year list need a clock; snapshot it once
+  // instead of reading Date.now() during render.
   const [now] = useState(() => Date.now());
+  const [year, setYear] = useState(() => String(new Date(now).getFullYear()));
+  const currentYear = new Date(now).getFullYear();
+  const yearOptions = [currentYear, currentYear - 1].map((value) => ({
+    value: String(value),
+    label: String(value),
+  }));
   const state = useAdminQuery('getAdminDashboard', { year });
 
   const number = new Intl.NumberFormat(language);
@@ -108,6 +129,15 @@ function AdminDashboard() {
     return formatDate(String(value), language);
   };
 
+  // Real admin notifications carry a type code; a type without copy falls back
+  // to the stored message instead of printing the missing translation key.
+  const notificationText = (item) => {
+    if (!item.type) return localized(item.text, language);
+    const key = `admin.notification.${item.type}`;
+    const translated = t(key);
+    return translated === key ? localized(item.text, language) : translated;
+  };
+
   const approvalResponse = data?.health?.approvalResponse;
   const satisfaction = data?.health?.satisfaction;
 
@@ -115,8 +145,10 @@ function AdminDashboard() {
     <div className="admin-dashboard">
       <header className="admin-dashboard__header">
         <div>
-          <h1>{t('admin.dashboard.welcome', { name: session?.name || 'Admin' })}</h1>
-          <p>{t('admin.dashboard.subtitle')}</p>
+          <h1>
+            {t("admin.dashboard.welcome", { name: session?.name || "Admin" })}
+          </h1>
+          <p>{t("admin.dashboard.subtitle")}</p>
         </div>
       </header>
 
@@ -124,38 +156,38 @@ function AdminDashboard() {
         <div className="admin-dashboard__metrics">
           <MetricCard
             icon={faHospital}
-            label={t('admin.dashboard.activeCenters')}
+            label={t("admin.dashboard.activeCenters")}
             value={number.format(data?.metrics?.centers?.value ?? 0)}
             change={data?.metrics?.centers?.change}
-            chart={<MiniBarChart />}
+            chart={<MiniBarChart values={data?.metrics?.centers?.series} />}
           />
           <MetricCard
             icon={faUsers}
-            label={t('admin.dashboard.registeredPatients')}
+            label={t("admin.dashboard.registeredPatients")}
             value={number.format(data?.metrics?.patients?.value ?? 0)}
             change={data?.metrics?.patients?.change}
-            chart={<MiniLineChart />}
+            chart={<MiniLineChart values={data?.metrics?.patients?.series} />}
           />
           <MetricCard
             icon={faUserDoctor}
-            label={t('admin.dashboard.physiotherapists')}
+            label={t("admin.dashboard.physiotherapists")}
             value={number.format(data?.metrics?.therapists?.value ?? 0)}
             change={data?.metrics?.therapists?.change}
-            chart={<MiniBarChart />}
+            chart={<MiniBarChart values={data?.metrics?.therapists?.series} />}
           />
         </div>
 
         <div className="admin-dashboard__grid">
-          <Panel title={t('admin.dashboard.appointmentOverview')} className="admin-panel">
+          <Panel
+            title={t("admin.dashboard.appointmentOverview")}
+            className="admin-panel"
+          >
             <div className="admin-panel__header-actions">
               <FilterSelect
                 value={year}
                 onChange={setYear}
-                ariaLabel={t('admin.dashboard.appointmentOverview')}
-                options={[
-                  { value: '2026', label: '2026' },
-                  { value: '2025', label: '2025' },
-                ]}
+                ariaLabel={t("admin.dashboard.appointmentOverview")}
+                options={yearOptions}
               />
             </div>
             <div className="admin-chart">
@@ -170,13 +202,27 @@ function AdminDashboard() {
                     const height = Math.max(2, (value / peak) * 140);
                     const width = step * 0.6;
                     const x = 40 + step * idx + step * 0.2;
-                    return <rect key={idx} x={x} y={160 - height} width={width} height={height} rx="3" />;
+                    return (
+                      <rect
+                        key={idx}
+                        x={x}
+                        y={160 - height}
+                        width={width}
+                        height={height}
+                        rx="3"
+                      />
+                    );
                   })}
                 </g>
                 <g fill="var(--color-text-secondary)" fontSize="10">
                   {monthly.map((_, idx) => (
-                    <text key={idx} x={40 + step * idx + step / 2} y="190" textAnchor="middle">
-                      {monthFormatter.format(new Date(2026, idx, 1))}
+                    <text
+                      key={idx}
+                      x={40 + step * idx + step / 2}
+                      y="190"
+                      textAnchor="middle"
+                    >
+                      {monthFormatter.format(new Date(Number(year), idx, 1))}
                     </text>
                   ))}
                 </g>
@@ -184,11 +230,21 @@ function AdminDashboard() {
             </div>
           </Panel>
 
-          <Panel title={t('admin.dashboard.platformHealth')} className="admin-panel">
+          <Panel
+            title={t("admin.dashboard.platformHealth")}
+            className="admin-panel"
+          >
             <div className="admin-health">
               <div className="admin-health__circle">
                 <svg viewBox="0 0 42 42">
-                  <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="var(--color-border)" strokeWidth="3" />
+                  <circle
+                    cx="21"
+                    cy="21"
+                    r="15.91549430918954"
+                    fill="transparent"
+                    stroke="var(--color-border)"
+                    strokeWidth="3"
+                  />
                   <circle
                     cx="21"
                     cy="21"
@@ -196,93 +252,114 @@ function AdminDashboard() {
                     fill="transparent"
                     stroke="var(--color-success)"
                     strokeWidth="3"
-                    strokeDasharray={`${data?.health?.percent ?? 0} ${100 - (data?.health?.percent ?? 0)}`}
+                    strokeDasharray={`${data?.health?.percent ?? 0} ${
+                      100 - (data?.health?.percent ?? 0)
+                    }`}
                     strokeDashoffset="25"
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="admin-health__circle-text">
                   <strong>{`${data?.health?.percent ?? 0}%`}</strong>
-                  <span>{t('admin.dashboard.healthy')}</span>
+                  <span>{t("admin.dashboard.healthy")}</span>
                 </div>
               </div>
               <div className="admin-health__metrics">
                 <div>
-                  <span>{t('admin.dashboard.approvalResponse')}</span>
+                  <span>{t("admin.dashboard.approvalResponse")}</span>
                   <strong>
                     {approvalResponse == null
-                      ? '—'
-                      : t('admin.dashboard.hours', {
-                          count: typeof approvalResponse === 'number'
-                            ? decimal.format(approvalResponse)
-                            : approvalResponse,
+                      ? "—"
+                      : t("admin.dashboard.hours", {
+                          count:
+                            typeof approvalResponse === "number"
+                              ? decimal.format(approvalResponse)
+                              : approvalResponse,
                         })}
                   </strong>
                 </div>
                 <div>
-                  <span>{t('admin.dashboard.satisfaction')}</span>
-                  <strong>{satisfaction == null ? '—' : `${decimal.format(satisfaction)} / 5.0`}</strong>
+                  <span>{t("admin.dashboard.satisfaction")}</span>
+                  <strong>
+                    {satisfaction == null
+                      ? "—"
+                      : `${decimal.format(satisfaction)} / 5.0`}
+                  </strong>
                 </div>
               </div>
             </div>
           </Panel>
         </div>
 
-        <div className="admin-dashboard__grid admin-dashboard__grid--bottom">
-          <Panel title={t('admin.dashboard.notifications')} className="admin-panel">
-            <ul className="admin-notifications">
-              {(data?.notifications ?? []).map((n) => (
-                <li key={n.id} className="admin-notifications__item">
-                  <span className={`admin-notifications__dot ${n.unread ? 'admin-notifications__dot--unread' : ''}`} />
-                  <span className="admin-notifications__text">
-                    {n.type ? t(`admin.notification.${n.type}`) : localized(n.text, language)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {/* The navbar bell is the official notifications view: no dedicated page. */}
-          </Panel>
-
-          <Panel title={t('admin.dashboard.pendingApprovals')} className="admin-panel">
-            <div className="admin-approvals">
-              <div className="admin-approvals__count">
-                <strong>{number.format(data?.pending?.total ?? 0)}</strong>
-                <span>{t('admin.dashboard.itemsNeedAttention', { count: number.format(data?.pending?.total ?? 0) })}</span>
-              </div>
-              <div className="admin-approvals__breakdown">
-                <div>
-                  <span>{t('admin.dashboard.centers')}</span>
-                  <strong>{number.format(data?.pending?.centers ?? 0)}</strong>
-                </div>
-                <div>
-                  <span>{t('admin.dashboard.therapists')}</span>
-                  <strong>{number.format(data?.pending?.therapists ?? 0)}</strong>
-                </div>
-                <div>
-                  <span>{t('admin.dashboard.reportedReviews')}</span>
-                  <strong>{number.format(data?.pending?.reviews ?? 0)}</strong>
-                </div>
-              </div>
-              <div className="admin-approvals__actions">
-                <Link to="/admin/centers">{t('admin.dashboard.reviewCenters')}</Link>
-                <Link to="/admin/physiotherapists">{t('admin.dashboard.reviewTherapists')}</Link>
-                <Link to="/admin/reviews">{t('admin.dashboard.reviewReports')}</Link>
-              </div>
-            </div>
-          </Panel>
-
-          <Panel title={t('admin.dashboard.recentActivity')} className="admin-panel admin-panel--wide">
+        <div className="admin-dashboard__grid">
+          <Panel
+            title={t("admin.dashboard.recentActivity")}
+            className="admin-panel"
+          >
+            <button className="admin-panel__link-button">
+              {t("center.viewAll")}
+            </button>
             <ul className="admin-activity">
               {(data?.activity ?? []).map((a) => (
                 <li key={a.id} className="admin-activity__item">
                   <div>
-                    <span className="admin-activity__text">{localized(a.text, language)}</span>
-                    <span className="admin-activity__time">{activityTime(a.at)}</span>
+                    <span className="admin-activity__text">
+                      {localized(a.text, language)}
+                    </span>
+                    <span className="admin-activity__time">
+                      {activityTime(a.at)}
+                    </span>
                   </div>
                 </li>
               ))}
             </ul>
-            <button className="admin-panel__link-button">{t('center.viewAll')}</button>
+            {(data?.activity ?? []).length === 0 && (
+              <p className="admin-panel__empty">
+                {t("admin.dashboard.noActivity")}
+              </p>
+            )}
+          </Panel>
+          <Panel
+            title={t("admin.dashboard.pendingApprovals")}
+            className="admin-panel"
+          >
+            <div className="admin-approvals">
+              <div className="admin-approvals__count">
+                <strong>{number.format(data?.pending?.total ?? 0)}</strong>
+                <span>
+                  {t("admin.dashboard.itemsNeedAttention", {
+                    count: number.format(data?.pending?.total ?? 0),
+                  })}
+                </span>
+              </div>
+              <div className="admin-approvals__breakdown">
+                <div>
+                  <span>
+                    <Link to="/admin/centers" style={{ textDecoration: "none", "color": "inherit" }}>
+                      {t("admin.dashboard.centers")}
+                    </Link>
+                  </span>
+                  <strong>{number.format(data?.pending?.centers ?? 0)}</strong>
+                </div>
+                <div>
+                  <span>
+                    <Link to="/admin/physiotherapists" style={{ textDecoration: "none", "color": "inherit" }}>
+                      {t("admin.dashboard.therapists")}
+                    </Link>
+                  </span>
+                  <strong>
+                    {number.format(data?.pending?.therapists ?? 0)}
+                  </strong>
+                </div>
+                <div>
+                    <Link to="/admin/reviews" style={{ textDecoration: "none", "color": "inherit" }}>
+                      {t("admin.dashboard.reportedReviews")}
+                    </Link>
+                  <strong>{number.format(data?.pending?.reviews ?? 0)}</strong>
+                </div>
+              </div>
+              <div className="admin-approvals__actions"></div>
+            </div>
           </Panel>
         </div>
       </QueryState>

@@ -86,6 +86,7 @@ const en = {
   'admin.dashboard.reviewTherapists': 'Review therapists',
   'admin.dashboard.reviewReports': 'Review reports',
   'admin.dashboard.recentActivity': 'Recent Activity Feed',
+  'admin.dashboard.noActivity': 'No activity recorded yet.',
   'admin.dashboard.hoursAgo': '{count} hours ago',
   'admin.dashboard.hours': '{count} hours',
   'admin.notification.centerApproval': 'Center approval required',

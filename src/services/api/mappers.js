@@ -500,6 +500,7 @@ export function toAdminDashboard(body) {
   const metric = (entry) => ({
     value: num(entry?.value ?? entry),
     change: pct(entry?.change ?? entry?.delta),
+    series: (Array.isArray(entry?.series) ? entry.series : []).map((item) => num(item)),
   });
   return {
     metrics: {
@@ -513,7 +514,8 @@ export function toAdminDashboard(body) {
     health: {
       percent: num(body?.health?.percent),
       approvalResponse: body?.health?.approvalResponse ?? null,
-      satisfaction: num(body?.health?.satisfaction),
+      // null means "no reviews yet" and must not render as a 0.0 score.
+      satisfaction: body?.health?.satisfaction == null ? null : num(body.health.satisfaction),
     },
     notifications: (Array.isArray(body?.notifications) ? body.notifications : []).map(
       (item, index) => ({
