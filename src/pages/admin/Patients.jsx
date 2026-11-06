@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
-import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
-import { Feedback } from '../../components/center/CenterUI.jsx';
+import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { callAdmin } from '../../services/adminService.js';
+import RowActions from './RowActions.jsx';
+import { PatientEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
-import { QueryState, AdminPagination } from './AdminUI.jsx';
+import { QueryState, AdminPagination, RecordDialog } from './AdminUI.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
 import './ListPages.css';
 
@@ -26,6 +27,9 @@ function AdminPatients() {
   });
   const [savingId, setSavingId] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [viewTarget, setViewTarget] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   // Changing a filter returns to the first page; page clicks keep the filters.
   const update = (values) =>
@@ -161,12 +165,26 @@ function AdminPatients() {
                     </select>
                   </td>
                   <td>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      iconOnly
-                      icon={faEllipsisV}
-                      aria-label={t('center.actions')}
+                    <RowActions
+                      label={t('center.actions')}
+                      items={[
+                        {
+                          label: t('admin.actions.view'),
+                          icon: faEye,
+                          onSelect: () => setViewTarget(patient),
+                        },
+                        {
+                          label: t('admin.actions.edit'),
+                          icon: faPen,
+                          onSelect: () => setEditId(patient.id),
+                        },
+                        {
+                          label: t('admin.actions.delete'),
+                          icon: faTrashCan,
+                          danger: true,
+                          onSelect: () => setDeleteTarget(patient),
+                        },
+                      ]}
                     />
                   </td>
                 </tr>
@@ -185,6 +203,55 @@ function AdminPatients() {
           />
         </QueryState>
       </div>
+
+      {viewTarget && (
+        <RecordDialog
+          title={viewTarget.name}
+          onClose={() => setViewTarget(null)}
+          rows={[
+            { label: t('admin.records.id'), value: viewTarget.id },
+            { label: t('admin.patients.patient'), value: viewTarget.name },
+            { label: t('admin.records.email'), value: viewTarget.email },
+            { label: t('admin.patients.age'), value: viewTarget.age },
+            { label: t('admin.patients.city'), value: viewTarget.city },
+            { label: t('admin.patients.appointments'), value: viewTarget.appointments },
+            {
+              label: t('admin.patients.lastVisit'),
+              value: viewTarget.lastVisit ? formatDate(viewTarget.lastVisit, language) : '',
+            },
+            {
+              label: t('admin.records.status'),
+              value: t(`admin.status.${viewTarget.status}`),
+            },
+          ]}
+        />
+      )}
+
+      {editId && (
+        <PatientEditDialog
+          id={editId}
+          onClose={() => setEditId(null)}
+          onSaved={() => {
+            setEditId(null);
+            setNotice({ error: false, text: t('admin.actions.updated') });
+            state.reload();
+          }}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          danger
+          title={t('admin.actions.deleteTitle', { name: deleteTarget.name })}
+          description={t('admin.actions.deletePatientBody')}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={async () => {
+            await callAdmin('deleteAdminPatient', { id: deleteTarget.id });
+            setNotice({ error: false, text: t('admin.actions.deleted') });
+            state.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

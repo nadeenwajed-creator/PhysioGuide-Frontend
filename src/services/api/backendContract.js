@@ -240,6 +240,31 @@ export const adminOperations = {
     response: resolved(map.toAdminCenter),
   },
 
+  updateAdminCenter: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/centers/${encodeURIComponent(values.id)}`,
+      data: {
+        nameEnglish: values.nameEnglish,
+        nameArabic: values.nameArabic,
+        city: values.city,
+        address: values.address,
+        websiteUrl: values.websiteUrl,
+        phoneNumber: values.phoneNumber,
+        descriptionEnglish: values.descriptionEnglish,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminCenter: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/centers/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
+  },
+
   getAdminPatients: {
     request: (_actor, params) => ({
       method: 'GET',
@@ -263,6 +288,37 @@ export const adminOperations = {
       data: { status },
     }),
     response: resolved((body) => map.toAdminPatient(body)),
+  },
+
+  getAdminPatient: {
+    request: (_actor, { id } = {}) => ({
+      method: 'GET',
+      path: `${ADMIN}/patients/${encodeURIComponent(id)}`,
+    }),
+    response: resolved(map.toAdminPatientProfile),
+  },
+
+  updateAdminPatient: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/patients/${encodeURIComponent(values.id)}`,
+      data: {
+        fullName: values.fullName,
+        phoneNumber: values.phoneNumber,
+        city: values.city,
+        gender: values.gender,
+        dateOfBirth: values.dateOfBirth || null,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminPatient: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/patients/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
   },
 
   getAdminPhysiotherapists: {
@@ -291,6 +347,39 @@ export const adminOperations = {
       data: { status },
     }),
     response: resolved((body) => map.toAdminPhysiotherapist(body)),
+  },
+
+  getAdminPhysiotherapist: {
+    request: (_actor, { id } = {}) => ({
+      method: 'GET',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(id)}`,
+    }),
+    response: resolved(map.toAdminTherapistProfile),
+  },
+
+  updateAdminPhysiotherapist: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(values.id)}`,
+      data: {
+        fullName: values.fullName,
+        phoneNumber: values.phoneNumber,
+        centerId: values.centerId || null,
+        specialtyId: values.specialtyId || null,
+        yearsOfExperience: values.yearsOfExperience === '' ? null : values.yearsOfExperience,
+        bio: values.bio,
+        isAvailable: values.isAvailable === undefined ? null : values.isAvailable,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminPhysiotherapist: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
   },
 
   addAdminPhysiotherapist: {
@@ -349,6 +438,31 @@ export const adminOperations = {
     response: resolved((body) => map.toAdminAppointment(body)),
   },
 
+  updateAdminAppointment: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/appointments/${encodeURIComponent(values.id)}`,
+      data: {
+        centerId: values.centerId || null,
+        therapistId: values.therapistId || null,
+        serviceId: values.serviceId || null,
+        startDateTime: values.startDateTime || null,
+        endDateTime: values.endDateTime || null,
+        status: values.status,
+        patientNotes: values.patientNotes,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminAppointment: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/appointments/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
+  },
+
   getAdminReviews: {
     request: (_actor, params) => ({
       method: 'GET',
@@ -392,7 +506,8 @@ export const adminOperations = {
       method: 'PUT',
       path: `${ADMIN}/settings`,
       data: {
-        ...(values?.profile ? { adminFullName: values.profile.name } : {}),
+        ...(values?.profile?.name ? { adminFullName: values.profile.name } : {}),
+        ...(values?.profile?.phone ? { contactPhone: values.profile.phone } : {}),
         // UI toggles travel as the four generic flags the API stores.
         notifications: values?.notifications
           ? map.adminPreferencesRequest(values.notifications)

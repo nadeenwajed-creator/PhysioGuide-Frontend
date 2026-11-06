@@ -386,23 +386,6 @@
   cursor: not-allowed;
 }
 
-/* Cards shared with the admin settings page. */
-.admin-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.admin-card h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-}
-
 /* Narrow screens: smaller portrait, stacked rows and full-width actions. */
 @media (max-width: 767px) {
   .admin-center-detail__card {

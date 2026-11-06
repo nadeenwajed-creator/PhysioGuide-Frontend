@@ -591,6 +591,15 @@ export function toAdminCenter(body) {
         : body?.city || body?.address
     ),
     manager: label(body?.manager ?? body?.managerName),
+    // Address-book fields the edit dialog fills in.
+    nameEnglish: label(body?.nameEn ?? body?.nameEnglish),
+    nameArabic: label(body?.nameAr ?? body?.nameArabic),
+    address: label(body?.address),
+    city: label(body?.city),
+    websiteUrl: label(body?.websiteUrl),
+    phone: label(body?.phone),
+    email: label(body?.email),
+    description: label(body?.descriptionEn ?? body?.description ?? body?.descriptionEnglish),
     therapists: staff
       ? staff.length
       : num(body?.therapists ?? body?.activeTherapists),
@@ -682,21 +691,68 @@ export function toAdminAppointment(item) {
   return {
     id: String(item?.id ?? item?.appointmentId ?? ''),
     patient: label(item?.patient ?? item?.patientName),
+    // The patient reference carries the portrait the row shows beside the name.
+    patientImage: label(item?.patient?.profileImageUrl ?? item?.patientImage),
     center: label(item?.center ?? item?.centerName),
     therapist: label(item?.therapist ?? item?.therapistName),
     service: label(item?.service ?? item?.serviceName),
     // The API reports the slot as startDateTime; older payloads used datetime.
     datetime: item?.datetime ?? item?.startDateTime ?? item?.date ?? null,
+    endDateTime: item?.endDateTime ?? null,
     status: lower(item?.status, 'pending'),
   };
 }
+
+// Profile payloads behind the view and edit dialogs.
+export function toAdminPatientProfile(body) {
+  return {
+    id: String(body?.id ?? ''),
+    name: label(body?.fullName ?? body?.name),
+    email: label(body?.email),
+    phone: label(body?.phone),
+    city: label(body?.city),
+    gender: lower(body?.gender),
+    dateOfBirth: body?.dateOfBirth ? String(body.dateOfBirth).slice(0, 10) : '',
+    imageUrl: label(body?.profileImageUrl),
+    status: body?.isActive === false ? 'suspended' : 'active',
+    joinedAt: body?.joinedAt ?? null,
+  };
+}
+
+export function toAdminTherapistProfile(body) {
+  return {
+    id: String(body?.id ?? ''),
+    name: label(body?.fullName ?? body?.name),
+    email: label(body?.email),
+    phone: label(body?.phone),
+    centerId: body?.centerId == null ? '' : String(body.centerId),
+    center: label(body?.centerName ?? body?.center),
+    specialtyId: body?.specialtyId == null ? '' : String(body.specialtyId),
+    specialty: label(body?.specialtyName ?? body?.specialty),
+    bio: label(body?.bio),
+    yearsOfExperience: body?.yearsOfExperience ?? '',
+    imageUrl: label(body?.profileImageUrl),
+    status: body?.isActive === false ? 'suspended' : 'active',
+    isAvailable: body?.isAvailable !== false,
+    joinedAt: body?.joinedAt ?? null,
+  };
+}
+
+// Statuses arrive as plain strings from the table they were read from.
+const statusOptions = (value) =>
+  (Array.isArray(value) ? value : []).map((item) => lower(item)).filter(Boolean);
 
 export function toAdminAppointments(body) {
   const list = adminList(body);
   return {
     ...list,
     items: list.items.map(toAdminAppointment),
-    filters: { centers: refOptions(list.filters?.centers) },
+    filters: {
+      centers: refOptions(list.filters?.centers),
+      // The statuses actually present in the table, so the dropdown always
+      // matches the values shown in the status column.
+      statuses: statusOptions(list.filters?.statuses),
+    },
   };
 }
 
@@ -803,9 +859,13 @@ export function toAdminSettings(body) {
       };
   return {
     profile: {
-      name: label(profile?.fullName ?? profile?.name),
+      // The API names the admin's own name `adminFullName`.
+      name: label(profile?.fullName ?? profile?.adminFullName ?? profile?.name),
+      email: label(profile?.email),
+      phone: label(profile?.phone ?? profile?.phoneNumber),
       role: label(profile?.role),
-      verified: profile?.verified === true,
+      // An active account is the only verification signal the API exposes.
+      verified: profile?.verified === true || profile?.isActive === true,
       lastSignIn: profile?.lastSignIn ?? null,
       location: label(profile?.location),
       adminId: profile?.adminId == null ? '' : String(profile.adminId),

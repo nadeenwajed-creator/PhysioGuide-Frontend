@@ -1,4 +1,5 @@
 import Button from '../../components/shared/Button/Button.jsx';
+import Modal from '../../components/shared/Modal/Modal.jsx';
 import { Feedback, EmptyState, Pager } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { errorText } from './useAdminQuery.js';
@@ -32,6 +33,35 @@ export function QueryState({ state, empty = false, children }) {
   // A fragment keeps multiple children (table + pager) out of a list, which
   // would otherwise ask them for keys.
   return <>{children}</>;
+}
+
+// Read-only dialog behind the "View" row action: plain label/value rows, so a
+// row can be inspected without leaving the list.
+export function RecordDialog({ title, rows = [], onClose }) {
+  const { t } = useLanguage();
+
+  return (
+    <Modal
+      isOpen
+      size="sm"
+      title={title}
+      onClose={onClose}
+      footer={
+        <Button variant="outline" onClick={onClose}>
+          {t('center.close')}
+        </Button>
+      }
+    >
+      <dl className="admin-record">
+        {rows.map((row) => (
+          <div key={row.label}>
+            <dt>{row.label}</dt>
+            <dd>{row.value === '' || row.value == null ? '—' : row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </Modal>
+  );
 }
 
 // The center pages' Pager (rows-per-page select, range label, shared

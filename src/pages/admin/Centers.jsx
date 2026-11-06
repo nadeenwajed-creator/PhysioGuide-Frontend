@@ -1,17 +1,24 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { Link, useNavigate } from 'react-router-dom';
+import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
+import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
+import { callAdmin } from '../../services/adminService.js';
+import RowActions from './RowActions.jsx';
+import { CenterEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import './ListPages.css';
 
 function AdminCenters() {
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
+  const [editId, setEditId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [notice, setNotice] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
     status: '',
@@ -44,6 +51,12 @@ function AdminCenters() {
           <p>{t('admin.centers.subtitle')}</p>
         </div>
       </header>
+
+      {notice && (
+        <Feedback error={notice.error} onDismiss={() => setNotice(null)}>
+          {notice.text}
+        </Feedback>
+      )}
 
       <div className="admin-table-wrapper">
         {/* Filters live inside the table card, like the center pages. */}
@@ -121,12 +134,26 @@ function AdminCenters() {
                       <Link to={`/admin/centers/${center.id}`} className="admin-link">
                         {t('center.view')}
                       </Link>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        iconOnly
-                        icon={faEllipsisV}
-                        aria-label={t('center.actions')}
+                      <RowActions
+                        label={t('center.actions')}
+                        items={[
+                          {
+                            label: t('admin.actions.view'),
+                            icon: faEye,
+                            onSelect: () => navigate(`/admin/centers/${center.id}`),
+                          },
+                          {
+                            label: t('admin.actions.edit'),
+                            icon: faPen,
+                            onSelect: () => setEditId(center.id),
+                          },
+                          {
+                            label: t('admin.actions.delete'),
+                            icon: faTrashCan,
+                            danger: true,
+                            onSelect: () => setDeleteTarget(center),
+                          },
+                        ]}
                       />
                     </div>
                   </td>
@@ -144,6 +171,34 @@ function AdminCenters() {
           />
         </QueryState>
       </div>
+
+      {editId && (
+        <CenterEditDialog
+          id={editId}
+          onClose={() => setEditId(null)}
+          onSaved={() => {
+            setEditId(null);
+            setNotice({ error: false, text: t('admin.actions.updated') });
+            state.reload();
+          }}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          danger
+          title={t('admin.actions.deleteTitle', { name: deleteTarget.name })}
+          description={t('admin.actions.deleteCenterBody')}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={async () => {
+            // A refusal (e.g. a center that still has therapists) throws, so
+            // the dialog shows the reason and stays open.
+            await callAdmin('deleteAdminCenter', { id: deleteTarget.id });
+            setNotice({ error: false, text: t('admin.actions.deleted') });
+            state.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,0 +1,86 @@
+/* Row action menu rendered into the body, positioned from the trigger rect. */
+.admin-row-actions__trigger {
+  display: inline-flex;
+}
+
+.admin-row-actions {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 168px;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 16px 36px rgb(8 57 68 / 18%);
+}
+
+.admin-row-actions__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  text-align: start;
+  cursor: pointer;
+}
+
+.admin-row-actions__item:hover {
+  background: var(--color-bg-light);
+}
+
+.admin-row-actions__item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.admin-row-actions__item.is-danger {
+  color: var(--color-danger);
+}
+
+.admin-row-actions__item.is-danger:hover {
+  background: var(--color-danger-bg);
+}
+
+.admin-row-actions__item svg {
+  inline-size: 14px;
+  color: currentColor;
+}
+
+/* Read-only rows behind the "View" dialog. */
+.admin-record {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.admin-record > div {
+  display: grid;
+  grid-template-columns: minmax(112px, 0.75fr) minmax(0, 1.4fr);
+  gap: 12px;
+  padding-block: 10px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.admin-record > div:last-child {
+  border-block-end: none;
+}
+
+.admin-record dt {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.admin-record dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}

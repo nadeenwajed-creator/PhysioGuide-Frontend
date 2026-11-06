@@ -1,19 +1,24 @@
 import { useState } from 'react';
-import { faEllipsisV, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faPen, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import FormField from '../../components/shared/FormField/FormField.jsx';
 import Modal from '../../components/shared/Modal/Modal.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
-import { Feedback } from '../../components/center/CenterUI.jsx';
+import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
-import { QueryState, AdminPagination } from './AdminUI.jsx';
+import { QueryState, AdminPagination, RecordDialog } from './AdminUI.jsx';
+import RowActions from './RowActions.jsx';
+import { AppointmentEditDialog } from './AdminRecordDialogs.jsx';
 import './ListPages.css';
 
-const appointmentStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+// Fallback only: the list endpoint reports the statuses actually stored in the
+// table, and the filter renders those so it can always match the status column.
+const appointmentStatuses = ['pending', 'confirmed', 'approved', 'completed', 'cancelled', 'rejected'];
 
 // The options endpoint feeds every select, so the form stays in sync with the
 // centers, therapists, patients and services the backend currently allows.
@@ -169,6 +174,9 @@ function AdminAppointments() {
   });
   const [showNew, setShowNew] = useState(false);
   const [notice, setNotice] = useState(null);
+  const [viewTarget, setViewTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const update = (values) =>
     setFilters((previous) => ({
@@ -181,19 +189,31 @@ function AdminAppointments() {
   const state = useAdminQuery('getAdminAppointments', { ...filters, search });
 
   const data = state.data;
-  const options = data?.filters ?? { centers: [] };
+  const options = data?.filters ?? { centers: [], statuses: [] };
+  const statuses = options.statuses?.length ? options.statuses : appointmentStatuses;
   const number = new Intl.NumberFormat(language);
 
+  // The API sends the booked slot as local wall-clock text, so the parts are
+  // read directly: new Date(string) would treat it as UTC and shift the time by
+  // the browser's offset (moving late appointments to the wrong day).
   const formatDateTime = (value) => {
     if (!value) return '—';
-    const date = new Date(value);
+    const parts = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/.exec(String(value));
+    if (!parts) return String(value);
+    const [, year, month, day, hour, minute] = parts;
+    const date = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour ?? 12),
+      Number(minute ?? 0)
+    );
     if (Number.isNaN(date.getTime())) return String(value);
     return new Intl.DateTimeFormat(language, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      ...(hour == null ? {} : { hour: '2-digit', minute: '2-digit' }),
     }).format(date);
   };
 
@@ -230,7 +250,7 @@ function AdminAppointments() {
             ariaLabel={t('center.status')}
             options={[
               { value: '', label: t('admin.allStatuses') },
-              ...appointmentStatuses.map((status) => ({
+              ...statuses.map((status) => ({
                 value: status,
                 label: t(`admin.status.${status}`),
               })),
@@ -278,7 +298,18 @@ function AdminAppointments() {
                   <td>
                     <strong>{appointment.id}</strong>
                   </td>
-                  <td>{appointment.patient || '—'}</td>
+                  <td>
+                    <div className="admin-table__person">
+                      <Avatar
+                        src={appointment.patientImage}
+                        name={appointment.patient}
+                        size="sm"
+                      />
+                      <div className="admin-table__primary">
+                        <strong>{appointment.patient || '—'}</strong>
+                      </div>
+                    </div>
+                  </td>
                   <td>{appointment.center || '—'}</td>
                   <td>{appointment.therapist || '—'}</td>
                   <td>{appointment.service || '—'}</td>
@@ -289,12 +320,26 @@ function AdminAppointments() {
                     </StatusBadge>
                   </td>
                   <td>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      iconOnly
-                      icon={faEllipsisV}
-                      aria-label={t('center.actions')}
+                    <RowActions
+                      label={t('center.actions')}
+                      items={[
+                        {
+                          label: t('admin.actions.view'),
+                          icon: faEye,
+                          onSelect: () => setViewTarget(appointment),
+                        },
+                        {
+                          label: t('admin.actions.edit'),
+                          icon: faPen,
+                          onSelect: () => setEditTarget(appointment),
+                        },
+                        {
+                          label: t('admin.actions.delete'),
+                          icon: faTrashCan,
+                          danger: true,
+                          onSelect: () => setDeleteTarget(appointment),
+                        },
+                      ]}
                     />
                   </td>
                 </tr>
@@ -313,6 +358,54 @@ function AdminAppointments() {
           />
         </QueryState>
       </div>
+
+      {viewTarget && (
+        <RecordDialog
+          title={`${t('admin.appointments.id')} ${viewTarget.id}`}
+          onClose={() => setViewTarget(null)}
+          rows={[
+            { label: t('admin.appointments.id'), value: viewTarget.id },
+            { label: t('admin.appointments.patient'), value: viewTarget.patient },
+            { label: t('admin.appointments.center'), value: viewTarget.center },
+            { label: t('admin.appointments.therapist'), value: viewTarget.therapist },
+            { label: t('admin.appointments.service'), value: viewTarget.service },
+            {
+              label: t('admin.records.dateTime'),
+              value: formatDateTime(viewTarget.datetime),
+            },
+            {
+              label: t('admin.records.status'),
+              value: t(`admin.status.${viewTarget.status}`),
+            },
+          ]}
+        />
+      )}
+
+      {editTarget && (
+        <AppointmentEditDialog
+          appointment={editTarget}
+          onClose={() => setEditTarget(null)}
+          onSaved={() => {
+            setEditTarget(null);
+            setNotice({ error: false, text: t('admin.actions.updated') });
+            state.reload();
+          }}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          danger
+          title={t('admin.actions.deleteTitle', { name: deleteTarget.id })}
+          description={t('admin.actions.deleteAppointmentBody')}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={async () => {
+            await callAdmin('deleteAdminAppointment', { id: deleteTarget.id });
+            setNotice({ error: false, text: t('admin.actions.deleted') });
+            state.reload();
+          }}
+        />
+      )}
 
       {showNew && (
         <NewAppointmentModal

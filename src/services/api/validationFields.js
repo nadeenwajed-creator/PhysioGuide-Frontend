@@ -118,6 +118,9 @@ const codeAliases = {
   account_suspended: 'accountRejected',
   center_profile_missing: 'accountPending',
 
+  // admin record protection
+  center_has_therapists: 'centerHasTherapists',
+
   // Google sign-in states, each carrying its own guidance
   invalid_google_credentials: 'googleCredentials',
   invalid_registration_ticket: 'googleTicket',

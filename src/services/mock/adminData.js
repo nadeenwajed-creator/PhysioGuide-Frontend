@@ -285,6 +285,30 @@ export const adminMockApi = {
     return centerDetail(center);
   },
 
+  async updateAdminCenter(actor, values = {}) {
+    await wait();
+    requireAdmin(actor);
+    const center = state.centers.find((item) => item.id === values.id);
+    if (!center) throw new ServiceError('notFound');
+    const name = String(values.nameEnglish || values.nameArabic || '').trim();
+    if (!name) throw new ServiceError('validation');
+    center.name = name;
+    state.centers = [...state.centers];
+    return centerDetail(center);
+  },
+
+  async deleteAdminCenter(actor, { id } = {}) {
+    await wait();
+    requireAdmin(actor);
+    const center = state.centers.find((item) => item.id === id);
+    if (!center) throw new ServiceError('notFound');
+    if (state.therapists.some((therapist) => therapist.centerId === id)) {
+      throw new ServiceError('centerHasTherapists');
+    }
+    state.centers = state.centers.filter((item) => item.id !== id);
+    return { id, deleted: true };
+  },
+
   async getAdminPatients(actor, params = {}) {
     await wait();
     requireAdmin(actor);
@@ -311,6 +335,47 @@ export const adminMockApi = {
     if (!patient) throw new ServiceError('notFound');
     patient.status = status;
     return patientRow(patient);
+  },
+
+  async getAdminPatient(actor, { id } = {}) {
+    await wait();
+    requireAdmin(actor);
+    const patient = state.patients.find((item) => item.id === id);
+    if (!patient) throw new ServiceError('notFound');
+    return {
+      id: patient.id,
+      name: patient.name,
+      email: patient.email,
+      phone: '',
+      city: patient.city || '',
+      gender: '',
+      dateOfBirth: '',
+      status: patient.status,
+      joinedAt: null,
+    };
+  },
+
+  async updateAdminPatient(actor, values = {}) {
+    await wait();
+    requireAdmin(actor);
+    const patient = state.patients.find((item) => item.id === values.id);
+    if (!patient) throw new ServiceError('notFound');
+    const name = String(values.fullName || '').trim();
+    if (!name) throw new ServiceError('validation');
+    patient.name = name;
+    if (values.city !== undefined) patient.city = values.city || '';
+    state.patients = [...state.patients];
+    return patientRow(patient);
+  },
+
+  async deleteAdminPatient(actor, { id } = {}) {
+    await wait();
+    requireAdmin(actor);
+    const patient = state.patients.find((item) => item.id === id);
+    if (!patient) throw new ServiceError('notFound');
+    state.patients = state.patients.filter((item) => item.id !== id);
+    state.appointments = state.appointments.filter((appointment) => appointment.patientId !== id);
+    return { id, deleted: true };
   },
 
   async getAdminPhysiotherapists(actor, params = {}) {
@@ -344,6 +409,57 @@ export const adminMockApi = {
     if (!therapist) throw new ServiceError('notFound');
     therapist.status = status;
     return therapistRow(therapist);
+  },
+
+  async getAdminPhysiotherapist(actor, { id } = {}) {
+    await wait();
+    requireAdmin(actor);
+    const therapist = state.therapists.find((item) => item.id === id);
+    if (!therapist) throw new ServiceError('notFound');
+    return {
+      id: therapist.id,
+      name: therapist.name,
+      email: therapist.email,
+      phone: '',
+      centerId: therapist.centerId || '',
+      center: therapist.center || '',
+      specialtyId: therapist.specialty || '',
+      specialty: therapist.specialty || '',
+      bio: '',
+      yearsOfExperience: '',
+      imageUrl: therapist.imageUrl || '',
+      status: therapist.status,
+      isAvailable: true,
+      joinedAt: null,
+    };
+  },
+
+  async updateAdminPhysiotherapist(actor, values = {}) {
+    await wait();
+    requireAdmin(actor);
+    const therapist = state.therapists.find((item) => item.id === values.id);
+    if (!therapist) throw new ServiceError('notFound');
+    const name = String(values.fullName || '').trim();
+    if (!name) throw new ServiceError('validation');
+    therapist.name = name;
+    if (values.centerId) {
+      const center = state.centers.find((item) => item.id === values.centerId);
+      if (!center) throw new ServiceError('selection');
+      therapist.centerId = center.id;
+      therapist.center = center.name;
+    }
+    if (values.specialtyId) therapist.specialty = values.specialtyId;
+    state.therapists = [...state.therapists];
+    return therapistRow(therapist);
+  },
+
+  async deleteAdminPhysiotherapist(actor, { id } = {}) {
+    await wait();
+    requireAdmin(actor);
+    const therapist = state.therapists.find((item) => item.id === id);
+    if (!therapist) throw new ServiceError('notFound');
+    state.therapists = state.therapists.filter((item) => item.id !== id);
+    return { id, deleted: true };
   },
 
   async addAdminPhysiotherapist(actor, values = {}) {
@@ -391,12 +507,14 @@ export const adminMockApi = {
         ]) &&
         (!params.status || appointment.status === params.status) &&
         (!params.center || appointment.centerId === params.center) &&
-        (!params.from || String(appointment.datetime).slice(0, 10) >= params.from) &&
-        (!params.to || String(appointment.datetime).slice(0, 10) <= params.to)
+        (!params.date || String(appointment.datetime).slice(0, 10) === params.date)
     );
     return {
       ...paginate(filtered, params),
-      filters: { centers: centerOptions() },
+      filters: {
+        centers: centerOptions(),
+        statuses: unique(state.appointments.map((appointment) => appointment.status)),
+      },
     };
   },
 
@@ -440,6 +558,42 @@ export const adminMockApi = {
     };
     state.appointments.push(appointment);
     return { ...appointment };
+  },
+
+  async updateAdminAppointment(actor, values = {}) {
+    await wait();
+    requireAdmin(actor);
+    const appointment = state.appointments.find((item) => item.id === values.id);
+    if (!appointment) throw new ServiceError('notFound');
+    if (values.centerId) {
+      const center = state.centers.find((item) => item.id === values.centerId);
+      if (!center) throw new ServiceError('selection');
+      appointment.centerId = center.id;
+      appointment.center = center.name;
+    }
+    if (values.therapistId) {
+      const therapist = state.therapists.find((item) => item.id === values.therapistId);
+      if (therapist) appointment.therapist = therapist.name;
+    }
+    if (values.serviceId) {
+      const service = state.services.find((item) => item.id === values.serviceId);
+      if (service) appointment.service = service.name;
+    }
+    if (values.startDateTime) {
+      appointment.datetime = String(values.startDateTime).slice(0, 16);
+    }
+    if (values.status) appointment.status = values.status;
+    state.appointments = [...state.appointments];
+    return { ...appointment };
+  },
+
+  async deleteAdminAppointment(actor, { id } = {}) {
+    await wait();
+    requireAdmin(actor);
+    const appointment = state.appointments.find((item) => item.id === id);
+    if (!appointment) throw new ServiceError('notFound');
+    state.appointments = state.appointments.filter((item) => item.id !== id);
+    return { id, deleted: true };
   },
 
   async getAdminReviews(actor, params = {}) {

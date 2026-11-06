@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { faEllipsisV, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faPen, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
@@ -7,11 +7,13 @@ import FormField from '../../components/shared/FormField/FormField.jsx';
 import Modal from '../../components/shared/Modal/Modal.jsx';
 import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
-import { Feedback } from '../../components/center/CenterUI.jsx';
+import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
-import { QueryState, AdminPagination } from './AdminUI.jsx';
+import { QueryState, AdminPagination, RecordDialog } from './AdminUI.jsx';
+import RowActions from './RowActions.jsx';
+import { TherapistEditDialog } from './AdminRecordDialogs.jsx';
 import './ListPages.css';
 
 // Therapists carry the account's IsActive flag only, so the two statuses the
@@ -161,6 +163,9 @@ function AdminPhysiotherapists() {
   const [showAdd, setShowAdd] = useState(false);
   const [savingId, setSavingId] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [viewTarget, setViewTarget] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const update = (values) =>
     setFilters((previous) => ({
@@ -308,12 +313,26 @@ function AdminPhysiotherapists() {
                     </select>
                   </td>
                   <td>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      iconOnly
-                      icon={faEllipsisV}
-                      aria-label={t('center.actions')}
+                    <RowActions
+                      label={t('center.actions')}
+                      items={[
+                        {
+                          label: t('admin.actions.view'),
+                          icon: faEye,
+                          onSelect: () => setViewTarget(therapist),
+                        },
+                        {
+                          label: t('admin.actions.edit'),
+                          icon: faPen,
+                          onSelect: () => setEditId(therapist.id),
+                        },
+                        {
+                          label: t('admin.actions.delete'),
+                          icon: faTrashCan,
+                          danger: true,
+                          onSelect: () => setDeleteTarget(therapist),
+                        },
+                      ]}
                     />
                   </td>
                 </tr>
@@ -332,6 +351,50 @@ function AdminPhysiotherapists() {
           />
         </QueryState>
       </div>
+
+      {viewTarget && (
+        <RecordDialog
+          title={viewTarget.name}
+          onClose={() => setViewTarget(null)}
+          rows={[
+            { label: t('admin.records.id'), value: viewTarget.id },
+            { label: t('admin.therapists.name'), value: viewTarget.name },
+            { label: t('admin.records.email'), value: viewTarget.email },
+            { label: t('admin.records.specialty'), value: viewTarget.specialty },
+            { label: t('admin.records.center'), value: viewTarget.center },
+            { label: t('admin.records.rating'), value: viewTarget.rating },
+            { label: t('admin.records.status'), value: t(`admin.status.${viewTarget.status}`) },
+          ]}
+        />
+      )}
+
+      {editId && (
+        <TherapistEditDialog
+          id={editId}
+          centers={options.centers}
+          specialties={options.specialties}
+          onClose={() => setEditId(null)}
+          onSaved={() => {
+            setEditId(null);
+            setNotice({ error: false, text: t('admin.actions.updated') });
+            state.reload();
+          }}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          danger
+          title={t('admin.actions.deleteTitle', { name: deleteTarget.name })}
+          description={t('admin.actions.deleteTherapistBody')}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={async () => {
+            await callAdmin('deleteAdminPhysiotherapist', { id: deleteTarget.id });
+            setNotice({ error: false, text: t('admin.actions.deleted') });
+            state.reload();
+          }}
+        />
+      )}
 
       {showAdd && (
         <AddTherapistModal

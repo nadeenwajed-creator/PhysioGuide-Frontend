@@ -81,6 +81,22 @@
   overflow-y: hidden;
 }
 
+/* Inline checkbox row used by the record edit dialogs. */
+.admin-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.admin-checkbox input {
+  inline-size: 18px;
+  block-size: 18px;
+  accent-color: var(--color-primary);
+}
+
 /* Query states render inside that card, so they must not draw a second card. */
 .admin-table-wrapper > .admin-state {
   border: none;
