@@ -44,7 +44,7 @@ function MetricCard({ icon, label, value, change, chart }) {
   );
 }
 
-// Both sparklines plot the metric's real monthly series. The peak month fills
+// Every sparkline plots the metric's real monthly series. The peak month fills
 // the box so the shape stays readable whatever the absolute numbers are.
 function MiniBarChart({ values = [] }) {
   const peak = Math.max(1, ...values);
@@ -64,28 +64,6 @@ function MiniBarChart({ values = [] }) {
           />
         );
       })}
-    </svg>
-  );
-}
-
-function MiniLineChart({ values = [] }) {
-  const peak = Math.max(1, ...values);
-  const step = values.length > 1 ? 100 / (values.length - 1) : 100;
-  const points = values
-    .map((value, index) => `${index * step},${28 - (value / peak) * 24}`)
-    .join(' ');
-  return (
-    <svg className="admin-mini-chart" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
-      {values.length > 1 && (
-        <polyline
-          points={points}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      )}
     </svg>
   );
 }
@@ -157,7 +135,7 @@ function AdminDashboard() {
             label={t("admin.dashboard.registeredPatients")}
             value={number.format(data?.metrics?.patients?.value ?? 0)}
             change={data?.metrics?.patients?.change}
-            chart={<MiniLineChart values={data?.metrics?.patients?.series} />}
+            chart={<MiniBarChart values={data?.metrics?.patients?.series} />}
           />
           <MetricCard
             icon={faUserDoctor}

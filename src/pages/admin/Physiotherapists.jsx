@@ -14,7 +14,9 @@ import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js'
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import './ListPages.css';
 
-const therapistStatuses = ['active', 'pending', 'inactive'];
+// Therapists carry the account's IsActive flag only, so the two statuses the
+// API can filter and store are Active and Suspended.
+const therapistStatuses = ['active', 'suspended'];
 
 function AddTherapistModal({ centers, specialties, onClose, onAdded }) {
   const { t } = useLanguage();

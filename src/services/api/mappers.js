@@ -575,14 +575,25 @@ export function toAdminCenters(body) {
 
 export function toAdminCenter(body) {
   const specialties = body?.specialties;
+  // The endpoint sends the staff list, not a count; the header row shows how
+  // many therapists actually work at the centre.
+  const staff = Array.isArray(body?.therapists) ? body.therapists : null;
   return {
     id: String(body?.id ?? body?.centerId ?? ''),
     name: label(body?.name ?? body?.centerName),
-    imageUrl: body?.imageUrl ?? null,
+    imageUrl: body?.profileImageUrl ?? null,
     status: lower(body?.status, 'pending'),
-    location: label(body?.location ?? body?.city),
+    // This endpoint reports `location` as coordinates; the place the page
+    // shows is the centre's city (with the street as a fallback).
+    location: label(
+      typeof body?.location === 'string'
+        ? body.location
+        : body?.city || body?.address
+    ),
     manager: label(body?.manager ?? body?.managerName),
-    therapists: num(body?.therapists ?? body?.activeTherapists),
+    therapists: staff
+      ? staff.length
+      : num(body?.therapists ?? body?.activeTherapists),
     specialties: Array.isArray(specialties)
       ? labels(specialties)
       : specialties
@@ -594,8 +605,16 @@ export function toAdminCenter(body) {
     submittedAt: body?.submittedAt ?? null,
     documents: (Array.isArray(body?.documents) ? body.documents : []).map((item, index) =>
       typeof item === 'string'
-        ? { id: String(index), name: item }
-        : { id: String(item?.id ?? index), name: label(item) }
+        ? { id: String(index), name: item, type: '', url: '', uploadedAt: null }
+        : {
+            id: String(item?.id ?? item?.centerDocumentId ?? index),
+            name:
+              label(item?.name ?? item?.fileName ?? item?.type ?? item?.documentType) ||
+              label(item),
+            type: label(item?.type ?? item?.documentType),
+            url: label(item?.url ?? item?.fileUrl),
+            uploadedAt: item?.uploadedAt ?? null,
+          }
     ),
     photos: (Array.isArray(body?.photos) ? body.photos : []).map((item, index) =>
       typeof item === 'string'
@@ -639,7 +658,9 @@ export function toAdminPhysiotherapist(item) {
     center: label(item?.center ?? item?.centerName),
     rating: item?.rating == null || item?.rating === '' ? null : num(item.rating),
     reviews: num(item?.reviews ?? item?.reviewCount),
-    status: lower(item?.status, 'active'),
+    // The list reports the account flag; the therapist keeps no status of its
+    // own, so a switched-off account reads as suspended.
+    status: lower(item?.status, item?.isActive === false ? 'suspended' : 'active'),
   };
 }
 
@@ -664,7 +685,8 @@ export function toAdminAppointment(item) {
     center: label(item?.center ?? item?.centerName),
     therapist: label(item?.therapist ?? item?.therapistName),
     service: label(item?.service ?? item?.serviceName),
-    datetime: item?.datetime ?? item?.date ?? null,
+    // The API reports the slot as startDateTime; older payloads used datetime.
+    datetime: item?.datetime ?? item?.startDateTime ?? item?.date ?? null,
     status: lower(item?.status, 'pending'),
   };
 }

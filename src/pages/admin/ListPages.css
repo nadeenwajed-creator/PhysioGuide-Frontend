@@ -262,41 +262,4 @@ select.admin-badge option {
   }
 }
 
-/* Document lists and photo grids for center detail. */
-.admin-document-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
-.admin-document-list li {
-  padding: 10px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  background: var(--color-bg-light);
-  font-size: 14px;
-}
-
-.admin-photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.admin-photo-grid__item {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-}
-
-.admin-empty-text {
-  color: var(--color-text-secondary);
-  text-align: center;
-  padding: 24px 0;
-  margin: 0;
-}

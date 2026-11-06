@@ -64,7 +64,7 @@ const state = {
   ],
   therapists: [
     { id: 'TH-7482', license: 'LIC-PH-7482', name: 'Dr. Lina Haddad', email: 'lina@example.com', specialty: 'Sports rehabilitation', centerId: 'CTR-4822', center: 'MotionCare Center', rating: 4.9, reviews: 124, status: 'active' },
-    { id: 'TH-7483', license: 'LIC-PH-7483', name: 'Dr. Karim Nasser', email: 'karim@example.com', specialty: 'Manual therapy', centerId: 'CTR-4821', center: 'Al Noor Rehabilitation', rating: 4.8, reviews: 98, status: 'pending' },
+    { id: 'TH-7483', license: 'LIC-PH-7483', name: 'Dr. Karim Nasser', email: 'karim@example.com', specialty: 'Manual therapy', centerId: 'CTR-4821', center: 'Al Noor Rehabilitation', rating: 4.8, reviews: 98, status: 'suspended' },
   ],
   appointments: [
     { id: 'PO-4031', patient: 'Ahmed Al-Masri', patientId: 'PAT-1001', center: 'MotionCare Center', centerId: 'CTR-4822', therapist: 'Dr. Lina Haddad', service: 'Knee rehab', datetime: '2026-09-27T08:30', status: 'confirmed' },

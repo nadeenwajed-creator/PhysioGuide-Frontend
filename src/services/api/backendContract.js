@@ -33,6 +33,14 @@ function resolveAssets(value) {
 
 const resolved = (mapper) => (body, ...rest) => resolveAssets(mapper(body, ...rest));
 
+// A therapist's status is the account's IsActive flag, so the list filter has
+// to turn the chosen status back into the boolean the API filters on.
+function isActiveFilter(status) {
+  if (status === 'active') return true;
+  if (status === 'suspended' || status === 'inactive') return false;
+  return undefined;
+}
+
 // The backend refuses an empty payload, so a password change carries whichever
 // pair of names the form happens to use.
 function passwordPair(values) {
@@ -265,8 +273,10 @@ export const adminOperations = {
         search: params?.search,
         // The API filters therapists by specialty id, not by label.
         specialtyId: params?.specialty,
-        center: params?.center,
-        status: params?.status,
+        centerId: params?.center,
+        // A therapist's status is the account's IsActive flag; the server has
+        // no separate status column to filter on.
+        isActive: isActiveFilter(params?.status),
         page: params?.page,
         pageSize: params?.pageSize,
       },
@@ -307,9 +317,10 @@ export const adminOperations = {
       query: {
         search: params?.search,
         status: params?.status,
-        center: params?.center,
-        from: params?.from,
-        to: params?.to,
+        centerId: params?.center,
+        // One exact day rather than a range: the API matches the appointment's
+        // start date against it.
+        date: params?.date,
         page: params?.page,
         pageSize: params?.pageSize,
       },

@@ -1,7 +1,18 @@
+/* Admin centre review page: one card holding the centre header, the tabs, the
+   tab content and the approval bar, matching the review design. */
 .admin-center-detail {
+  /* Design accents: the approval teal and the reject coral. They sit outside
+     the palette because the review design uses its own pair. */
+  --detail-accent: #0f7f7f;
+  --detail-danger: #ef5b6b;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
+}
+
+:root[data-theme='dark'] .admin-center-detail {
+  --detail-accent: #2fa9a7;
+  --detail-danger: #ff6d7c;
 }
 
 .admin-back-link {
@@ -10,58 +21,144 @@
   gap: 8px;
   color: var(--color-primary);
   text-decoration: none;
-  margin-bottom: 16px;
+  inline-size: fit-content;
 }
 
-.admin-center-detail__title-row {
+.admin-center-detail__card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  padding: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-primary-darker) 4%, transparent);
 }
 
-.admin-center-detail__title {
+/* Header: portrait left, name and status block right. */
+.admin-center-detail__header {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 20px;
 }
 
-/* Shared Avatar (size lg = 64px) draws the centre portrait; this only pins
-   it in place beside the title. */
-.admin-center-detail__image {
+.admin-center-detail__photo {
   flex: none;
+  inline-size: 140px;
+  block-size: 86px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
 }
 
-.admin-center-detail__title h1 {
+.admin-center-detail__photo img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.admin-center-detail__photo-fallback {
+  display: grid;
+  place-items: center;
+  block-size: 100%;
+  color: var(--color-text-muted);
+  font-size: 28px;
+}
+
+.admin-center-detail__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-inline-size: 0;
+  padding-block-start: 2px;
+}
+
+.admin-center-detail__intro h1 {
   margin: 0;
-  font-size: clamp(24px, 2.5vw, 32px);
-  font-weight: 600;
-  color: var(--color-primary-darker);
+  font-size: clamp(24px, 2.4vw, 30px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-primary);
 }
 
-.admin-center-detail__title span {
+.admin-center-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-center-detail__code {
   color: var(--color-text-secondary);
+  font-size: 15px;
+  letter-spacing: 0.02em;
 }
 
+.admin-center-detail__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-center-detail__status svg {
+  font-size: 11px;
+}
+
+.admin-center-detail__status--pending {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.admin-center-detail__status--approved {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.admin-center-detail__status--rejected,
+.admin-center-detail__status--suspended {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+/* Tabs sit on a full-width rule; the active tab paints over it. */
 .admin-tabs {
   display: flex;
   gap: 12px;
-  border-bottom: 1px solid var(--color-border);
+  margin-block: 26px 0;
+  border-block-end: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .admin-tab {
+  flex: none;
   border: none;
   background: transparent;
-  padding: 12px 16px;
+  padding: 12px 18px;
   font: inherit;
+  font-size: 16px;
   color: var(--color-text-secondary);
   position: relative;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-tab:hover {
+  color: var(--color-text-primary);
 }
 
 .admin-tab.is-active {
-  color: var(--color-primary);
+  color: var(--detail-accent);
+  font-weight: 600;
 }
 
 .admin-tab.is-active::after {
@@ -69,10 +166,227 @@
   position: absolute;
   inset-inline: 0;
   inset-block-end: -1px;
-  height: 2px;
-  background: var(--color-primary);
+  block-size: 2px;
+  border-radius: 2px;
+  background: var(--detail-accent);
 }
 
+/* Overview: icon, label, value rows separated by hairlines. */
+.admin-details {
+  display: flex;
+  flex-direction: column;
+  padding-block: 4px;
+}
+
+.admin-details__row {
+  display: grid;
+  grid-template-columns: 22px minmax(140px, 0.85fr) minmax(0, 1.55fr);
+  align-items: center;
+  column-gap: 10px;
+  padding-block: 16px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.admin-details__row:last-child {
+  border-block-end: none;
+}
+
+.admin-details__icon {
+  display: inline-flex;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 17px;
+}
+
+.admin-details__label {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+.admin-details__value {
+  min-inline-size: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.admin-center-detail__panel {
+  padding-block-start: 20px;
+}
+
+/* Documents: one file row per uploaded document. */
+.admin-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-file-list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg-light);
+}
+
+.admin-file-list__icon {
+  flex: none;
+  inline-size: 38px;
+  block-size: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--detail-accent);
+}
+
+.admin-file-list__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.admin-file-list__text strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admin-file-list__text small {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.admin-file-list__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+  color: var(--detail-accent);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-file-list__link:hover {
+  text-decoration: underline;
+}
+
+/* Photos: a grid of the uploaded images; each opens the full file. */
+.admin-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.admin-media-grid__item {
+  display: block;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-bg-light);
+}
+
+.admin-media-grid__item img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: transform 160ms ease;
+}
+
+.admin-media-grid__item:hover img {
+  transform: scale(1.03);
+}
+
+/* Empty tab state: a quiet icon and a single line of copy. */
+.admin-center-detail__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 44px 16px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.admin-center-detail__empty svg {
+  font-size: 26px;
+  color: var(--color-text-muted);
+}
+
+.admin-center-detail__empty p {
+  margin: 0;
+}
+
+/* Approval bar: three equal actions under a divider. */
+.admin-action-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-block-start: 24px;
+  padding-block-start: 24px;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.admin-action-bar .pg-button {
+  min-block-size: 54px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.admin-action-bar .pg-button__icon {
+  font-size: 20px;
+}
+
+/* The design fills Approve and Reject; Suspend is the quiet outline. */
+.admin-action-bar .admin-action--approve {
+  background: var(--detail-accent);
+  border-color: var(--detail-accent);
+  color: var(--color-white);
+}
+
+.admin-action-bar .admin-action--approve:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--detail-accent) 88%, black);
+  border-color: color-mix(in srgb, var(--detail-accent) 88%, black);
+}
+
+.admin-action-bar .admin-action--reject {
+  background: var(--detail-danger);
+  border-color: var(--detail-danger);
+  color: var(--color-white);
+}
+
+.admin-action-bar .admin-action--reject:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--detail-danger) 88%, black);
+  border-color: color-mix(in srgb, var(--detail-danger) 88%, black);
+}
+
+.admin-action-bar .admin-action--suspend {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.admin-action-bar .admin-action--suspend:hover:not(:disabled) {
+  background: var(--color-bg-light);
+}
+
+.admin-action-bar .pg-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Cards shared with the admin settings page. */
 .admin-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -89,98 +403,47 @@
   font-weight: 600;
 }
 
-.admin-key-value {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-}
-
-.admin-key-value > div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.admin-key-value span {
-  color: var(--color-text-secondary);
-}
-
-.admin-key-value strong {
-  font-weight: 600;
-}
-
-.admin-action-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-.admin-action-bar button:disabled {
-  opacity: 0.6;
-  cursor: wait;
-}
-
-/* Documents tab: a plain list of submitted files. */
-.admin-documents {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.admin-documents li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: var(--color-bg-light);
-}
-
-/* Photos tab: a responsive thumbnail grid. */
-.admin-photos {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-}
-
-.admin-photos .center-record-image {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-}
-
-/* Narrow screens: scrollable tabs, tighter cards and stacked approval
-   controls so nothing overflows on a phone. */
+/* Narrow screens: smaller portrait, stacked rows and full-width actions. */
 @media (max-width: 767px) {
-  .admin-card {
+  .admin-center-detail__card {
     padding: 16px;
   }
 
-  .admin-tabs {
-    overflow-x: auto;
+  .admin-center-detail__header {
+    gap: 14px;
+  }
+
+  .admin-center-detail__photo {
+    inline-size: 96px;
+    block-size: 64px;
+  }
+
+  .admin-center-detail__intro h1 {
+    font-size: 21px;
   }
 
   .admin-tab {
-    flex: none;
-    white-space: nowrap;
     padding: 12px;
   }
 
+  .admin-details__row {
+    grid-template-columns: 22px minmax(0, 1fr);
+    row-gap: 4px;
+    padding-block: 14px;
+  }
+
+  .admin-details__value {
+    grid-column: 2;
+  }
+
   .admin-action-bar {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-block-start: 20px;
+    padding-block-start: 20px;
   }
 
   .admin-action-bar .pg-button {
-    width: 100%;
+    min-block-size: 48px;
   }
 }
-
-

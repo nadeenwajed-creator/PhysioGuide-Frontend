@@ -163,8 +163,7 @@ function AdminAppointments() {
     search: '',
     status: '',
     center: '',
-    from: '',
-    to: '',
+    date: '',
     page: 1,
     pageSize: 10,
   });
@@ -252,16 +251,10 @@ function AdminAppointments() {
           <input
             type="date"
             className="admin-date"
-            value={filters.from}
-            onChange={(e) => update({ from: e.target.value })}
-            aria-label={t('admin.appointments.from')}
-          />
-          <input
-            type="date"
-            className="admin-date"
-            value={filters.to}
-            onChange={(e) => update({ to: e.target.value })}
-            aria-label={t('admin.appointments.to')}
+            value={filters.date}
+            onChange={(e) => update({ date: e.target.value })}
+            aria-label={t('admin.appointments.form.date')}
+            title={t('admin.appointments.form.date')}
           />
         </div>
 
