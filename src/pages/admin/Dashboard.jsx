@@ -129,15 +129,6 @@ function AdminDashboard() {
     return formatDate(String(value), language);
   };
 
-  // Real admin notifications carry a type code; a type without copy falls back
-  // to the stored message instead of printing the missing translation key.
-  const notificationText = (item) => {
-    if (!item.type) return localized(item.text, language);
-    const key = `admin.notification.${item.type}`;
-    const translated = t(key);
-    return translated === key ? localized(item.text, language) : translated;
-  };
-
   const approvalResponse = data?.health?.approvalResponse;
   const satisfaction = data?.health?.satisfaction;
 

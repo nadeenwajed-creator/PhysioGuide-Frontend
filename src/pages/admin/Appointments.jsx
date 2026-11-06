@@ -210,61 +210,62 @@ function AdminAppointments() {
         </Button>
       </header>
 
-      <div className="admin-list-page__filters">
-        <SearchBar
-          value={filters.search}
-          onChange={(value) => update({ search: value })}
-          placeholder={t('admin.appointments.search')}
-          ariaLabel={t('admin.appointments.search')}
-        />
-        <FilterSelect
-          value={filters.status}
-          onChange={(value) => update({ status: value })}
-          ariaLabel={t('center.status')}
-          options={[
-            { value: '', label: t('admin.allStatuses') },
-            ...appointmentStatuses.map((status) => ({
-              value: status,
-              label: t(`admin.status.${status}`),
-            })),
-          ]}
-        />
-        <FilterSelect
-          value={filters.center}
-          onChange={(value) => update({ center: value })}
-          ariaLabel={t('admin.allCenters')}
-          options={[
-            { value: '', label: t('admin.allCenters') },
-            ...options.centers.map((center) => ({
-              value: center.id,
-              label: center.name,
-            })),
-          ]}
-        />
-        <input
-          type="date"
-          className="admin-date"
-          value={filters.from}
-          onChange={(e) => update({ from: e.target.value })}
-          aria-label={t('admin.appointments.from')}
-        />
-        <input
-          type="date"
-          className="admin-date"
-          value={filters.to}
-          onChange={(e) => update({ to: e.target.value })}
-          aria-label={t('admin.appointments.to')}
-        />
-      </div>
-
       {notice && (
         <Feedback error={notice.error} onDismiss={() => setNotice(null)}>
           {notice.text}
         </Feedback>
       )}
 
-      <QueryState state={state} empty={!data?.items?.length}>
-        <div className="admin-table-wrapper">
+      <div className="admin-table-wrapper">
+        {/* Filters live inside the table card, like the center pages. */}
+        <div className="admin-list-page__filters">
+          <SearchBar
+            value={filters.search}
+            onChange={(value) => update({ search: value })}
+            placeholder={t('admin.appointments.search')}
+            ariaLabel={t('admin.appointments.search')}
+          />
+          <FilterSelect
+            value={filters.status}
+            onChange={(value) => update({ status: value })}
+            ariaLabel={t('center.status')}
+            options={[
+              { value: '', label: t('admin.allStatuses') },
+              ...appointmentStatuses.map((status) => ({
+                value: status,
+                label: t(`admin.status.${status}`),
+              })),
+            ]}
+          />
+          <FilterSelect
+            value={filters.center}
+            onChange={(value) => update({ center: value })}
+            ariaLabel={t('admin.allCenters')}
+            options={[
+              { value: '', label: t('admin.allCenters') },
+              ...options.centers.map((center) => ({
+                value: center.id,
+                label: center.name,
+              })),
+            ]}
+          />
+          <input
+            type="date"
+            className="admin-date"
+            value={filters.from}
+            onChange={(e) => update({ from: e.target.value })}
+            aria-label={t('admin.appointments.from')}
+          />
+          <input
+            type="date"
+            className="admin-date"
+            value={filters.to}
+            onChange={(e) => update({ to: e.target.value })}
+            aria-label={t('admin.appointments.to')}
+          />
+        </div>
+
+        <QueryState state={state} empty={!data?.items?.length}>
           <table className="admin-table">
             <thead>
               <tr>
@@ -317,8 +318,8 @@ function AdminAppointments() {
             onChange={(page) => update({ page })}
             onPageSizeChange={(value) => update({ pageSize: Number(value) })}
           />
-        </div>
-      </QueryState>
+        </QueryState>
+      </div>
 
       {showNew && (
         <NewAppointmentModal

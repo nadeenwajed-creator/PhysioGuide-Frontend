@@ -45,55 +45,55 @@ function AdminCenters() {
         </div>
       </header>
 
-      <div className="admin-list-page__filters">
-        <SearchBar
-          value={filters.search}
-          onChange={(value) => update({ search: value })}
-          placeholder={t('admin.centers.search')}
-          ariaLabel={t('admin.centers.search')}
-        />
-        <FilterSelect
-          value={filters.status}
-          onChange={(value) => update({ status: value })}
-          ariaLabel={t('center.status')}
-          options={[
-            { value: '', label: t('admin.allStatuses') },
-            { value: 'pending', label: t('admin.status.pending') },
-            { value: 'approved', label: t('admin.status.approved') },
-            { value: 'rejected', label: t('admin.status.rejected') },
-            { value: 'suspended', label: t('admin.status.suspended') },
-          ]}
-        />
-        <FilterSelect
-          value={filters.specialty}
-          onChange={(value) => update({ specialty: value })}
-          ariaLabel={t('admin.allSpecialties')}
-          options={[
-            { value: '', label: t('admin.allSpecialties') },
-            ...options.specialties.map((specialty) => ({
-              value: specialty,
-              label: specialty,
-            })),
-          ]}
-        />
-        <FilterSelect
-          value={filters.city}
-          onChange={(value) => update({ city: value })}
-          ariaLabel={t('admin.allCities')}
-          options={[
-            { value: '', label: t('admin.allCities') },
-            ...options.cities.map((city) => ({ value: city, label: city })),
-          ]}
-        />
-      </div>
+      <div className="admin-table-wrapper">
+        {/* Filters live inside the table card, like the center pages. */}
+        <div className="admin-list-page__filters">
+          <SearchBar
+            value={filters.search}
+            onChange={(value) => update({ search: value })}
+            placeholder={t('admin.centers.search')}
+            ariaLabel={t('admin.centers.search')}
+          />
+          <FilterSelect
+            value={filters.status}
+            onChange={(value) => update({ status: value })}
+            ariaLabel={t('center.status')}
+            options={[
+              { value: '', label: t('admin.allStatuses') },
+              { value: 'pending', label: t('admin.status.pending') },
+              { value: 'approved', label: t('admin.status.approved') },
+              { value: 'rejected', label: t('admin.status.rejected') },
+              { value: 'suspended', label: t('admin.status.suspended') },
+            ]}
+          />
+          <FilterSelect
+            value={filters.specialty}
+            onChange={(value) => update({ specialty: value })}
+            ariaLabel={t('admin.allSpecialties')}
+            options={[
+              { value: '', label: t('admin.allSpecialties') },
+              ...options.specialties.map((specialty) => ({
+                value: specialty,
+                label: specialty,
+              })),
+            ]}
+          />
+          <FilterSelect
+            value={filters.city}
+            onChange={(value) => update({ city: value })}
+            ariaLabel={t('admin.allCities')}
+            options={[
+              { value: '', label: t('admin.allCities') },
+              ...options.cities.map((city) => ({ value: city, label: city })),
+            ]}
+          />
+        </div>
 
-      <QueryState state={state} empty={!state.data?.items?.length}>
-        <div className="admin-table-wrapper">
+        <QueryState state={state} empty={!state.data?.items?.length}>
           <table className="admin-table">
             <thead>
               <tr>
                 <th>{t('admin.centers.nameId')}</th>
-                <th>{t('admin.centers.manager')}</th>
                 <th>{t('admin.centers.location')}</th>
                 <th>{t('admin.centers.activeTherapists')}</th>
                 <th>{t('center.status')}</th>
@@ -109,7 +109,6 @@ function AdminCenters() {
                       <span>{center.id}</span>
                     </div>
                   </td>
-                  <td>{center.manager}</td>
                   <td>{center.location}</td>
                   <td>{center.therapists}</td>
                   <td>
@@ -143,8 +142,8 @@ function AdminCenters() {
             onChange={(page) => update({ page })}
             onPageSizeChange={(value) => update({ pageSize: Number(value) })}
           />
-        </div>
-      </QueryState>
+        </QueryState>
+      </div>
     </div>
   );
 }

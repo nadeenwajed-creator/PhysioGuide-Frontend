@@ -29,7 +29,9 @@ export function QueryState({ state, empty = false, children }) {
 
   if (empty) return <EmptyState>{t('admin.state.empty')}</EmptyState>;
 
-  return children;
+  // A fragment keeps multiple children (table + pager) out of a list, which
+  // would otherwise ask them for keys.
+  return <>{children}</>;
 }
 
 // The center pages' Pager (rows-per-page select, range label, shared

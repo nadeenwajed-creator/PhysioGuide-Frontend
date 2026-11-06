@@ -326,7 +326,11 @@ export const adminMockApi = {
     return {
       ...paginate(filtered, params),
       filters: {
-        specialties: unique(state.therapists.map((therapist) => therapist.specialty)),
+        // The catalog carries ids so the list filter and the add form send the
+        // same thing the API expects; demo records use their name as the id.
+        specialties: unique(state.therapists.map((therapist) => therapist.specialty)).map(
+          (name) => ({ id: name, name })
+        ),
         centers: centerOptions(),
       },
     };

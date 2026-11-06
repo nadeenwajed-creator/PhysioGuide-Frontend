@@ -32,6 +32,12 @@
   align-items: center;
 }
 
+/* Inside the table card the filter row sits above the table with the same
+   spacing the center pages use between their filters and their table. */
+.admin-table-wrapper > .admin-list-page__filters {
+  margin-block-end: 20px;
+}
+
 /* Shared SearchBar grows to fill the row; the shared FilterSelect and the
    date fields keep their intrinsic width (their components default to 100%). */
 .admin-list-page__filters .pg-search-bar {
@@ -75,6 +81,13 @@
   overflow-y: hidden;
 }
 
+/* Query states render inside that card, so they must not draw a second card. */
+.admin-table-wrapper > .admin-state {
+  border: none;
+  background: transparent;
+  padding-inline: 0;
+}
+
 .admin-table {
   width: 100%;
   min-width: 720px;
@@ -88,7 +101,8 @@
 .admin-table th,
 .admin-table td {
   padding: 14px 20px;
-  text-align: left;
+  /* Logical alignment keeps the table reading right-to-left in Arabic. */
+  text-align: start;
   border-top: 1px solid var(--color-border);
 }
 

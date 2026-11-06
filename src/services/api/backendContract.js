@@ -263,7 +263,8 @@ export const adminOperations = {
       path: `${ADMIN}/physiotherapists`,
       query: {
         search: params?.search,
-        specialty: params?.specialty,
+        // The API filters therapists by specialty id, not by label.
+        specialtyId: params?.specialty,
         center: params?.center,
         status: params?.status,
         page: params?.page,

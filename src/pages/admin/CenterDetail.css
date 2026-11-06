@@ -67,9 +67,8 @@
 .admin-tab.is-active::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
+  inset-inline: 0;
+  inset-block-end: -1px;
   height: 2px;
   background: var(--color-primary);
 }

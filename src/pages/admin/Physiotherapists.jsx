@@ -16,7 +16,7 @@ import './ListPages.css';
 
 const therapistStatuses = ['active', 'pending', 'inactive'];
 
-function AddTherapistModal({ centers, onClose, onAdded }) {
+function AddTherapistModal({ centers, specialties, onClose, onAdded }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({
     fullName: "",
@@ -49,6 +49,16 @@ function AddTherapistModal({ centers, onClose, onAdded }) {
   const centerOptions = [
     { value: '', label: t('admin.allCenters') },
     ...(centers || []).map((center) => ({ value: center.id, label: center.name })),
+  ];
+
+  // The form sends the specialty id; the server resolves it against the
+  // specialty catalog it already uses for the list filter.
+  const specialtyOptions = [
+    { value: '', label: '—' },
+    ...(specialties || []).map((specialty) => ({
+      value: specialty.id,
+      label: specialty.name,
+    })),
   ];
 
   return (
@@ -114,9 +124,11 @@ function AddTherapistModal({ centers, onClose, onAdded }) {
         />
         <FormField
           label={t("admin.therapists.form.specialty")}
+          as="select"
           required
           value={form.specialty}
           onChange={(value) => set("specialty", value)}
+          options={specialtyOptions}
           disabled={saving}
         />
         <FormField
@@ -187,59 +199,60 @@ function AdminPhysiotherapists() {
         </Button>
       </header>
 
-      <div className="admin-list-page__filters">
-        <SearchBar
-          value={filters.search}
-          onChange={(value) => update({ search: value })}
-          placeholder={t('admin.therapists.search')}
-          ariaLabel={t('admin.therapists.search')}
-        />
-        <FilterSelect
-          value={filters.specialty}
-          onChange={(value) => update({ specialty: value })}
-          ariaLabel={t('admin.allSpecialties')}
-          options={[
-            { value: '', label: t('admin.allSpecialties') },
-            ...options.specialties.map((specialty) => ({
-              value: specialty,
-              label: specialty,
-            })),
-          ]}
-        />
-        <FilterSelect
-          value={filters.center}
-          onChange={(value) => update({ center: value })}
-          ariaLabel={t('admin.allCenters')}
-          options={[
-            { value: '', label: t('admin.allCenters') },
-            ...options.centers.map((center) => ({
-              value: center.id,
-              label: center.name,
-            })),
-          ]}
-        />
-        <FilterSelect
-          value={filters.status}
-          onChange={(value) => update({ status: value })}
-          ariaLabel={t('admin.allStatuses')}
-          options={[
-            { value: '', label: t('admin.allStatuses') },
-            ...therapistStatuses.map((status) => ({
-              value: status,
-              label: t(`admin.status.${status}`),
-            })),
-          ]}
-        />
-      </div>
-
       {notice && (
         <Feedback error={notice.error} onDismiss={() => setNotice(null)}>
           {notice.text}
         </Feedback>
       )}
 
-      <QueryState state={state} empty={!data?.items?.length}>
-        <div className="admin-table-wrapper">
+      <div className="admin-table-wrapper">
+        {/* Filters live inside the table card, like the center pages. */}
+        <div className="admin-list-page__filters">
+          <SearchBar
+            value={filters.search}
+            onChange={(value) => update({ search: value })}
+            placeholder={t('admin.therapists.search')}
+            ariaLabel={t('admin.therapists.search')}
+          />
+          <FilterSelect
+            value={filters.specialty}
+            onChange={(value) => update({ specialty: value })}
+            ariaLabel={t('admin.allSpecialties')}
+            options={[
+              { value: '', label: t('admin.allSpecialties') },
+              ...options.specialties.map((specialty) => ({
+                value: specialty.id,
+                label: specialty.name,
+              })),
+            ]}
+          />
+          <FilterSelect
+            value={filters.center}
+            onChange={(value) => update({ center: value })}
+            ariaLabel={t('admin.allCenters')}
+            options={[
+              { value: '', label: t('admin.allCenters') },
+              ...options.centers.map((center) => ({
+                value: center.id,
+                label: center.name,
+              })),
+            ]}
+          />
+          <FilterSelect
+            value={filters.status}
+            onChange={(value) => update({ status: value })}
+            ariaLabel={t('admin.allStatuses')}
+            options={[
+              { value: '', label: t('admin.allStatuses') },
+              ...therapistStatuses.map((status) => ({
+                value: status,
+                label: t(`admin.status.${status}`),
+              })),
+            ]}
+          />
+        </div>
+
+        <QueryState state={state} empty={!data?.items?.length}>
           <table className="admin-table">
             <thead>
               <tr>
@@ -315,12 +328,13 @@ function AdminPhysiotherapists() {
             onChange={(page) => update({ page })}
             onPageSizeChange={(value) => update({ pageSize: Number(value) })}
           />
-        </div>
-      </QueryState>
+        </QueryState>
+      </div>
 
       {showAdd && (
         <AddTherapistModal
           centers={options.centers}
+          specialties={options.specialties}
           onClose={() => setShowAdd(false)}
           onAdded={() => {
             setShowAdd(false);

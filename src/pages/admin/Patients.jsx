@@ -64,53 +64,54 @@ function AdminPatients() {
         </div>
       </header>
 
-      <div className="admin-list-page__filters">
-        <SearchBar
-          value={filters.search}
-          onChange={(value) => update({ search: value })}
-          placeholder={t('admin.patients.search')}
-          ariaLabel={t('admin.patients.search')}
-        />
-        <FilterSelect
-          value={filters.status}
-          onChange={(value) => update({ status: value })}
-          ariaLabel={t('center.status')}
-          options={[
-            { value: '', label: t('admin.allStatuses') },
-            ...patientStatuses.map((status) => ({
-              value: status,
-              label: t(`admin.status.${status}`),
-            })),
-          ]}
-        />
-        <FilterSelect
-          value={filters.city}
-          onChange={(value) => update({ city: value })}
-          ariaLabel={t('admin.allCities')}
-          options={[
-            { value: '', label: t('admin.allCities') },
-            ...options.cities.map((city) => ({ value: city, label: city })),
-          ]}
-        />
-        <FilterSelect
-          value={filters.sort}
-          onChange={(value) => update({ sort: value })}
-          ariaLabel={t('admin.sort.default')}
-          options={[
-            { value: '', label: t('admin.sort.default') },
-            { value: 'recent', label: t('admin.recentlyActive') },
-          ]}
-        />
-      </div>
-
       {notice && (
         <Feedback error={notice.error} onDismiss={() => setNotice(null)}>
           {notice.text}
         </Feedback>
       )}
 
-      <QueryState state={state} empty={!data?.items?.length}>
-        <div className="admin-table-wrapper">
+      <div className="admin-table-wrapper">
+        {/* Filters live inside the table card, like the center pages. */}
+        <div className="admin-list-page__filters">
+          <SearchBar
+            value={filters.search}
+            onChange={(value) => update({ search: value })}
+            placeholder={t('admin.patients.search')}
+            ariaLabel={t('admin.patients.search')}
+          />
+          <FilterSelect
+            value={filters.status}
+            onChange={(value) => update({ status: value })}
+            ariaLabel={t('center.status')}
+            options={[
+              { value: '', label: t('admin.allStatuses') },
+              ...patientStatuses.map((status) => ({
+                value: status,
+                label: t(`admin.status.${status}`),
+              })),
+            ]}
+          />
+          <FilterSelect
+            value={filters.city}
+            onChange={(value) => update({ city: value })}
+            ariaLabel={t('admin.allCities')}
+            options={[
+              { value: '', label: t('admin.allCities') },
+              ...options.cities.map((city) => ({ value: city, label: city })),
+            ]}
+          />
+          <FilterSelect
+            value={filters.sort}
+            onChange={(value) => update({ sort: value })}
+            ariaLabel={t('admin.sort.default')}
+            options={[
+              { value: '', label: t('admin.sort.default') },
+              { value: 'recent', label: t('admin.recentlyActive') },
+            ]}
+          />
+        </div>
+
+        <QueryState state={state} empty={!data?.items?.length}>
           <table className="admin-table">
             <thead>
               <tr>
@@ -182,8 +183,8 @@ function AdminPatients() {
             onChange={(page) => update({ page })}
             onPageSizeChange={(value) => update({ pageSize: Number(value) })}
           />
-        </div>
-      </QueryState>
+        </QueryState>
+      </div>
     </div>
   );
 }

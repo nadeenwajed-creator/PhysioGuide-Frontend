@@ -484,6 +484,14 @@ const refOptions = (value) =>
       : { id: String(item?.id ?? item?.centerId ?? index), name: label(item) }
   );
 
+// The specialty table can hold two rows with the same name; one entry per name
+// keeps the dropdown readable while every entry still carries a real id.
+const uniqueOptions = (value) =>
+  refOptions(value).filter(
+    (option, index, list) =>
+      list.findIndex((other) => other.name === option.name) === index
+  );
+
 const num = (value, fallback = 0) => {
   if (value == null || value === '') return fallback;
   const parsed = Number(String(value).replace(/,/g, ''));
@@ -641,7 +649,9 @@ export function toAdminPhysiotherapists(body) {
     ...list,
     items: list.items.map(toAdminPhysiotherapist),
     filters: {
-      specialties: labels(list.filters?.specialties),
+      // The specialty catalog keeps its ids: the filter and the add form both
+      // send a specialty id to the server.
+      specialties: uniqueOptions(list.filters?.specialties),
       centers: refOptions(list.filters?.centers),
     },
   };
