@@ -573,6 +573,20 @@ export function toAdminCenters(body) {
   };
 }
 
+// The activity log is a plain paginated event list: bilingual text plus the
+// moment the event happened, newest first from the API.
+export function toAdminActivity(body) {
+  const list = adminList(body);
+  return {
+    ...list,
+    items: list.items.map((item, index) => ({
+      id: String(item?.id ?? item?.activityId ?? index),
+      text: item?.text ?? item?.title ?? '',
+      at: item?.at ?? item?.createdAt ?? item?.timestamp ?? null,
+    })),
+  };
+}
+
 export function toAdminCenter(body) {
   const specialties = body?.specialties;
   // The endpoint sends the staff list, not a count; the header row shows how

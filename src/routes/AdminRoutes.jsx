@@ -8,6 +8,7 @@ import AdminPatients from '../pages/admin/Patients.jsx';
 import AdminPhysiotherapists from '../pages/admin/Physiotherapists.jsx';
 import AdminAppointments from '../pages/admin/Appointments.jsx';
 import AdminReviews from '../pages/admin/Reviews.jsx';
+import AdminActivity from '../pages/admin/Activity.jsx';
 import AdminSettings from '../pages/admin/Settings.jsx';
 import RequireRole from './RequireRole.jsx';
 import PublicLayout from "../layouts/PublicLayout.jsx";
@@ -31,6 +32,7 @@ const adminRoutes = (
         <Route path="physiotherapists" element={<AdminPhysiotherapists />} />
         <Route path="appointments" element={<AdminAppointments />} />
         <Route path="reviews" element={<AdminReviews />} />
+        <Route path="activity" element={<AdminActivity />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
     </Route>

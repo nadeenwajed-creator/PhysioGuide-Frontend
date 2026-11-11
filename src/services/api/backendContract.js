@@ -207,6 +207,15 @@ export const adminOperations = {
     response: resolved(map.toAdminDashboard),
   },
 
+  getAdminActivity: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/activity`,
+      query: { page: params?.page, pageSize: params?.pageSize },
+    }),
+    response: resolved(map.toAdminActivity),
+  },
+
   getAdminCenters: {
     request: (_actor, params) => ({
       method: 'GET',

@@ -264,9 +264,9 @@ function AdminDashboard() {
           <Panel
             title={t("admin.dashboard.recentActivity")}
             action={
-              <button className="admin-panel__link-button">
+              <Link to="/admin/activity" className="admin-panel__link-button">
                 {t("center.viewAll")}
-              </button>
+              </Link>
             }
             className="admin-panel"
           >

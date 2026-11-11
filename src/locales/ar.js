@@ -101,6 +101,11 @@ const ar = {
   'admin.activity.therapistVerified': 'تم التحقق من ملف أخصائي',
   'admin.activity.appointmentConfirmed': 'تم تأكيد موعد',
   'admin.activity.systemAlert': 'تنبيه نظام',
+  'admin.activity.title': 'سجل النشاط',
+  'admin.activity.subtitle': 'كل أحداث المراكز والأخصائيين والمرضى والتقييمات، الأحدث أولًا.',
+  'admin.activity.event': 'النشاط',
+  'admin.activity.time': 'الوقت',
+  'admin.activity.total': '{total} نشاط',
   // Admin shared
   'admin.search': 'بحث...',
   'admin.allStatuses': 'كل الحالات',

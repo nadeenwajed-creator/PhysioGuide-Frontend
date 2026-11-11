@@ -82,6 +82,22 @@ const state = {
     { id: 'REV-9002', patient: { id: 'PAT-1002', name: 'Layla Hassan' }, center: { id: 'CTR-4821', name: 'Al Noor Rehabilitation' }, therapistName: 'Dr. Karim Nasser', rating: 4, comment: 'Great experience, very attentive physiotherapist.', reply: null, isVisible: false, createdAt: daysAgo(5) },
     { id: 'REV-9003', patient: { id: 'PAT-1003', name: 'Mohammed Saleh' }, center: { id: 'CTR-4823', name: 'Healing Hands Clinic' }, therapistName: 'Dr. Sara Ali', rating: 5, comment: 'Amazing results after only three sessions, my knee feels new!', reply: 'Thank you for your kind words.', isVisible: true, createdAt: daysAgo(1) },
   ],
+  // Full audit-style feed behind the dashboard's "View all": enough rows to
+  // exercise the pager, newest first like the API orders them.
+  activity: [
+    { id: 'centerSubmitted-CTR-4821', text: { en: 'Center application submitted', ar: 'تم إرسال طلب مركز' }, at: hoursAgo(2) },
+    { id: 'reviewPosted-REV-9003', text: { en: 'New patient review', ar: 'تم استلام تقييم جديد' }, at: hoursAgo(3) },
+    { id: 'therapistJoined-TH-7483', text: { en: 'Physiotherapist account created', ar: 'تم إنشاء حساب معالج' }, at: hoursAgo(5) },
+    { id: 'patientJoined-PAT-1003', text: { en: 'Patient registered', ar: 'تم تسجيل مريض جديد' }, at: hoursAgo(9) },
+    { id: 'centerReviewed-CTR-4823', text: { en: 'Center application reviewed', ar: 'تمت مراجعة طلب مركز' }, at: hoursAgo(14) },
+    { id: 'reviewPosted-REV-9002', text: { en: 'New patient review', ar: 'تم استلام تقييم جديد' }, at: daysAgo(1) },
+    { id: 'centerSubmitted-CTR-4822', text: { en: 'Center application submitted', ar: 'تم إرسال طلب مركز' }, at: daysAgo(2) },
+    { id: 'therapistJoined-TH-7482', text: { en: 'Physiotherapist account created', ar: 'تم إنشاء حساب معالج' }, at: daysAgo(3) },
+    { id: 'patientJoined-PAT-1002', text: { en: 'Patient registered', ar: 'تم تسجيل مريض جديد' }, at: daysAgo(4) },
+    { id: 'reviewPosted-REV-9001', text: { en: 'New patient review', ar: 'تم استلام تقييم جديد' }, at: daysAgo(6) },
+    { id: 'centerReviewed-CTR-4822', text: { en: 'Center application reviewed', ar: 'تمت مراجعة طلب مركز' }, at: daysAgo(8) },
+    { id: 'patientJoined-PAT-1001', text: { en: 'Patient registered', ar: 'تم تسجيل مريض جديد' }, at: daysAgo(11) },
+  ],
   settings: {
     profile: {
       fullName: 'Maya Al-Hassan',
@@ -211,6 +227,13 @@ export const adminMockApi = {
       pendingApprovals: state.dashboard.pendingApprovals,
       activity: state.dashboard.activity,
     };
+  },
+
+  // The dashboard's activity feed and the full log share the same records.
+  async getAdminActivity(actor, params = {}) {
+    await wait();
+    requireAdmin(actor);
+    return paginate(state.activity, params);
   },
 
   // The navbar bell reads the same demo notifications with their types so
