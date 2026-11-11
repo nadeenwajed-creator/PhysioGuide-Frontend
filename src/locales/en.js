@@ -199,6 +199,8 @@ const en = {
   'admin.reviews.moderate': 'Moderate',
   'admin.reviews.remove': 'Remove',
   'admin.reviews.total': '{total} reviews',
+  'admin.reviews.linkedReview': 'Showing the review from your activity link.',
+  'admin.reviews.showAll': 'Show all reviews',
   // Admin settings
   'admin.settingsPage.title': 'Settings',
   'admin.settingsPage.subtitle': 'Admin profile & settings',
@@ -454,6 +456,7 @@ const en = {
   'statusBadge.cancelled': 'Cancelled', 
   'statusBadge.approved': 'Approved', 
   'statusBadge.rejected': 'Rejected', 
+  'statusBadge.suspended': 'Suspended', 
 
   // Public and authentication pages
   "public.home": "Home",

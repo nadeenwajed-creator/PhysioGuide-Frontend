@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
@@ -14,6 +15,41 @@ import { formatDate } from '../../utils/centerFormat.js';
 import './ListPages.css';
 
 const patientStatuses = ['active', 'inactive', 'suspended'];
+
+// The rows of the view dialog opened from a list row.
+const patientRows = (patient, t, language) => [
+  { label: t('admin.records.id'), value: patient.id },
+  { label: t('admin.patients.patient'), value: patient.name },
+  { label: t('admin.records.email'), value: patient.email },
+  { label: t('admin.patients.age'), value: patient.age },
+  { label: t('admin.patients.city'), value: patient.city },
+  { label: t('admin.patients.appointments'), value: patient.appointments },
+  {
+    label: t('admin.patients.lastVisit'),
+    value: patient.lastVisit ? formatDate(patient.lastVisit, language) : '',
+  },
+  { label: t('admin.records.status'), value: t(`admin.status.${patient.status}`) },
+];
+
+const genderLabel = (gender, t) =>
+  gender === 'male'
+    ? t('admin.records.genderMale')
+    : gender === 'female'
+      ? t('admin.records.genderFemale')
+      : gender || '';
+
+// An activity link opens a patient fetched by id, so the dialog shows the
+// stored profile fields rather than the summary columns of a list row.
+const patientProfileRows = (patient, t) => [
+  { label: t('admin.records.id'), value: patient.id },
+  { label: t('admin.patients.patient'), value: patient.name },
+  { label: t('admin.records.email'), value: patient.email },
+  { label: t('admin.records.phone'), value: patient.phone },
+  { label: t('admin.records.city'), value: patient.city },
+  { label: t('admin.records.gender'), value: genderLabel(patient.gender, t) },
+  { label: t('admin.records.dateOfBirth'), value: patient.dateOfBirth },
+  { label: t('admin.records.status'), value: t(`admin.status.${patient.status}`) },
+];
 
 function AdminPatients() {
   const { t, language } = useLanguage();
@@ -41,6 +77,17 @@ function AdminPatients() {
 
   const search = useDebouncedValue(filters.search, 300);
   const state = useAdminQuery('getAdminPatients', { ...filters, search });
+
+  // The activity log links here with ?patient=<id>; the list's view dialog is
+  // the patient profile, so the record is fetched and opened on arrival.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedId = searchParams.get('patient');
+  const linkedState = useAdminQuery(
+    'getAdminPatient',
+    { id: linkedId },
+    { enabled: Boolean(linkedId) }
+  );
+  const linkedPatient = linkedState.data;
 
   const data = state.data;
   const options = data?.filters ?? { cities: [] };
@@ -208,22 +255,15 @@ function AdminPatients() {
         <RecordDialog
           title={viewTarget.name}
           onClose={() => setViewTarget(null)}
-          rows={[
-            { label: t('admin.records.id'), value: viewTarget.id },
-            { label: t('admin.patients.patient'), value: viewTarget.name },
-            { label: t('admin.records.email'), value: viewTarget.email },
-            { label: t('admin.patients.age'), value: viewTarget.age },
-            { label: t('admin.patients.city'), value: viewTarget.city },
-            { label: t('admin.patients.appointments'), value: viewTarget.appointments },
-            {
-              label: t('admin.patients.lastVisit'),
-              value: viewTarget.lastVisit ? formatDate(viewTarget.lastVisit, language) : '',
-            },
-            {
-              label: t('admin.records.status'),
-              value: t(`admin.status.${viewTarget.status}`),
-            },
-          ]}
+          rows={patientRows(viewTarget, t, language)}
+        />
+      )}
+
+      {linkedId && linkedPatient && (
+        <RecordDialog
+          title={linkedPatient.name}
+          onClose={() => setSearchParams({}, { replace: true })}
+          rows={patientProfileRows(linkedPatient, t)}
         />
       )}
 

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { localized } from '../../utils/centerFormat.js';
 import useAdminQuery from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
+import { activityPath } from './activityLinks.js';
 import './ListPages.css';
 
 // Every real platform event the dashboard summarises, newest first, one page at
@@ -47,12 +49,23 @@ function AdminActivity() {
               </tr>
             </thead>
             <tbody>
-              {data?.items?.map((entry) => (
-                <tr key={entry.id}>
-                  <td>{localized(entry.text, language)}</td>
-                  <td>{when(entry.at)}</td>
-                </tr>
-              ))}
+              {data?.items?.map((entry) => {
+                const target = activityPath(entry.kind, entry.relatedId);
+                return (
+                  <tr key={entry.id}>
+                    <td>
+                      {target ? (
+                        <Link to={target} className="admin-activity-link">
+                          {localized(entry.text, language)}
+                        </Link>
+                      ) : (
+                        localized(entry.text, language)
+                      )}
+                    </td>
+                    <td>{when(entry.at)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           <AdminPagination

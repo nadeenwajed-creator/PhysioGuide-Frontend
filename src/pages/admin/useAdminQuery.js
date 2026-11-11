@@ -4,7 +4,7 @@ import { callAdmin } from '../../services/adminService.js';
 // Loads one admin operation and reloads when its parameters change. The previous
 // rows stay on screen while new ones arrive, so filters never blank the table;
 // an error state is cleared as soon as a retry starts.
-export default function useAdminQuery(method, params = {}) {
+export default function useAdminQuery(method, params = {}, { enabled = true } = {}) {
   const key = JSON.stringify(params);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState({ requestKey: null, data: null, error: null });
@@ -12,6 +12,8 @@ export default function useAdminQuery(method, params = {}) {
   const requestKey = `${key}#${attempt}`;
 
   useEffect(() => {
+    // Optional queries (a deep link that may be absent) stay idle.
+    if (!enabled) return undefined;
     let live = true;
 
     callAdmin(method, JSON.parse(key))
@@ -25,7 +27,7 @@ export default function useAdminQuery(method, params = {}) {
     return () => {
       live = false;
     };
-  }, [method, key, attempt, requestKey]);
+  }, [enabled, method, key, attempt, requestKey]);
 
   const reload = useCallback(() => setAttempt((value) => value + 1), []);
 
@@ -34,9 +36,9 @@ export default function useAdminQuery(method, params = {}) {
   const current = state.requestKey === requestKey;
 
   return {
-    data: state.data,
-    error: current ? state.error : null,
-    loading: current ? !state.data && !state.error : !state.data,
+    data: enabled ? state.data : null,
+    error: enabled && current ? state.error : null,
+    loading: enabled ? (current ? !state.data && !state.error : !state.data) : false,
     reload,
   };
 }

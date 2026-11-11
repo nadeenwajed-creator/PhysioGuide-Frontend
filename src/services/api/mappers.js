@@ -504,6 +504,36 @@ const pct = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+// Activity ids are built as "<kind>-<recordId>" by the API and the demo data.
+// The kind says which record the event was about, so the feed can link to it.
+const activityKinds = [
+  'centerSubmitted',
+  'centerReviewed',
+  'therapistJoined',
+  'reviewPosted',
+  'patientJoined',
+];
+
+const splitActivityId = (id) => {
+  const text = String(id ?? '');
+  const kind = activityKinds.find((name) => text.startsWith(`${name}-`));
+  return kind
+    ? { kind, relatedId: text.slice(kind.length + 1) }
+    : { kind: null, relatedId: null };
+};
+
+const toActivityEvent = (item, index) => {
+  const id = String(item?.id ?? index);
+  const fallback = splitActivityId(id);
+  return {
+    id,
+    kind: item?.kind ?? fallback.kind,
+    relatedId: item?.relatedId == null ? fallback.relatedId : String(item.relatedId),
+    text: item?.text ?? '',
+    at: item?.at ?? null,
+  };
+};
+
 export function toAdminDashboard(body) {
   const metric = (entry) => ({
     value: num(entry?.value ?? entry),
@@ -542,11 +572,7 @@ export function toAdminDashboard(body) {
         body?.pendingApprovals?.reportedReviews ?? body?.pendingApprovals?.reviews
       ),
     },
-    activity: (Array.isArray(body?.activity) ? body.activity : []).map((item, index) => ({
-      id: item?.id ?? index,
-      text: item?.text ?? '',
-      at: item?.at ?? null,
-    })),
+    activity: (Array.isArray(body?.activity) ? body.activity : []).map(toActivityEvent),
   };
 }
 
@@ -573,17 +599,22 @@ export function toAdminCenters(body) {
   };
 }
 
-// The activity log is a plain paginated event list: bilingual text plus the
-// moment the event happened, newest first from the API.
+// The activity log is a plain paginated event list: bilingual text, the moment
+// the event happened and the record it happened on, newest first from the API.
 export function toAdminActivity(body) {
   const list = adminList(body);
   return {
     ...list,
-    items: list.items.map((item, index) => ({
-      id: String(item?.id ?? item?.activityId ?? index),
-      text: item?.text ?? item?.title ?? '',
-      at: item?.at ?? item?.createdAt ?? item?.timestamp ?? null,
-    })),
+    items: list.items.map((item, index) =>
+      toActivityEvent(
+        {
+          ...item,
+          text: item?.text ?? item?.title ?? '',
+          at: item?.at ?? item?.createdAt ?? item?.timestamp ?? null,
+        },
+        index
+      )
+    ),
   };
 }
 

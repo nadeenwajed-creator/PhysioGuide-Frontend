@@ -489,6 +489,8 @@ export const adminOperations = {
               ? 'hidden'
               : undefined,
         sort: params?.sort || undefined,
+        // The activity log links to one review by id.
+        reviewId: params?.reviewId || undefined,
         page: params?.page,
         pageSize: params?.pageSize,
       },

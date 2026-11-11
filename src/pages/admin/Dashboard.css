@@ -331,6 +331,19 @@
   padding-top: 0;
 }
 
+/* Feed rows link to the record behind the event; the time keeps its own line. */
+.admin-activity__item-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.admin-activity__item-link:hover .admin-activity__text,
+.admin-activity__item-link:focus-visible .admin-activity__text {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
 .admin-activity__text {
   display: block;
   color: var(--color-text-primary);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { faEye, faPen, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
@@ -19,6 +20,30 @@ import './ListPages.css';
 // Therapists carry the account's IsActive flag only, so the two statuses the
 // API can filter and store are Active and Suspended.
 const therapistStatuses = ['active', 'suspended'];
+
+// The rows of the view dialog opened from a list row.
+const therapistRows = (therapist, t) => [
+  { label: t('admin.records.id'), value: therapist.id },
+  { label: t('admin.therapists.name'), value: therapist.name },
+  { label: t('admin.records.email'), value: therapist.email },
+  { label: t('admin.records.specialty'), value: therapist.specialty },
+  { label: t('admin.records.center'), value: therapist.center },
+  { label: t('admin.records.rating'), value: therapist.rating },
+  { label: t('admin.records.status'), value: t(`admin.status.${therapist.status}`) },
+];
+
+// An activity link opens a therapist fetched by id, so the dialog shows the
+// stored profile fields rather than the summary columns of a list row.
+const therapistProfileRows = (therapist, t) => [
+  { label: t('admin.records.id'), value: therapist.id },
+  { label: t('admin.therapists.name'), value: therapist.name },
+  { label: t('admin.records.email'), value: therapist.email },
+  { label: t('admin.records.phone'), value: therapist.phone },
+  { label: t('admin.records.specialty'), value: therapist.specialty },
+  { label: t('admin.records.center'), value: therapist.center },
+  { label: t('admin.records.years'), value: therapist.yearsOfExperience },
+  { label: t('admin.records.status'), value: t(`admin.status.${therapist.status}`) },
+];
 
 function AddTherapistModal({ centers, specialties, onClose, onAdded }) {
   const { t } = useLanguage();
@@ -176,6 +201,17 @@ function AdminPhysiotherapists() {
 
   const search = useDebouncedValue(filters.search, 300);
   const state = useAdminQuery('getAdminPhysiotherapists', { ...filters, search });
+
+  // The activity log links here with ?therapist=<id>; the view dialog below is
+  // the therapist profile, so the record is fetched and opened on arrival.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedId = searchParams.get('therapist');
+  const linkedState = useAdminQuery(
+    'getAdminPhysiotherapist',
+    { id: linkedId },
+    { enabled: Boolean(linkedId) }
+  );
+  const linkedTherapist = linkedState.data;
 
   const data = state.data;
   const options = data?.filters ?? { specialties: [], centers: [] };
@@ -356,15 +392,15 @@ function AdminPhysiotherapists() {
         <RecordDialog
           title={viewTarget.name}
           onClose={() => setViewTarget(null)}
-          rows={[
-            { label: t('admin.records.id'), value: viewTarget.id },
-            { label: t('admin.therapists.name'), value: viewTarget.name },
-            { label: t('admin.records.email'), value: viewTarget.email },
-            { label: t('admin.records.specialty'), value: viewTarget.specialty },
-            { label: t('admin.records.center'), value: viewTarget.center },
-            { label: t('admin.records.rating'), value: viewTarget.rating },
-            { label: t('admin.records.status'), value: t(`admin.status.${viewTarget.status}`) },
-          ]}
+          rows={therapistRows(viewTarget, t)}
+        />
+      )}
+
+      {linkedId && linkedTherapist && (
+        <RecordDialog
+          title={linkedTherapist.name}
+          onClose={() => setSearchParams({}, { replace: true })}
+          rows={therapistProfileRows(linkedTherapist, t)}
         />
       )}
 

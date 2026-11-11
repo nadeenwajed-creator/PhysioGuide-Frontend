@@ -70,6 +70,18 @@
   outline-offset: 2px;
 }
 
+/* Activity log rows jump to the record the event was about. */
+.admin-activity-link {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.admin-activity-link:hover,
+.admin-activity-link:focus-visible {
+  text-decoration: underline;
+}
+
 .admin-table-wrapper {
   background: var(--color-surface);
   border: 1px solid var(--color-border);

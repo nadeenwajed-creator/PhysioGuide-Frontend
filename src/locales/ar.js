@@ -199,6 +199,8 @@ const ar = {
   'admin.reviews.moderate': 'إشراف',
   'admin.reviews.remove': 'حذف',
   'admin.reviews.total': '{total} تقييم',
+  'admin.reviews.linkedReview': 'يتم عرض التقييم المحدد من رابط سجل النشاط.',
+  'admin.reviews.showAll': 'عرض كل التقييمات',
   // Admin settings
   'admin.settingsPage.title': 'الإعدادات',
   'admin.settingsPage.subtitle': 'ملف وإعدادات المشرف',
@@ -454,6 +456,7 @@ const ar = {
   'statusBadge.cancelled': 'ملغي',
   'statusBadge.approved': 'مقبول',
   'statusBadge.rejected': 'مرفوض',
+  'statusBadge.suspended': 'موقوف',
 
   // Public and authentication pages
   "public.home": "الرئيسية",

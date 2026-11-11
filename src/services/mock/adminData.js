@@ -631,6 +631,7 @@ export const adminMockApi = {
           review.comment,
         ]) &&
         (!params.rating || Math.round(Number(review.rating)) === Number(params.rating)) &&
+        (!params.reviewId || String(review.id) === String(params.reviewId)) &&
         (!params.status || (params.status === 'published' ? review.isVisible : !review.isVisible))
     );
     if (params.sort === 'oldest') {

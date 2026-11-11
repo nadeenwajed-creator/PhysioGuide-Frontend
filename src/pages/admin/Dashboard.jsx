@@ -15,6 +15,7 @@ import { Panel } from '../../components/center/CenterUI.jsx';
 import { localized, formatDate } from '../../utils/centerFormat.js';
 import useAdminQuery from './useAdminQuery.js';
 import { QueryState } from './AdminUI.jsx';
+import { activityPath } from './activityLinks.js';
 import './Dashboard.css';
 
 function MetricCard({ icon, label, value, change, chart }) {
@@ -271,18 +272,30 @@ function AdminDashboard() {
             className="admin-panel"
           >
             <ul className="admin-activity">
-              {(data?.activity ?? []).map((a) => (
-                <li key={a.id} className="admin-activity__item">
-                  <div>
+              {(data?.activity ?? []).map((a) => {
+                const target = activityPath(a.kind, a.relatedId);
+                const body = (
+                  <>
                     <span className="admin-activity__text">
                       {localized(a.text, language)}
                     </span>
                     <span className="admin-activity__time">
                       {activityTime(a.at)}
                     </span>
-                  </div>
-                </li>
-              ))}
+                  </>
+                );
+                return (
+                  <li key={a.id} className="admin-activity__item">
+                    {target ? (
+                      <Link to={target} className="admin-activity__item-link">
+                        {body}
+                      </Link>
+                    ) : (
+                      <div>{body}</div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
             {(data?.activity ?? []).length === 0 && (
               <p className="admin-panel__empty">

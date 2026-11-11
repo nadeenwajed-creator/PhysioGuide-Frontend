@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faFileAlt, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
@@ -37,8 +38,14 @@ function AdminReviews() {
       ...('page' in values ? {} : { page: 1 }),
     }));
 
+  // The activity log links here with ?review=<id>; the list narrows to that
+  // review until the link is cleared.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedReviewId = searchParams.get('review');
+  const clearLinkedReview = () => setSearchParams({}, { replace: true });
+
   const search = useDebouncedValue(filters.search, 300);
-  const state = useAdminQuery('getAdminReviews', { ...filters, search });
+  const state = useAdminQuery('getAdminReviews', { ...filters, search, reviewId: linkedReviewId });
 
   const data = state.data;
   const summary = data?.summary ?? {};
@@ -62,6 +69,15 @@ function AdminReviews() {
           <p>{t('admin.reviews.subtitle')}</p>
         </div>
       </header>
+
+      {linkedReviewId && (
+        <p className="center-feedback" role="status">
+          {t('admin.reviews.linkedReview')}{' '}
+          <Button variant="ghost" size="sm" onClick={clearLinkedReview}>
+            {t('admin.reviews.showAll')}
+          </Button>
+        </p>
+      )}
 
       <QueryState state={state}>
         <div className="admin-reviews__summary">
