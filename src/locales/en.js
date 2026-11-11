@@ -446,7 +446,9 @@ const en = {
   'statusBadge.confirmed': 'Confirmed',
   'statusBadge.pending': 'Pending',
   'statusBadge.completed': 'Completed',
-  'statusBadge.cancelled': 'Cancelled',
+  'statusBadge.cancelled': 'Cancelled', 
+  'statusBadge.approved': 'Approved', 
+  'statusBadge.rejected': 'Rejected', 
 
   // Public and authentication pages
   "public.home": "Home",

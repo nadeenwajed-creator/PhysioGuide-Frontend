@@ -125,9 +125,7 @@ function AdminCenters() {
                   <td>{center.location}</td>
                   <td>{center.therapists}</td>
                   <td>
-                    <StatusBadge status={center.status}>
-                      {t(`admin.status.${center.status}`)}
-                    </StatusBadge>
+                    <StatusBadge status={center.status} />
                   </td>
                   <td>
                     <div className="admin-table__actions">

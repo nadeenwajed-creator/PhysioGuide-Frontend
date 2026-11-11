@@ -447,6 +447,8 @@ const ar = {
   'statusBadge.pending': 'قيد الانتظار',
   'statusBadge.completed': 'مكتمل',
   'statusBadge.cancelled': 'ملغي',
+  'statusBadge.approved': 'مقبول',
+  'statusBadge.rejected': 'مرفوض',
 
   // Public and authentication pages
   "public.home": "الرئيسية",

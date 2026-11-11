@@ -154,9 +154,7 @@ function AdminReviews() {
                   {formatDate(review.createdAt, language)}
                 </small>
               )}
-              <StatusBadge status={review.status} className="admin-review-card__status">
-                {t(`admin.status.${review.status}`)}
-              </StatusBadge>
+              <StatusBadge status={review.status} className="admin-review-card__status" />
               <div className="admin-review-card__actions">
                 <Button
                   variant="outline"

@@ -315,9 +315,7 @@ function AdminAppointments() {
                   <td>{appointment.service || '—'}</td>
                   <td>{formatDateTime(appointment.datetime)}</td>
                   <td>
-                    <StatusBadge status={appointment.status}>
-                      {t(`admin.status.${appointment.status}`)}
-                    </StatusBadge>
+                    <StatusBadge status={appointment.status} />
                   </td>
                   <td>
                     <RowActions
