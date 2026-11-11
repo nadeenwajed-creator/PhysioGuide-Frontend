@@ -457,6 +457,8 @@ const en = {
   'statusBadge.approved': 'Approved', 
   'statusBadge.rejected': 'Rejected', 
   'statusBadge.suspended': 'Suspended', 
+  'statusBadge.published': 'Published', 
+  'statusBadge.hidden': 'Hidden', 
 
   // Public and authentication pages
   "public.home": "Home",

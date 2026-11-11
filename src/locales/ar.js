@@ -457,6 +457,8 @@ const ar = {
   'statusBadge.approved': 'مقبول',
   'statusBadge.rejected': 'مرفوض',
   'statusBadge.suspended': 'موقوف',
+  'statusBadge.published': 'منشور', 
+  'statusBadge.hidden': 'مخفي', 
 
   // Public and authentication pages
   "public.home": "الرئيسية",

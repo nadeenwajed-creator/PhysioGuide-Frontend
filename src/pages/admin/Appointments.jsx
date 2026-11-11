@@ -45,9 +45,35 @@ function NewAppointmentModal({ onClose, onCreated }) {
     ...(items || []).map((item) => ({ value: item.id, label: item.name })),
   ];
 
-  const therapists = (options?.therapists || []).filter(
+  const allTherapists = options?.therapists || [];
+  const therapists = allTherapists.filter(
     (therapist) => !form.centerId || therapist.centerId === form.centerId
   );
+
+  // The service select follows the chosen therapist: only the services that
+  // therapist provides at that centre are listed. A therapist with no service
+  // mapping keeps the centre's full list instead of an empty dropdown.
+  const centerServices = (options?.services || []).filter(
+    (service) => !form.centerId || service.centerId === form.centerId
+  );
+  const selectedTherapist = allTherapists.find((item) => item.id === form.therapistId);
+  const offeredServices = selectedTherapist?.serviceIds ?? [];
+  const services = offeredServices.length
+    ? centerServices.filter((service) => offeredServices.includes(service.id))
+    : centerServices;
+
+  // Picking another therapist drops a service they do not provide.
+  const changeTherapist = (value) => {
+    const therapist = allTherapists.find((item) => item.id === value);
+    const offered = therapist?.serviceIds ?? [];
+    setForm((previous) => ({
+      ...previous,
+      therapistId: value,
+      serviceId: !offered.length || offered.includes(previous.serviceId)
+        ? previous.serviceId
+        : '',
+    }));
+  };
 
   async function submit(event) {
     event.preventDefault();
@@ -118,6 +144,7 @@ function NewAppointmentModal({ onClose, onCreated }) {
             onChange={(value) => {
               set('centerId', value);
               set('therapistId', '');
+              set('serviceId', '');
             }}
             options={toOptions(options.centers, '—')}
             disabled={saving}
@@ -126,7 +153,7 @@ function NewAppointmentModal({ onClose, onCreated }) {
             label={t('admin.appointments.form.therapist')}
             as="select"
             value={form.therapistId}
-            onChange={(value) => set('therapistId', value)}
+            onChange={changeTherapist}
             options={toOptions(therapists, '—')}
             disabled={saving}
           />
@@ -136,7 +163,7 @@ function NewAppointmentModal({ onClose, onCreated }) {
             required
             value={form.serviceId}
             onChange={(value) => set('serviceId', value)}
-            options={toOptions(options.services, '—')}
+            options={toOptions(services, '—')}
             disabled={saving}
           />
           <FormField

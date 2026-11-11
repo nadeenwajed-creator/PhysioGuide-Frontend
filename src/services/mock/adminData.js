@@ -63,8 +63,8 @@ const state = {
     { id: 'PAT-1003', name: 'Mohammed Saleh', email: 'mohammed@example.com', age: 42, city: 'Dammam', appointments: 5, lastVisit: '2026-09-25', status: 'inactive' },
   ],
   therapists: [
-    { id: 'TH-7482', license: 'LIC-PH-7482', name: 'Dr. Lina Haddad', email: 'lina@example.com', specialty: 'Sports rehabilitation', centerId: 'CTR-4822', center: 'MotionCare Center', rating: 4.9, reviews: 124, status: 'active' },
-    { id: 'TH-7483', license: 'LIC-PH-7483', name: 'Dr. Karim Nasser', email: 'karim@example.com', specialty: 'Manual therapy', centerId: 'CTR-4821', center: 'Al Noor Rehabilitation', rating: 4.8, reviews: 98, status: 'suspended' },
+    { id: 'TH-7482', license: 'LIC-PH-7482', name: 'Dr. Lina Haddad', email: 'lina@example.com', specialty: 'Sports rehabilitation', centerId: 'CTR-4822', center: 'MotionCare Center', rating: 4.9, reviews: 124, status: 'active', serviceIds: ['SVC-1', 'SVC-4'] },
+    { id: 'TH-7483', license: 'LIC-PH-7483', name: 'Dr. Karim Nasser', email: 'karim@example.com', specialty: 'Manual therapy', centerId: 'CTR-4821', center: 'Al Noor Rehabilitation', rating: 4.8, reviews: 98, status: 'suspended', serviceIds: ['SVC-2'] },
   ],
   appointments: [
     { id: 'PO-4031', patient: 'Ahmed Al-Masri', patientId: 'PAT-1001', center: 'MotionCare Center', centerId: 'CTR-4822', therapist: 'Dr. Lina Haddad', service: 'Knee rehab', datetime: '2026-09-27T08:30', status: 'confirmed' },
@@ -72,10 +72,10 @@ const state = {
     { id: 'PO-4033', patient: 'Mohammed Saleh', patientId: 'PAT-1003', center: 'Healing Hands Clinic', centerId: 'CTR-4823', therapist: 'Dr. Sara Ali', service: 'Sports rehab', datetime: '2026-09-28T14:00', status: 'completed' },
   ],
   services: [
-    { id: 'SVC-1', name: 'Knee rehab' },
-    { id: 'SVC-2', name: 'Manual therapy' },
-    { id: 'SVC-3', name: 'Sports rehab' },
-    { id: 'SVC-4', name: 'Neuro rehab' },
+    { id: 'SVC-1', name: 'Knee rehab', centerId: 'CTR-4822' },
+    { id: 'SVC-2', name: 'Manual therapy', centerId: 'CTR-4821' },
+    { id: 'SVC-3', name: 'Sports rehab', centerId: 'CTR-4823' },
+    { id: 'SVC-4', name: 'Neuro rehab', centerId: 'CTR-4822' },
   ],
   reviews: [
     { id: 'REV-9001', patient: { id: 'PAT-1001', name: 'Ahmed Al-Masri' }, center: { id: 'CTR-4822', name: 'MotionCare Center' }, therapistName: 'Dr. Lina Haddad', rating: 5, comment: 'Excellent treatment and professional care. Highly recommended!', reply: null, isVisible: true, createdAt: daysAgo(2) },
@@ -551,6 +551,7 @@ export const adminMockApi = {
         id: therapist.id,
         name: therapist.name,
         centerId: therapist.centerId,
+        serviceIds: therapist.serviceIds ?? [],
       })),
       services: state.services.map((service) => ({ ...service })),
     };

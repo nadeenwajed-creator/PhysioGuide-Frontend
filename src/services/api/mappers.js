@@ -688,7 +688,8 @@ export function toAdminPatient(item) {
     city: label(item?.city),
     appointments: num(item?.appointments ?? item?.appointmentCount),
     lastVisit: item?.lastVisit ?? null,
-    status: lower(item?.status, 'active'),
+    // Falls back to the account flag when the payload carries only isActive.
+    status: lower(item?.status, item?.isActive === false ? 'suspended' : 'active'),
   };
 }
 
@@ -811,6 +812,11 @@ const optionList = (value) =>
           id: String(item?.id ?? item?.value ?? index),
           name: label(item),
           ...(item?.centerId != null ? { centerId: String(item.centerId) } : {}),
+          // Therapists carry the services they provide, so the appointment forms
+          // can narrow the service select to the chosen therapist's offer.
+          ...(Array.isArray(item?.serviceIds)
+            ? { serviceIds: item.serviceIds.map((id) => String(id)) }
+            : {}),
         }
   );
 
