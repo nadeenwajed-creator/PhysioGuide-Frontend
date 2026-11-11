@@ -914,6 +914,7 @@ export function toAdminSettings(body) {
       name: label(profile?.fullName ?? profile?.adminFullName ?? profile?.name),
       email: label(profile?.email),
       phone: label(profile?.phone ?? profile?.phoneNumber),
+      imageUrl: label(profile?.profileImageUrl ?? profile?.imageUrl),
       role: label(profile?.role),
       // An active account is the only verification signal the API exposes.
       verified: profile?.verified === true || profile?.isActive === true,

@@ -51,6 +51,8 @@ function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [logout, setLogout] = useState(false);
+  // Photo stored on the admin account; the generated face is only a fallback.
+  const [profileImage, setProfileImage] = useState('');
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -73,9 +75,9 @@ function AdminLayout() {
 
   const user = {
     name: session?.name || 'Admin',
-    // Deterministic face from initials + email domain: unique per admin and
-    // stable across reloads.
-    avatar: personFace(session?.name || 'Admin', session?.email),
+    // The uploaded photo wins; without one the deterministic face from
+    // initials + email domain keeps the header and sidebar unique.
+    avatar: profileImage || personFace(session?.name || 'Admin', session?.email),
   };
 
   const results = search.trim()
@@ -114,6 +116,16 @@ function AdminLayout() {
         })
         .catch(() => {
           // A transient failure keeps the last list; focus and push will retry.
+        });
+
+      // Same request as the settings page: the header avatar follows the
+      // account photo instead of always showing the generated face.
+      callAdmin('getAdminSettings')
+        .then((result) => {
+          if (live) setProfileImage(result?.profile?.imageUrl || '');
+        })
+        .catch(() => {
+          // Keep the last known photo when settings cannot be read.
         });
     };
     load();
@@ -218,7 +230,9 @@ function AdminLayout() {
         />
         <div className="center-layout__column">
           <main id="admin-content" className="center-page" tabIndex={-1}>
-            <Outlet />
+            {/* The settings page reports a fresh photo so the header updates
+                without waiting for the next navigation. */}
+            <Outlet context={{ setProfileImage }} />
           </main>
         </div>
       </div>

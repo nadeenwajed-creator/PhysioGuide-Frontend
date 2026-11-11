@@ -219,6 +219,8 @@ const ar = {
   'admin.settingsPage.verified': 'موثّق',
   'admin.settingsPage.edit': 'تعديل',
   'admin.settingsPage.editProfileTitle': 'تعديل الملف الشخصي',
+  'admin.settingsPage.changePhoto': 'تغيير صورة الملف الشخصي',
+  'admin.settingsPage.photoUpdated': 'تم تحديث صورة الملف الشخصي.',
   'admin.settingsPage.security': 'الأمان وتسجيل الدخول',
   'admin.settingsPage.protectedTitle': 'حسابك محمي',
   'admin.settingsPage.protectedHint': 'تم تفعيل المصادقة الثنائية',

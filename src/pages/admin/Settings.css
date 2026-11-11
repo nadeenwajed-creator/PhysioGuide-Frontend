@@ -88,9 +88,64 @@
 }
 
 /* The shared avatar tops out at 64px; the profile portrait is larger. */
+.admin-profile__avatar {
+  position: relative;
+  display: inline-flex;
+}
+
 .admin-profile__avatar .pg-avatar {
   inline-size: 96px;
   block-size: 96px;
+}
+
+/* Camera badge: the photo is changed in place on the portrait itself. */
+.admin-profile__photo-btn {
+  position: absolute;
+  inset-block-end: 2px;
+  inset-inline-end: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 30px;
+  block-size: 30px;
+  padding: 0;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.admin-profile__photo-btn:hover:not(:disabled),
+.admin-profile__photo-btn:focus-visible {
+  background: var(--color-primary-light);
+  transform: scale(1.06);
+}
+
+.admin-profile__photo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-profile__photo-input {
+  display: none;
+}
+
+.admin-profile__photo-spinner {
+  inline-size: 12px;
+  block-size: 12px;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-block-start-color: #fff;
+  border-radius: 50%;
+  animation: admin-photo-spin 0.7s linear infinite;
+}
+
+@keyframes admin-photo-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .admin-profile__name {

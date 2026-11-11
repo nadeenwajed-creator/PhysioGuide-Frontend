@@ -519,6 +519,10 @@ export const adminOperations = {
       data: {
         ...(values?.profile?.name ? { adminFullName: values.profile.name } : {}),
         ...(values?.profile?.phone ? { contactPhone: values.profile.phone } : {}),
+        // The photo is uploaded first, then saved with the rest of the profile.
+        ...(values?.profile?.imageUrl
+          ? { profileImageUrl: values.profile.imageUrl }
+          : {}),
         // UI toggles travel as the four generic flags the API stores.
         notifications: values?.notifications
           ? map.adminPreferencesRequest(values.notifications)
@@ -526,6 +530,16 @@ export const adminOperations = {
       },
     }),
     response: resolved(map.toAdminSettings),
+  },
+
+  // Mirrors the patient/centre upload contract: multipart "file" in, { url } out.
+  prepareAdminImage: {
+    request: (_actor, file) => {
+      const form = new FormData();
+      form.append('file', file, file?.name || 'upload');
+      return { method: 'POST', path: `${ADMIN}/settings/image`, data: form };
+    },
+    response: (body) => resolveAssets(body?.url || ''),
   },
 
   // The navbar bell: the full list plus the preferences that filter it.

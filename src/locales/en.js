@@ -219,6 +219,8 @@ const en = {
   'admin.settingsPage.verified': 'Verified',
   'admin.settingsPage.edit': 'Edit',
   'admin.settingsPage.editProfileTitle': 'Edit profile',
+  'admin.settingsPage.changePhoto': 'Change profile photo',
+  'admin.settingsPage.photoUpdated': 'Profile photo updated.',
   'admin.settingsPage.security': 'Security & sign-in',
   'admin.settingsPage.protectedTitle': 'Your account is protected',
   'admin.settingsPage.protectedHint': 'Two-factor authentication is enabled',

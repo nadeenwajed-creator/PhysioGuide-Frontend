@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faCamera,
   faCircleCheck,
   faFloppyDisk,
   faLock,
@@ -175,10 +177,14 @@ function AdminSettings() {
   const { t, language } = useLanguage();
   const state = useAdminQuery('getAdminSettings');
   const [saving, setSaving] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [notifications, setNotifications] = useState(null);
   const [notice, setNotice] = useState(null);
+  const photoInput = useRef(null);
+  // The admin layout owns the header/sidebar avatar; a saved photo updates it.
+  const { setProfileImage } = useOutletContext() || {};
   // Reading the clock during render is a side effect; snapshot it once.
   const [now] = useState(() => Date.now());
 
@@ -207,6 +213,29 @@ function AdminSettings() {
       setNotice({ error: true, text: errorText(t, failure) });
     } finally {
       setSaving(false);
+    }
+  }
+
+  // The photo is applied on its own instead of joining the notifications form,
+  // so it uploads and saves in one go and the new portrait shows immediately.
+  async function changePhoto(event) {
+    const file = event.target.files?.[0];
+    // Reset the input so picking the same file again still triggers change.
+    event.target.value = '';
+    if (!file) return;
+
+    setPhotoBusy(true);
+    setNotice(null);
+    try {
+      const imageUrl = await callAdmin('prepareAdminImage', file);
+      await callAdmin('saveAdminSettings', { profile: { imageUrl } });
+      setProfileImage?.(imageUrl);
+      setNotice({ error: false, text: t('admin.settingsPage.photoUpdated') });
+      state.reload();
+    } catch (failure) {
+      setNotice({ error: true, text: errorText(t, failure) });
+    } finally {
+      setPhotoBusy(false);
     }
   }
 
@@ -289,6 +318,28 @@ function AdminSettings() {
                       name={profile.name}
                       email={profile.email}
                       size="lg"
+                    />
+                    <button
+                      type="button"
+                      className="admin-profile__photo-btn"
+                      aria-label={t('admin.settingsPage.changePhoto')}
+                      title={t('admin.settingsPage.changePhoto')}
+                      disabled={!data || photoBusy || saving}
+                      onClick={() => photoInput.current?.click()}
+                    >
+                      {photoBusy ? (
+                        <span className="admin-profile__photo-spinner" aria-hidden="true" />
+                      ) : (
+                        <FontAwesomeIcon icon={faCamera} aria-hidden="true" />
+                      )}
+                    </button>
+                    <input
+                      ref={photoInput}
+                      className="admin-profile__photo-input"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={!data || photoBusy || saving}
+                      onChange={changePhoto}
                     />
                   </span>
                   <strong className="admin-profile__name">{profile.name || '—'}</strong>
