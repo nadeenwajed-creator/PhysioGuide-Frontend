@@ -162,6 +162,26 @@
   font-size: 13px;
 }
 
+/* Centre logo in the centres table, matching the detail page's fallback. */
+.admin-center-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--color-bg-soft);
+  color: var(--color-text-secondary);
+}
+
+.admin-center-thumb img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
 /* Rating cell: shared stars left of the value and review count. */
 .admin-table__rating {
   display: inline-flex;
@@ -208,6 +228,11 @@
 .admin-link {
   color: var(--color-primary);
   text-decoration: none;
+  min-block-size: 44px;
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 10px;
+  border: 1px solid black;
 }
 
 /* Loading / error block shared by every admin query state. */

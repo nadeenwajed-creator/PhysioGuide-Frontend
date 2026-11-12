@@ -586,6 +586,8 @@ export function toAdminCenterRow(item) {
   return {
     id: String(item?.id ?? item?.centerId ?? ''),
     name: label(item?.name ?? item?.centerName),
+    // The row shows the centre logo; the detail page uses the same source.
+    imageUrl: label(item?.profileImageUrl ?? item?.imageUrl),
     manager: label(item?.manager ?? item?.managerName),
     location: label(item?.location ?? item?.city),
     therapists: num(item?.therapists ?? item?.activeTherapists),

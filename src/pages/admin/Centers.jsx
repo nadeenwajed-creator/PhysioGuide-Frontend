@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import { faBuilding, faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
@@ -12,6 +14,21 @@ import { CenterEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import './ListPages.css';
+
+// The same logo the center detail page shows, with its building fallback when
+// the center has no photo or the URL stops loading.
+function CenterThumb({ src }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <span className="admin-center-thumb">
+      {src && !failed ? (
+        <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} />
+      ) : (
+        <FontAwesomeIcon icon={faBuilding} aria-hidden="true" />
+      )}
+    </span>
+  );
+}
 
 function AdminCenters() {
   const { t, language } = useLanguage();
@@ -117,9 +134,12 @@ function AdminCenters() {
               {data?.items?.map((center) => (
                 <tr key={center.id}>
                   <td>
-                    <div className="admin-table__primary">
-                      <strong>{center.name}</strong>
-                      <span>{center.id}</span>
+                    <div className="admin-table__person">
+                      <CenterThumb src={center.imageUrl} />
+                      <div className="admin-table__primary">
+                        <strong>{center.name}</strong>
+                        <span>{center.id}</span>
+                      </div>
                     </div>
                   </td>
                   <td>{center.location}</td>
@@ -129,9 +149,15 @@ function AdminCenters() {
                   </td>
                   <td>
                     <div className="admin-table__actions">
-                      <Link to={`/admin/centers/${center.id}`} className="admin-link">
+                      {/* Same control as the center patient list: a small
+                          outline button that opens the record. */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/admin/centers/${center.id}`)}
+                      >
                         {t('center.view')}
-                      </Link>
+                      </Button>
                       <RowActions
                         label={t('center.actions')}
                         items={[
