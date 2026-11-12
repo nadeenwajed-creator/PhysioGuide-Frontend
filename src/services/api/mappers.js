@@ -158,7 +158,7 @@ export function toDiscovery(centers) {
         about: bilingual(therapist.about, therapist.bioAr),
       })),
     })),
-    // Favourites have no backend endpoint yet.
+    // Filled in by useDiscovery from /api/patient/saved-centers.
     favoriteIds: [],
   };
 }
@@ -594,6 +594,7 @@ export function toAdminCenters(body) {
     items: list.items.map(toAdminCenterRow),
     filters: {
       cities: labels(list.filters?.cities),
+      // Specialty names are already unique in the API payload.
       specialties: labels(list.filters?.specialties),
     },
   };

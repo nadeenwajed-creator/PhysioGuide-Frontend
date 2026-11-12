@@ -223,6 +223,7 @@ export const adminOperations = {
       query: {
         search: params?.search,
         status: params?.status,
+        // The API filters a center by the specialty name of its therapists.
         specialty: params?.specialty,
         city: params?.city,
         page: params?.page,
@@ -666,6 +667,25 @@ export const centerOperations = {
     response: resolved(map.toDiscovery),
   },
 
+  // Favourites are their own rows, so they load next to the discovery list
+  // and the hearts/tabs stay in sync with what the server stored.
+  getPatientSavedCenters: {
+    request: () => ({ method: 'GET', path: `${PATIENT}/saved-centers` }),
+    response: resolved((body) =>
+      (Array.isArray(body) ? body : [])
+        .map((row) => String(row?.centerId ?? row?.id ?? ''))
+        .filter(Boolean)
+    ),
+  },
+
+  setPatientFavorite: {
+    request: (_actor, { centerId, saved } = {}) => ({
+      method: saved ? 'PUT' : 'DELETE',
+      path: `${PATIENT}/saved-centers/${encodeURIComponent(centerId)}`,
+    }),
+    response: resolved((body) => body),
+  },
+
   getPatientAppointments: {
     request: () => ({ method: 'GET', path: `${PATIENT}/appointments` }),
     response: resolved(map.toAppointments),
@@ -814,14 +834,22 @@ export const centerOperations = {
         });
       }
       if (values?.add) {
-        const form = new FormData();
-        form.append('imageUrl', values.add);
-        await client.post(`${CENTER_WORKSPACE}/images`, { data: form });
+        // The endpoint stores one gallery photo per call, so a multi-file
+        // upload walks the URLs it prepared instead of joining them.
+        const urls = Array.isArray(values.add) ? values.add : [values.add];
+        for (const url of urls) {
+          if (!url) continue;
+          const form = new FormData();
+          form.append('imageUrl', url);
+          await client.post(`${CENTER_WORKSPACE}/images`, { data: form });
+        }
       }
-      // Removing a gallery image needs its id, which the workspace only exposes
-      // as a URL, so a removal cannot be expressed against the API yet.
-      if (values?.remove) throw new ServiceError('unavailable');
-      if (!values?.imageUrl && !values?.add) throw new ServiceError('image');
+      // The workspace shows gallery photos as URLs, so removal addresses the
+      // photo by its URL and the server scopes it to this centre.
+      if (values?.remove) {
+        await client.delete(`${CENTER_WORKSPACE}/images`, { query: { url: values.remove } });
+      }
+      if (!values?.imageUrl && !values?.add && !values?.remove) throw new ServiceError('image');
       return undefined;
     },
   },
@@ -836,6 +864,8 @@ export const centerOperations = {
           descriptionArabic: values?.aboutAr,
           address: values?.address,
           city: values?.city,
+          email: values?.email,
+          phoneNumber: values?.phone,
           profileImageUrl: values?.imageUrl,
           websiteUrl: values?.websiteUrl,
           latitude: values?.coordinates?.latitude,
@@ -974,6 +1004,8 @@ export const centerOperations = {
         price: Number(values?.price) || 0,
         durationMinutes: Number(values?.duration) || 30,
         specialtyId,
+        // The service card shows this photo to the centre and to patients.
+        imageUrl: values?.imageUrl,
         isActive: values?.status !== 'inactive',
       };
       const body = id
@@ -1142,7 +1174,6 @@ const notImplemented = () => {
 };
 
 for (const operation of [
-  'setPatientFavorite',
   'saveAppointment',
 ]) {
   centerOperations[operation] = { execute: notImplemented };

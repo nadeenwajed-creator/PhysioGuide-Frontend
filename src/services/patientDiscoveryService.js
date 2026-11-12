@@ -1,5 +1,6 @@
 import { callCenter, subscribeCenter } from './centerPortalService.js';
 export const getPatientDiscovery = actor => callCenter('getPatientDiscovery', actor);
+export const getPatientSavedCenters = actor => callCenter('getPatientSavedCenters', actor);
 export const setPatientFavorite = (actor, centerId, saved) => callCenter('setPatientFavorite', actor, {
   centerId,
   saved

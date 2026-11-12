@@ -8,12 +8,22 @@ import ClinicLocationEditor from '../ClinicLocationEditor.jsx';
 import useUnsavedChanges from '../useUnsavedChanges.js';
 import { validCoordinates, hasSavedCenterLocation } from '../../../services/centerLocationService.js';
 
-function readFields(center) { return {
-    name: center.name?.en || '', nameAr: center.name?.ar || '', email: center.email || '', phone: center.phone || '',
-    address: center.address?.en || '', addressAr: center.address?.ar || '',
-    about: center.about?.en || '', aboutAr: center.about?.ar || '',
+// The API sends one string per field (with the Arabic copy on nameAr/aboutAr),
+// while the mock keeps bilingual objects, so both shapes fill the form.
+function readFields(center) {
+  const text = value => (typeof value === 'string' ? value : '');
+  return {
+    name: center.name?.en || center.nameEn || text(center.name),
+    nameAr: center.name?.ar || center.nameAr || '',
+    email: center.email || '',
+    phone: center.phone || '',
+    address: center.address?.en || text(center.address),
+    addressAr: center.address?.ar || center.addressAr || '',
+    about: center.about?.en || center.aboutEn || text(center.about),
+    aboutAr: center.about?.ar || center.aboutAr || '',
     hours: center.hours ? { ...center.hours } : { weekStart: '', weekEnd: '', fridayStart: '', fridayEnd: '' },
-  }; }
+  };
+}
 
 export default function CenterInformationForm() {
   const { data: { center }, actor, tr, language } = useCenter();
