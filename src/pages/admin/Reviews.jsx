@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faFileAlt, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
@@ -156,9 +157,17 @@ function AdminReviews() {
           {(data?.items ?? []).map((review) => (
             <div key={review.id} className="admin-review-card">
               <div className="admin-review-card__header">
-                <div>
-                  <strong>{review.name}</strong>
-                  {review.context && <span>{review.context}</span>}
+                <div className="admin-review-card__person">
+                  <Avatar
+                    src={review.imageUrl}
+                    name={review.name}
+                    seed={review.patientId}
+                    size="sm"
+                  />
+                  <div className="admin-review-card__identity">
+                    <strong>{review.name}</strong>
+                    {review.context && <span>{review.context}</span>}
+                  </div>
                 </div>
                 <span className="admin-review-card__rating">
                   <RatingStars rating={review.rating} showValue />

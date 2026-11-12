@@ -279,10 +279,16 @@ export const adminOperations = {
       method: 'GET',
       path: `${ADMIN}/patients`,
       query: {
-        search: params?.search,
-        status: params?.status,
-        city: params?.city,
-        sort: params?.sort,
+        search: params?.search || undefined,
+        // The API filters on the account flag, not on the status word.
+        isActive:
+          params?.status === 'active'
+            ? true
+            : params?.status === 'suspended'
+              ? false
+              : undefined,
+        city: params?.city || undefined,
+        sort: params?.sort || undefined,
         page: params?.page,
         pageSize: params?.pageSize,
       },

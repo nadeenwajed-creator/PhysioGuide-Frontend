@@ -57,6 +57,20 @@
   flex-direction: column;
 }
 
+/* The reviewer's portrait sits beside the name, so this block lays out as a
+   row even though the header stacks its other children. */
+.admin-review-card__header > .admin-review-card__person {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-review-card__identity {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
 .admin-review-card__header span {
   color: var(--color-text-secondary);
 }

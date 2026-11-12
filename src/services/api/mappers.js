@@ -839,6 +839,10 @@ export function toAdminReview(item) {
   return {
     id: String(item?.id ?? item?.reviewId ?? ''),
     name: label(item?.patient ?? item?.patientName ?? item?.name),
+    // The reviewer: id keeps their portrait stable, image is their own photo
+    // when they uploaded one.
+    patientId: String(item?.patient?.id ?? item?.patientId ?? ''),
+    imageUrl: label(item?.patient?.imageUrl ?? item?.patientImage ?? item?.imageUrl),
     context,
     text: label(item?.text ?? item?.comment),
     rating: num(item?.rating, 0),
