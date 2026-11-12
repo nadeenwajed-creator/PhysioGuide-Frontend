@@ -691,6 +691,26 @@ export const centerOperations = {
     response: resolved(map.toAppointments),
   },
 
+  // One review per completed appointment; the server attaches it to the
+  // patient's newest unreviewed visit at that center.
+  createPatientReview: {
+    request: (_actor, { centerId, rating, comment } = {}) => ({
+      method: 'POST',
+      path: `${PATIENT}/reviews`,
+      data: {
+        centerId: Number(centerId),
+        rating: Number(rating),
+        comment: comment ? String(comment).trim() : null,
+      },
+    }),
+    response: resolved((body) => ({
+      id: String(body?.id ?? ''),
+      rating: Number(body?.rating) || 0,
+      comment: body?.comment || '',
+      createdAt: body?.createdAt || '',
+    })),
+  },
+
   submitAssessment: {
     request: (_actor, answers) => ({
       method: 'POST',
@@ -863,6 +883,7 @@ export const centerOperations = {
           descriptionEnglish: values?.about,
           descriptionArabic: values?.aboutAr,
           address: values?.address,
+          addressArabic: values?.addressAr,
           city: values?.city,
           email: values?.email,
           phoneNumber: values?.phone,

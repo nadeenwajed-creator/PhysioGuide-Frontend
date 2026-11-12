@@ -105,9 +105,8 @@ export function toProfile(profile) {
     phone: profile?.phone || '',
     imageUrl: profile?.imageUrl || '',
     dateOfBirth: profile?.dateOfBirth || '',
-    // The backend only stores male/female, so anything else is left unset.
-    gender: ['male', 'female'].includes(gender) ? gender : '',
-    city: '',
+    gender: ['male', 'female', 'other'].includes(gender) ? gender : '',
+    city: profile?.city || '',
   };
 }
 
@@ -118,8 +117,9 @@ export function profileRequest(values) {
   };
   if (values?.phone != null) body.phoneNumber = String(values.phone).trim();
   if (values?.imageUrl) body.profileImageUrl = values.imageUrl;
+  if (values?.city != null) body.city = String(values.city).trim();
   const gender = String(values?.gender || '').toLowerCase();
-  if (['male', 'female'].includes(gender)) body.gender = gender;
+  if (['male', 'female', 'other'].includes(gender)) body.gender = gender;
   return body;
 }
 
@@ -298,7 +298,7 @@ function toCenterRecord(center) {
     nameEn: rendered.name ?? '',
     aboutAr: center.descriptionArabic ?? '',
     aboutEn: rendered.about ?? '',
-    addressAr: center.address ?? '',
+    addressAr: center.addressArabic ?? rendered.addressArabic ?? '',
     email: center.email ?? rendered.email,
     phone: center.phone ?? rendered.phone,
     approvalStatus: center.approvalStatus,

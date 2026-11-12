@@ -19,6 +19,8 @@ function readFields(center) {
     phone: center.phone || '',
     address: center.address?.en || text(center.address),
     addressAr: center.address?.ar || center.addressAr || '',
+    city: center.city || '',
+    websiteUrl: center.websiteUrl || '',
     about: center.about?.en || center.aboutEn || text(center.about),
     aboutAr: center.about?.ar || center.aboutAr || '',
     hours: center.hours ? { ...center.hours } : { weekStart: '', weekEnd: '', fridayStart: '', fridayEnd: '' },
@@ -40,7 +42,9 @@ export default function CenterInformationForm() {
     if (!busy && Object.keys(fields).length) formRef.current?.querySelector('[aria-invalid="true"]')?.focus();
   }, [fields, busy]);
   const disabled = busy || locationBusy;
-  const set = (key, value) => { if (key === 'address' || key === 'addressAr') { setConfirmed(false); setLocationTouched(true); } setValues(current => ({ ...current, [key]: value })); setFeedback(null); };
+  //  Only the primary address stands for the map pin; the Arabic label is a
+  //  translation of it and does not need a new location confirmation.
+  const set = (key, value) => { if (key === 'address') { setConfirmed(false); setLocationTouched(true); } setValues(current => ({ ...current, [key]: value })); setFeedback(null); };
   const field = (key, props = {}) => <FormField id={`information-${key}`} label={tr(key)} value={values[key]} onChange={value => set(key, value)} disabled={disabled} error={fields[key] && tr(`error.${fields[key]}`)} {...props} />;
   const serialized = JSON.stringify({ values, coordinates, confirmed });
   const [saved, setSaved] = useState(serialized);
@@ -58,13 +62,23 @@ export default function CenterInformationForm() {
     setFields({}); setFeedback(null);
     const invalid = {};
     const submitted = { ...values };
+    if (!values.name.trim()) invalid.name = 'required';
+    if (!values.email.trim()) invalid.email = 'required';
+    else if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) invalid.email = 'email';
+    if (!values.phone.trim()) invalid.phone = 'required';
+    if (!values.city.trim()) invalid.city = 'required';
+    if (!values.address.trim()) invalid.address = 'required';
     if (locationTouched) {
       if (!validCoordinates(coordinates)) invalid.coordinates = 'coordinates';
       else if (!confirmed) invalid.coordinates = 'confirmLocation';
       else { submitted.coordinates = coordinates; submitted.locationConfirmed = true; }
     }
     if (!Object.values(submitted.hours).some(Boolean)) submitted.hours = null;
-    if (Object.keys(invalid).length) { setFields(invalid); setFeedback({ error: true, text: tr(`error.${invalid.coordinates}`) }); return; }
+    if (Object.keys(invalid).length) {
+      setFields(invalid);
+      setFeedback({ error: true, text: tr(invalid.coordinates ? `error.${invalid.coordinates}` : 'error.validation') });
+      return;
+    }
     setBusy(true);
     try {
       await saveCenterInformation(actor, submitted);
@@ -77,6 +91,7 @@ export default function CenterInformationForm() {
     <div className="center-form-grid">
       {field('name', { required: true, dir: 'ltr' })}{field('nameAr', { dir: 'rtl' })}
       {field('email', { type: 'email', required: true, dir: 'ltr' })}{field('phone', { type: 'tel', required: true, dir: 'ltr' })}
+      {field('city', { required: true, dir: 'ltr' })}{field('websiteUrl', { type: 'url', dir: 'ltr' })}
       {field('about', { as: 'textarea', rows: 3, dir: 'ltr' })}{field('aboutAr', { as: 'textarea', rows: 3, dir: 'rtl' })}
     </div>
     <fieldset className="remaining-fieldset"><legend>{tr('location')}</legend>
