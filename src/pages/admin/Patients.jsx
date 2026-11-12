@@ -10,46 +10,12 @@ import { callAdmin } from '../../services/adminService.js';
 import RowActions from './RowActions.jsx';
 import { PatientEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
-import { QueryState, AdminPagination, RecordDialog } from './AdminUI.jsx';
+import { QueryState, AdminPagination } from './AdminUI.jsx';
+import { PatientViewDialog } from './AdminViewDialogs.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
 import './ListPages.css';
 
 const patientStatuses = ['active', 'suspended'];
-
-// The rows of the view dialog opened from a list row.
-const patientRows = (patient, t, language) => [
-  { label: t('admin.records.id'), value: patient.id },
-  { label: t('admin.patients.patient'), value: patient.name },
-  { label: t('admin.records.email'), value: patient.email },
-  { label: t('admin.patients.age'), value: patient.age },
-  { label: t('admin.patients.city'), value: patient.city },
-  { label: t('admin.patients.appointments'), value: patient.appointments },
-  {
-    label: t('admin.patients.lastVisit'),
-    value: patient.lastVisit ? formatDate(patient.lastVisit, language) : '',
-  },
-  { label: t('admin.records.status'), value: t(`admin.status.${patient.status}`) },
-];
-
-const genderLabel = (gender, t) =>
-  gender === 'male'
-    ? t('admin.records.genderMale')
-    : gender === 'female'
-      ? t('admin.records.genderFemale')
-      : gender || '';
-
-// An activity link opens a patient fetched by id, so the dialog shows the
-// stored profile fields rather than the summary columns of a list row.
-const patientProfileRows = (patient, t) => [
-  { label: t('admin.records.id'), value: patient.id },
-  { label: t('admin.patients.patient'), value: patient.name },
-  { label: t('admin.records.email'), value: patient.email },
-  { label: t('admin.records.phone'), value: patient.phone },
-  { label: t('admin.records.city'), value: patient.city },
-  { label: t('admin.records.gender'), value: genderLabel(patient.gender, t) },
-  { label: t('admin.records.dateOfBirth'), value: patient.dateOfBirth },
-  { label: t('admin.records.status'), value: t(`admin.status.${patient.status}`) },
-];
 
 function AdminPatients() {
   const { t, language } = useLanguage();
@@ -254,18 +220,20 @@ function AdminPatients() {
       </div>
 
       {viewTarget && (
-        <RecordDialog
-          title={viewTarget.name}
+        <PatientViewDialog
+          patient={viewTarget}
           onClose={() => setViewTarget(null)}
-          rows={patientRows(viewTarget, t, language)}
+          onEdit={() => {
+            setViewTarget(null);
+            setEditId(viewTarget.id);
+          }}
         />
       )}
 
       {linkedId && linkedPatient && (
-        <RecordDialog
-          title={linkedPatient.name}
+        <PatientViewDialog
+          patient={linkedPatient}
           onClose={() => setSearchParams({}, { replace: true })}
-          rows={patientProfileRows(linkedPatient, t)}
         />
       )}
 

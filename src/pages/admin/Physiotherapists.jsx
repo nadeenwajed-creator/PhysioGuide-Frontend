@@ -12,7 +12,8 @@ import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
-import { QueryState, AdminPagination, RecordDialog } from './AdminUI.jsx';
+import { QueryState, AdminPagination } from './AdminUI.jsx';
+import { TherapistViewDialog } from './AdminViewDialogs.jsx';
 import RowActions from './RowActions.jsx';
 import { TherapistEditDialog } from './AdminRecordDialogs.jsx';
 import './ListPages.css';
@@ -20,30 +21,6 @@ import './ListPages.css';
 // Therapists carry the account's IsActive flag only, so the two statuses the
 // API can filter and store are Active and Suspended.
 const therapistStatuses = ['active', 'suspended'];
-
-// The rows of the view dialog opened from a list row.
-const therapistRows = (therapist, t) => [
-  { label: t('admin.records.id'), value: therapist.id },
-  { label: t('admin.therapists.name'), value: therapist.name },
-  { label: t('admin.records.email'), value: therapist.email },
-  { label: t('admin.records.specialty'), value: therapist.specialty },
-  { label: t('admin.records.center'), value: therapist.center },
-  { label: t('admin.records.rating'), value: therapist.rating },
-  { label: t('admin.records.status'), value: t(`admin.status.${therapist.status}`) },
-];
-
-// An activity link opens a therapist fetched by id, so the dialog shows the
-// stored profile fields rather than the summary columns of a list row.
-const therapistProfileRows = (therapist, t) => [
-  { label: t('admin.records.id'), value: therapist.id },
-  { label: t('admin.therapists.name'), value: therapist.name },
-  { label: t('admin.records.email'), value: therapist.email },
-  { label: t('admin.records.phone'), value: therapist.phone },
-  { label: t('admin.records.specialty'), value: therapist.specialty },
-  { label: t('admin.records.center'), value: therapist.center },
-  { label: t('admin.records.years'), value: therapist.yearsOfExperience },
-  { label: t('admin.records.status'), value: t(`admin.status.${therapist.status}`) },
-];
 
 function AddTherapistModal({ centers, specialties, onClose, onAdded }) {
   const { t } = useLanguage();
@@ -390,18 +367,13 @@ function AdminPhysiotherapists() {
       </div>
 
       {viewTarget && (
-        <RecordDialog
-          title={viewTarget.name}
-          onClose={() => setViewTarget(null)}
-          rows={therapistRows(viewTarget, t)}
-        />
+        <TherapistViewDialog therapist={viewTarget} onClose={() => setViewTarget(null)} />
       )}
 
       {linkedId && linkedTherapist && (
-        <RecordDialog
-          title={linkedTherapist.name}
+        <TherapistViewDialog
+          therapist={linkedTherapist}
           onClose={() => setSearchParams({}, { replace: true })}
-          rows={therapistProfileRows(linkedTherapist, t)}
         />
       )}
 

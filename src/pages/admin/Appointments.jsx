@@ -11,7 +11,8 @@ import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { callAdmin } from '../../services/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
-import { QueryState, AdminPagination, RecordDialog } from './AdminUI.jsx';
+import { QueryState, AdminPagination } from './AdminUI.jsx';
+import { AppointmentViewDialog } from './AdminViewDialogs.jsx';
 import RowActions from './RowActions.jsx';
 import { AppointmentEditDialog } from './AdminRecordDialogs.jsx';
 import './ListPages.css';
@@ -386,24 +387,9 @@ function AdminAppointments() {
       </div>
 
       {viewTarget && (
-        <RecordDialog
-          title={`${t('admin.appointments.id')} ${viewTarget.id}`}
+        <AppointmentViewDialog
+          appointment={viewTarget}
           onClose={() => setViewTarget(null)}
-          rows={[
-            { label: t('admin.appointments.id'), value: viewTarget.id },
-            { label: t('admin.appointments.patient'), value: viewTarget.patient },
-            { label: t('admin.appointments.center'), value: viewTarget.center },
-            { label: t('admin.appointments.therapist'), value: viewTarget.therapist },
-            { label: t('admin.appointments.service'), value: viewTarget.service },
-            {
-              label: t('admin.records.dateTime'),
-              value: formatDateTime(viewTarget.datetime),
-            },
-            {
-              label: t('admin.records.status'),
-              value: t(`admin.status.${viewTarget.status}`),
-            },
-          ]}
         />
       )}
 

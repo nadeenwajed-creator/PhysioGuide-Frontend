@@ -1,0 +1,64 @@
+/* Read-only record views behind the admin "View" row action. */
+.admin-view {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.admin-view__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-block-end: 18px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.admin-view__who {
+  min-inline-size: 0;
+}
+
+.admin-view__who h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.admin-view__who p {
+  margin: 0 0 2px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.admin-view__muted {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.admin-view__meta {
+  margin-inline-start: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.admin-view__id {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.admin-view__section h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.admin-view__state {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}

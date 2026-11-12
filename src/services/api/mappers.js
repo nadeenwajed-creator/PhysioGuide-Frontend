@@ -744,6 +744,10 @@ export function toAdminPhysiotherapists(body) {
 export function toAdminAppointment(item) {
   return {
     id: String(item?.id ?? item?.appointmentId ?? ''),
+    patientId: String(item?.patient?.id ?? item?.patientId ?? ''),
+    centerId: String(item?.center?.id ?? item?.centerId ?? ''),
+    therapistId: String(item?.therapist?.id ?? item?.therapistId ?? ''),
+    serviceId: String(item?.service?.id ?? item?.serviceId ?? ''),
     patient: label(item?.patient ?? item?.patientName),
     // The patient reference carries the portrait the row shows beside the name.
     patientImage: label(item?.patient?.profileImageUrl ?? item?.patientImage),
@@ -753,6 +757,11 @@ export function toAdminAppointment(item) {
     // The API reports the slot as startDateTime; older payloads used datetime.
     datetime: item?.datetime ?? item?.startDateTime ?? item?.date ?? null,
     endDateTime: item?.endDateTime ?? null,
+    price: item?.price == null || item?.price === '' ? null : num(item.price),
+    notes: label(item?.patientNotes ?? item?.notes),
+    cancellationReason: label(item?.cancellationReason),
+    rejectionReason: label(item?.rejectionReason),
+    createdAt: item?.createdAt ?? null,
     status: lower(item?.status, 'pending'),
   };
 }

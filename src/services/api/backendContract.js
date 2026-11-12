@@ -423,6 +423,8 @@ export const adminOperations = {
         search: params?.search,
         status: params?.status,
         centerId: params?.center,
+        // One patient's own history, used by the patient view dialog.
+        patientId: params?.patientId,
         // One exact day rather than a range: the API matches the appointment's
         // start date against it.
         date: params?.date,
