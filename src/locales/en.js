@@ -104,6 +104,7 @@ const en = {
   'admin.activity.title': 'Activity Log',
   'admin.activity.subtitle': 'Every center, physiotherapist, patient and review event on the platform, newest first.',
   'admin.activity.event': 'Activity',
+  'admin.activity.record': 'Record',
   'admin.activity.time': 'When',
   'admin.activity.total': '{total} activities',
   // Admin shared

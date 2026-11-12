@@ -279,7 +279,11 @@ function AdminDashboard() {
                     <span className="admin-activity__text">
                       {localized(a.text, language)}
                     </span>
+                    {a.subject ? (
+                      <span className="admin-activity__subject">{a.subject}</span>
+                    ) : null}
                     <span className="admin-activity__time">
+                      {a.detail ? `${a.detail} · ` : ''}
                       {activityTime(a.at)}
                     </span>
                   </>

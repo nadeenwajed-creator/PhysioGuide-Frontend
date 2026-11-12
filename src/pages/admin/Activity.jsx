@@ -45,6 +45,7 @@ function AdminActivity() {
             <thead>
               <tr>
                 <th>{t('admin.activity.event')}</th>
+                <th>{t('admin.activity.record')}</th>
                 <th>{t('admin.activity.time')}</th>
               </tr>
             </thead>
@@ -61,6 +62,15 @@ function AdminActivity() {
                       ) : (
                         localized(entry.text, language)
                       )}
+                    </td>
+                    <td>
+                      <div className="admin-activity__record">
+                        <strong>{entry.subject || '—'}</strong>
+                        <span>
+                          {entry.detail ? `${entry.detail} · ` : ''}
+                          {entry.relatedId ? `#${entry.relatedId}` : ''}
+                        </span>
+                      </div>
                     </td>
                     <td>{when(entry.at)}</td>
                   </tr>

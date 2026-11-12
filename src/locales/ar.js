@@ -104,6 +104,7 @@ const ar = {
   'admin.activity.title': 'سجل النشاط',
   'admin.activity.subtitle': 'كل أحداث المراكز والأخصائيين والمرضى والتقييمات، الأحدث أولًا.',
   'admin.activity.event': 'النشاط',
+  'admin.activity.record': 'السجل',
   'admin.activity.time': 'الوقت',
   'admin.activity.total': '{total} نشاط',
   // Admin shared

@@ -537,6 +537,10 @@ const toActivityEvent = (item, index) => {
     relatedId: item?.relatedId == null ? fallback.relatedId : String(item.relatedId),
     text: item?.text ?? '',
     at: item?.at ?? null,
+    // The record the event happened on: its name plus a short context (city
+    // for people and centres, centre for therapists and reviews).
+    subject: label(item?.subject),
+    detail: label(item?.detail),
   };
 };
 

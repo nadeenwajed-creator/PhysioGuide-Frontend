@@ -82,6 +82,24 @@
   text-decoration: underline;
 }
 
+/* The record an activity event happened on: its name, then context and id. */
+.admin-activity__record {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-activity__record strong {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.admin-activity__record span {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  unicode-bidi: plaintext;
+}
+
 .admin-table-wrapper {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
