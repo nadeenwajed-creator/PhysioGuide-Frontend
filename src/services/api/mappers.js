@@ -299,6 +299,12 @@ function toCenterRecord(center) {
     aboutAr: center.descriptionArabic ?? '',
     aboutEn: rendered.about ?? '',
     addressAr: center.addressArabic ?? rendered.addressArabic ?? '',
+    // The map needs a point; the API stores it as separate lat/lng columns.
+    coordinates: rendered.coordinates
+      ?? (rendered.latitude != null && rendered.longitude != null
+        ? { latitude: rendered.latitude, longitude: rendered.longitude }
+        : center.coordinates ?? null),
+    locationConfirmed: rendered.locationConfirmed ?? center.locationConfirmed,
     email: center.email ?? rendered.email,
     phone: center.phone ?? rendered.phone,
     approvalStatus: center.approvalStatus,
