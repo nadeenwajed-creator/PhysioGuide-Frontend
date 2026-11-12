@@ -39,7 +39,7 @@ function AppointmentsTable({
         }] : [];
         return <tr key={appointment.id} data-status={appointment.status}>
         <td className="center-table__identity" data-label={tr('patientId')}><div className="center-identity">
-            <Avatar src={patient?.imageUrl} name={name(patient?.name)} size="sm" />
+            <Avatar src={patient?.imageUrl} name={name(patient?.name)} seed={patient?.id} size="sm" />
             <div>
               <strong>{name(patient?.name)}</strong>
               <small><bdi>{patient?.phone}</bdi></small>

@@ -330,6 +330,7 @@ function AdminAppointments() {
                       <Avatar
                         src={appointment.patientImage}
                         name={appointment.patient}
+                        seed={appointment.patientId}
                         size="sm"
                       />
                       <div className="admin-table__primary">

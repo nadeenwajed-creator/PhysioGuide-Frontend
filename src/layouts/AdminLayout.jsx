@@ -51,8 +51,14 @@ function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [logout, setLogout] = useState(false);
-  // Photo stored on the admin account; the generated face is only a fallback.
-  const [profileImage, setProfileImage] = useState('');
+  // Name and photo as stored on the admin account. The session only carries
+  // what was true at sign-in, so the settings record is what the header and
+  // sidebar show; the generated face is only the fallback for a missing photo.
+  const [account, setAccount] = useState({ name: '', imageUrl: '' });
+  const updateAccount = useCallback(
+    (patch) => setAccount((previous) => ({ ...previous, ...patch })),
+    []
+  );
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -73,11 +79,12 @@ function AdminLayout() {
     document.title = `${title} | PhysioGuide Admin`;
   }, [title]);
 
+  const displayName = account.name || session?.name || 'Admin';
   const user = {
-    name: session?.name || 'Admin',
-    // The uploaded photo wins; without one the deterministic face from
-    // initials + email domain keeps the header and sidebar unique.
-    avatar: profileImage || personFace(session?.name || 'Admin', session?.email),
+    name: displayName,
+    // The uploaded photo wins; without one the shared face pool gives this
+    // admin a real portrait that matches the one used elsewhere.
+    avatar: account.imageUrl || personFace(displayName, session?.email),
   };
 
   const results = search.trim()
@@ -118,14 +125,19 @@ function AdminLayout() {
           // A transient failure keeps the last list; focus and push will retry.
         });
 
-      // Same request as the settings page: the header avatar follows the
-      // account photo instead of always showing the generated face.
+      // Same request as the settings page: the header identity and avatar
+      // follow the account record instead of the name captured at sign-in.
       callAdmin('getAdminSettings')
         .then((result) => {
-          if (live) setProfileImage(result?.profile?.imageUrl || '');
+          if (live) {
+            setAccount({
+              name: result?.profile?.name || '',
+              imageUrl: result?.profile?.imageUrl || '',
+            });
+          }
         })
         .catch(() => {
-          // Keep the last known photo when settings cannot be read.
+          // Keep the last known identity when settings cannot be read.
         });
     };
     load();
@@ -230,9 +242,9 @@ function AdminLayout() {
         />
         <div className="center-layout__column">
           <main id="admin-content" className="center-page" tabIndex={-1}>
-            {/* The settings page reports a fresh photo so the header updates
-                without waiting for the next navigation. */}
-            <Outlet context={{ setProfileImage }} />
+            {/* The settings page reports a saved name or photo so the header
+                updates without waiting for the next navigation. */}
+            <Outlet context={{ updateAccount }} />
           </main>
         </div>
       </div>

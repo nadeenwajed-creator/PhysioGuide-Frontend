@@ -45,7 +45,7 @@ function PatientDetails({
       <Button onClick={onEdit}>{tr('edit.patient')}</Button>
     </>}>
     <div className="center-identity center-patient-details__identity">
-      <Avatar src={patient.imageUrl} name={name(patient.name)} size="lg" />
+      <Avatar src={patient.imageUrl} name={name(patient.name)} seed={patient.id} size="lg" />
       <div>
         <h3>{name(patient.name)}</h3>
         <p><bdi>{patient.phone}</bdi></p>

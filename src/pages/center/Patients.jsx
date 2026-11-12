@@ -116,6 +116,7 @@ function Patients() {
                         <Avatar
                           src={patient.imageUrl}
                           name={name(patient.name)}
+                          seed={patient.id}
                           size="sm"
                         />
                         <button

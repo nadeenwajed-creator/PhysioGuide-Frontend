@@ -14,7 +14,7 @@ import { QueryState, AdminPagination, RecordDialog } from './AdminUI.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
 import './ListPages.css';
 
-const patientStatuses = ['active', 'inactive', 'suspended'];
+const patientStatuses = ['active', 'suspended'];
 
 // The rows of the view dialog opened from a list row.
 const patientRows = (patient, t, language) => [
@@ -184,6 +184,8 @@ function AdminPatients() {
                         src={patient.imageUrl}
                         name={patient.name}
                         email={patient.email}
+                        seed={patient.id}
+                        gender={patient.gender}
                         size="sm"
                       />
                       <div className="admin-table__primary">

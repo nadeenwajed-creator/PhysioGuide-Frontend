@@ -107,6 +107,7 @@ function Dashboard() {
                     <Avatar
                       src={patient?.imageUrl}
                       name={name(patient?.name)}
+                      seed={patient?.id}
                       size="sm"
                     />
                     <div className="center-dashboard__patient">

@@ -12,6 +12,10 @@ function Avatar({
   src,
   name = '',
   email = '',
+  // Record id: keeps two people who share a name on different faces.
+  seed = '',
+  // When known, the portrait comes from the matching face folder.
+  gender = '',
   alt,
   size = 'md',
   status = 'none',
@@ -42,11 +46,10 @@ function Avatar({
     ? statusLabel ?? t(`avatar.${status}`)
     : undefined;
 
-  // People without a profile photo get a deterministic DiceBear face seeded
-  // from their initials plus email domain, so the face stays unique and never
-  // changes between reloads; the initials stay as the last resort when even
-  // that image cannot be loaded.
-  const face = personFace(displayName, email);
+  // People without a profile photo get a real portrait from the face pool, one
+  // nobody else on the page shares, so it stays stable between reloads; the
+  // initials stay as the last resort when even that image cannot be loaded.
+  const face = personFace(displayName, email, seed, gender);
   const failed = imageState.failed;
   const resolvedSrc = src && !failed.includes(src)
     ? src

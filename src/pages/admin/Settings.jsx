@@ -125,8 +125,8 @@ function ProfileModal({ profile, onClose, onSaved }) {
     setSaving(true);
     setError('');
     try {
-      await callAdmin('saveAdminSettings', { profile: form });
-      onSaved();
+      const saved = await callAdmin('saveAdminSettings', { profile: form });
+      onSaved(saved?.profile);
     } catch (failure) {
       setError(errorText(t, failure));
     } finally {
@@ -183,8 +183,8 @@ function AdminSettings() {
   const [notifications, setNotifications] = useState(null);
   const [notice, setNotice] = useState(null);
   const photoInput = useRef(null);
-  // The admin layout owns the header/sidebar avatar; a saved photo updates it.
-  const { setProfileImage } = useOutletContext() || {};
+  // The admin layout owns the header/sidebar identity; saved edits update it.
+  const { updateAccount } = useOutletContext() || {};
   // Reading the clock during render is a side effect; snapshot it once.
   const [now] = useState(() => Date.now());
 
@@ -229,7 +229,7 @@ function AdminSettings() {
     try {
       const imageUrl = await callAdmin('prepareAdminImage', file);
       await callAdmin('saveAdminSettings', { profile: { imageUrl } });
-      setProfileImage?.(imageUrl);
+      updateAccount?.({ imageUrl });
       setNotice({ error: false, text: t('admin.settingsPage.photoUpdated') });
       state.reload();
     } catch (failure) {
@@ -442,8 +442,10 @@ function AdminSettings() {
         <ProfileModal
           profile={profile}
           onClose={() => setShowProfile(false)}
-          onSaved={() => {
+          onSaved={(saved) => {
             setShowProfile(false);
+            // Mirror the saved name in the header and sidebar right away.
+            if (saved?.name) updateAccount?.({ name: saved.name });
             setNotice({ error: false, text: t('admin.settingsPage.saved') });
             state.reload();
           }}

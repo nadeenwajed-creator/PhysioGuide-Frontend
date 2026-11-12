@@ -316,6 +316,7 @@ function AdminPhysiotherapists() {
                         src={therapist.imageUrl}
                         name={therapist.name}
                         email={therapist.email}
+                        seed={therapist.id}
                         size="sm"
                       />
                       <div className="admin-table__primary">

@@ -1,12 +1,18 @@
-import { Style, Avatar } from '@dicebear/core';
-import lorelei from '@dicebear/styles/lorelei.json' with { type: 'json' };
+// People without a profile photo get a real portrait photo instead of a drawn
+// avatar. The pool holds 100 men and 100 women, and every person is given one
+// slot that no one else gets, so two people never share a face on a page.
+const FACE_COUNT = 200;
+const STORAGE_KEY = 'physioguide.face-slots.v2';
 
-// People without a profile photo get a generated face from DiceBear instead of
-// thispersondoesnotexist.com, which served a fresh random face on every load.
-// DiceBear draws from a seed: the initials plus the email domain, so a person
-// keeps one unique face forever and the src stays cacheable with no cache-buster.
-const faceStyle = new Style(lorelei);
-const faceCache = new Map();
+// Odd slots draw from the men folder, even slots from the women folder, so the
+// 200 slots map one-to-one onto the 200 available portraits.
+const slotFolder = (slot) => (slot % 2 === 0 ? 'women' : 'men');
+const FACE_FOLDERS = { female: 'women', male: 'men' };
+
+const faceUrl = (slot) => {
+  const index = Math.floor((slot - 1) / 2) % 100;
+  return `https://randomuser.me/api/portraits/${slotFolder(slot)}/${index}.jpg`;
+};
 
 // First letters of the first and last name parts, uppercased ("Ahmad Ali" -> "AA").
 export function personInitials(name = '') {
@@ -17,25 +23,79 @@ export function personInitials(name = '') {
   return (first + last).toUpperCase();
 }
 
-// "AA" + "@example.com" keeps faces unique across people who share initials.
-export function personSeed(name = '', email = '') {
-  const initials = personInitials(name);
-  const domain = String(email).split('@')[1]?.trim().toLowerCase() ?? '';
-  if (initials && domain) return `${initials}@${domain}`;
-  if (initials) return initials;
-  return domain || 'physioguide';
+// The full name plus the email identifies a person better than initials, and
+// a record id (when the caller has one) separates people who share a name.
+export function personSeed(name = '', email = '', identity = '') {
+  const person = String(name).trim().toLowerCase();
+  const address = String(email).trim().toLowerCase();
+  const id = String(identity ?? '').trim().toLowerCase();
+  if (id) return `${id}|${person}|${address}`;
+  if (person || address) return `${person}|${address}`;
+  return 'physioguide';
 }
 
-// Deterministic face for a person; memoized so repeated renders reuse one URI.
-export function personFace(name = '', email = '') {
-  const seed = personSeed(name, email);
-  let uri = faceCache.get(seed);
-  if (!uri) {
-    uri = new Avatar(faceStyle, { seed }).toDataUri();
-    faceCache.set(seed, uri);
+// Where a person would like to sit in the face pool; collisions are resolved
+// below, so this only decides the starting point.
+function preferredSlot(seed) {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) % 2147483647;
   }
-  return uri;
+  return (hash % FACE_COUNT) + 1;
 }
 
-// Profile photo when the record has one, generated face otherwise.
-export const personImage = (url, name = '', email = '') => url || personFace(name, email);
+// seed -> slot, kept in localStorage so a face survives reloads and stays the
+// same in every tab instead of reshuffling on each visit.
+const slots = new Map(readStoredSlots());
+
+function readStoredSlots() {
+  if (typeof window === 'undefined') return [];
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '{}');
+    return Object.entries(parsed).filter(([, slot]) => Number.isInteger(slot));
+  } catch {
+    return [];
+  }
+}
+
+function persistSlots() {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(slots)));
+  } catch {
+    // Faces still work; the assignment just is not remembered.
+  }
+}
+
+// First free slot that matches the known gender, else any free slot. When the
+// pool is exhausted (more people than faces) the preferred slot is reused.
+function pickSlot(start, taken, folder) {
+  let anyFree = null;
+  for (let offset = 0; offset < FACE_COUNT; offset += 1) {
+    const slot = ((start - 1 + offset) % FACE_COUNT) + 1;
+    if (taken.has(slot)) continue;
+    if (!folder || slotFolder(slot) === folder) return slot;
+    if (anyFree === null) anyFree = slot;
+  }
+  return anyFree ?? start;
+}
+
+// Real face for a person. A slot already given to someone else is skipped, so
+// no two people ever show the same portrait on a page or in a list. The gender
+// only picks the folder; a person who already has a face keeps it.
+export function personFace(name = '', email = '', identity = '', gender = '') {
+  const seed = personSeed(name, email, identity);
+  const known = slots.get(seed);
+  if (known) return faceUrl(known);
+
+  const folder = FACE_FOLDERS[String(gender).trim().toLowerCase()] || '';
+  const slot = pickSlot(preferredSlot(seed), new Set(slots.values()), folder);
+
+  slots.set(seed, slot);
+  persistSlots();
+  return faceUrl(slot);
+}
+
+// Profile photo when the record has one, real face otherwise.
+export const personImage = (url, name = '', email = '', identity = '', gender = '') =>
+  url || personFace(name, email, identity, gender);

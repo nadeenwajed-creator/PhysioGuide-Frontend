@@ -684,6 +684,7 @@ export function toAdminPatient(item) {
     name: label(item?.name ?? item?.fullName ?? item?.patientName),
     email: label(item?.email),
     imageUrl: label(item?.imageUrl ?? item?.profileImageUrl),
+    gender: lower(item?.gender),
     age: item?.age == null || item?.age === '' ? null : num(item.age),
     city: label(item?.city),
     appointments: num(item?.appointments ?? item?.appointmentCount),

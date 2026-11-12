@@ -138,7 +138,7 @@ function Physiotherapists() {
             key={therapist.id}
           >
             <div className="center-physiotherapists__card-head">
-              <Avatar src={therapist.imageUrl} name={name(therapist.name)} size="md" />
+              <Avatar src={therapist.imageUrl} name={name(therapist.name)} seed={therapist.id} size="md" />
               <div>
                 <h2>{name(therapist.name)}</h2>
                 <RatingStars rating={therapist.rating} showValue />

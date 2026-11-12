@@ -71,7 +71,7 @@ export default function Reviews() {
           const patientName = name(patient?.name) || tr('remaining.patient');
           return (
             <article className="center-panel center-reviews__item" key={review.id}>
-              <Avatar src={patient?.imageUrl} name={patientName} size="sm" />
+              <Avatar src={patient?.imageUrl} name={patientName} seed={review.patientId} size="sm" />
               <div className="center-reviews__content">
                 <div className="center-reviews__identity">
                   <h3>{patientName}</h3>

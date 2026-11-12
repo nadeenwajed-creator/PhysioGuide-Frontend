@@ -134,7 +134,7 @@ function CenterLayout({ portal = 'center' }) {
   const account = patientPortal ? data?.patientProfile || data?.patients.find(item => item.id === actor.patientId) || actor : therapistPortal ? data?.therapists.find(item => item.id === actor.therapistId) : data?.center;
   const user = {
     name: name(account?.name),
-    // Patients and therapists get the generated face when they have no photo;
+    // Patients and therapists get a real portrait when they have no photo;
     // the center's own account keeps the icon fallback.
     avatar: patientPortal || therapistPortal
       ? personImage(account?.imageUrl, name(account?.name), account?.email)
@@ -205,6 +205,8 @@ function CenterLayout({ portal = 'center' }) {
   async function markRead(id) {
     try {
       await markNotificationsRead(actor, id);
+      // Refetch so the bell drops the notification that was just read.
+      await refreshRef.current?.();
     } catch (failure) {
       notify(tr(`error.${failure.code || 'network'}`), { error: true });
     }
