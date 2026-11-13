@@ -64,7 +64,7 @@ export async function callCenter(method, ...args) {
   }
 }
 export const getCenterWorkspace = actor => callCenter('getWorkspace', actor);
-export const prepareCenterImage = file => callCenter('prepareImage', file);
+export const prepareCenterImage = (file, role) => callCenter('prepareImage', file, role);
 
 if (mockEnabled && typeof window !== 'undefined') {
   window.addEventListener('storage', event => {

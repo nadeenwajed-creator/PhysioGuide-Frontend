@@ -8,6 +8,7 @@ import { ServiceError } from './serviceError.js';
 import { loadSession, saveSession, clearSession } from '../auth/session.js';
 import * as map from './mappers.js';
 import { toAssessmentResult } from '../patient/painAssessmentModel.js';
+import { fitImageFile } from '../../utils/imageFile.js';
 
 const CENTER_WORKSPACE = '/api/center/workspace';
 const SCHEDULES = '/api/Schedules';
@@ -828,10 +829,15 @@ export const centerOperations = {
   // and it also inserts a gallery row. The row is removed immediately so the
   // caller receives a usable URL without silently changing the gallery.
   prepareImage: {
-    execute: async (client, file) => {
+    // Therapists upload through their own workspace endpoint: the centre route
+    // is restricted to the centre account and would answer 403.
+    execute: async (client, file, role) => {
+      // Phone photos are larger than the API's upload limit; shrink them here.
+      const upload = await fitImageFile(file);
       const form = new FormData();
-      form.append('file', file, file?.name || 'upload');
-      const created = await client.post(`${CENTER_WORKSPACE}/images`, { data: form });
+      form.append('file', upload, upload?.name || 'upload');
+      const base = role === 'physiotherapist' ? THERAPIST_WORKSPACE : CENTER_WORKSPACE;
+      const created = await client.post(`${base}/images`, { data: form });
       if (created?.id) {
         await client.delete(`${CENTER_WORKSPACE}/images/${created.id}`).catch(() => undefined);
       }
@@ -1132,14 +1138,27 @@ export const centerOperations = {
         data: {
           fullName: values?.name,
           fullNameAr: values?.nameAr,
-          specialtyId: current?.specialty?.specialtyId,
+          phoneNumber: values?.phone,
+          specialtyId: values?.specialtyId
+            ? Number(values.specialtyId)
+            : current?.specialtyId ?? current?.specialty?.specialtyId,
           bio: values?.about,
           bioAr: values?.aboutAr,
           profileImageUrl: values?.imageUrl,
-          yearsOfExperience: current?.yearsOfExperience ?? null,
+          //  The personal form does not carry experience; keep the stored value
+          //  instead of clearing it with an absent field.
+          yearsOfExperience:
+            values?.experience === undefined
+              ? current?.yearsOfExperience ?? null
+              : values.experience === '' || values.experience === null
+                ? null
+                : Number(values.experience),
           qualifications: current?.qualifications,
           languages: current?.languages,
-          isAvailable: current?.isAvailable ?? true,
+          isAvailable:
+            typeof values?.availability === 'string'
+              ? values.availability === 'available'
+              : current?.isAvailable ?? true,
         },
       });
       return resolveAssets({ ...values, id: String(current?.therapistId ?? ''), ...body });

@@ -22,8 +22,10 @@ import {
 } from '../../components/center/CenterUI.jsx';
 import useCenter from '../../components/center/useCenter.js';
 import useUnsavedChanges from '../../components/center/useUnsavedChanges.js';
-import { prepareCenterImage } from '../../services/centerPortalService.js';
-import { saveOwnTherapistProfile } from '../../services/therapistService.js';
+import {
+  prepareTherapistImage,
+  saveOwnTherapistProfile,
+} from '../../services/therapistService.js';
 import { money } from '../../utils/centerFormat.js';
 import './Profile.css';
 
@@ -96,8 +98,17 @@ function ProfileContent({ person }) {
     event.target.value = '';
     if (!file) return;
     setBusy(true);
+    setFeedback(null);
     try {
-      change('imageUrl', await prepareCenterImage(file));
+      //  Therapist uploads go through the therapist workspace endpoint, then the
+      //  portrait is saved on its own so the header avatar updates right away
+      //  instead of waiting for the rest of the form.
+      const imageUrl = await prepareTherapistImage(file);
+      const next = { ...saved, imageUrl };
+      await saveOwnTherapistProfile(actor, next);
+      setSaved(next);
+      setDraft((current) => ({ ...current, imageUrl }));
+      setFeedback({ message: tr('saved') });
     } catch (error) {
       setFeedback({ error: true, message: tr(`error.${error.code || 'image'}`) });
     } finally {

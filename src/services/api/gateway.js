@@ -16,6 +16,8 @@ const statusCodes = {
   403: 'forbidden',
   404: 'notFound',
   409: 'conflict',
+  // Uploads larger than the server accepts come back as 413
+  413: 'image',
   415: 'validation',
   422: 'validation',
   429: 'rateLimited',
