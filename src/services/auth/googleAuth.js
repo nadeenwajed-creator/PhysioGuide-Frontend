@@ -19,7 +19,7 @@ const AUTH_GOOGLE = '/api/Auth/google';
 // kept in .env so an environment can override it without a code change.
 const CLIENT_ID =
   import.meta.env?.VITE_GOOGLE_CLIENT_ID ||
-  '564871365119-fsn3u0ssrangdvlsl2tqcup047utblgr.apps.googleusercontent.com';
+  '140644515810-c8rfnj6tmsfakleg51is3dafo2u9if5n.apps.googleusercontent.com';
 
 // UI error codes (after validationFields aliasing) that mean "this flow is
 // dead, start a new one": both carry single-use challenges or tickets.
