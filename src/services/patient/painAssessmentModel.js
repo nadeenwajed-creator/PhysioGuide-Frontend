@@ -1,4 +1,4 @@
-import { careCategories, serviceMatches } from './specialtyMatching.js';
+import { careCategories, serviceMatchScore } from './specialtyMatching.js';
 
 export { careCategories };
 // Keep answers in React memory until submit; API codes are independent of UI ids
@@ -332,6 +332,10 @@ export function matchingCenters(centers, care, {
   allowMock = false
 } = {}) {
   const keys = (Array.isArray(care) ? care : [care]).filter(Boolean);
+  // How well a service suits any of the assessed care categories; services
+  // named for the category outrank ones that only belong to a suitable
+  // specialty, so the three chips under a centre are the closest matches.
+  const scoreService = (service) => keys.reduce((best, key) => Math.max(best, serviceMatchScore(service, `care:${key}`)), 0);
   return (Array.isArray(centers) ? centers : []).filter(c => c && c.id
       && (allowMock && c.dataSource === 'mock'
       || c.id !== 'center-demo' && c.isDemo !== true && c.isMock !== true && c.dataSource !== 'mock')
@@ -340,9 +344,21 @@ export function matchingCenters(centers, care, {
       && labels(c.name).some(Boolean)
       && (labels(c.city).some(city => palestinianCities.some(p => normalize(p) === normalize(city)))
       || labels(c.address).some(address => /palestine|فلسطين/i.test(address)
-    && palestinianCities.some(city => normalize(address).includes(normalize(city)))))).map(center => ({
-    ...center,
-    matchingServices: (Array.isArray(center.services) ? center.services : []).filter(s => s.id && !['inactive', 'archived'].includes(s.status)
-      && keys.some(key => serviceMatches(s, `care:${key}`)))
-  })).filter(center => center.matchingServices.length > 0).filter((center, index, list) => list.findIndex(c => c.id === center.id) === index).slice(0, 2);
+    && palestinianCities.some(city => normalize(address).includes(normalize(city)))))).map(center => {
+    const matches = (Array.isArray(center.services) ? center.services : []).filter(s => s.id && !['inactive', 'archived'].includes(s.status))
+      .map(service => ({ service, score: scoreService(service) })).filter(entry => entry.score > 0)
+      .sort((a, b) => b.score - a.score);
+    // Name-level matches are the services that actually fit the symptoms; the
+    // specialty-only matches fill in when a centre names nothing specific.
+    const specific = matches.filter(entry => entry.score > 1);
+    const shown = specific.length ? specific : matches;
+    return {
+      ...center,
+      matchingServices: shown.map(entry => entry.service),
+      matchScore: matches.reduce((sum, entry) => sum + entry.score, 0)
+    };
+  }).filter(center => center.matchingServices.length > 0)
+    .filter((center, index, list) => list.findIndex(c => c.id === center.id) === index)
+    .sort((a, b) => b.matchScore - a.matchScore || (b.rating ?? 0) - (a.rating ?? 0))
+    .slice(0, 2);
 }
