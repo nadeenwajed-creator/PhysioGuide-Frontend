@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../../../context/AuthContext.jsx';
 import { useLanguage } from '../../../context/LanguageContext.jsx';
 import { localized } from '../../../utils/centerFormat.js';
-import { getPatientDiscovery, subscribePatientDiscovery } from '../../../services/patientDiscoveryService.js';
+import { getPatientDiscovery, subscribePatientDiscovery } from '../../../services/crud/patientDiscoveryService.js';
 import { matchingCareKeys, matchingCenters } from '../../../services/patient/painAssessmentModel.js';
 import { CenterRating, Favorite } from '../DiscoveryUI.jsx';
 import { RecordImage, ConfirmDialog } from '../../center/CenterUI.jsx';

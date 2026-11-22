@@ -5,7 +5,7 @@ import Button from '../shared/Button/Button.jsx';
 import FormField from '../shared/FormField/FormField.jsx';
 import { EmptyState, RecordStatus, Feedback } from './CenterUI.jsx';
 import useCenter from './useCenter.js';
-import { addPatientNote } from '../../services/patientService.js';
+import { addPatientNote } from '../../services/crud/patientService.js';
 import { formatDate } from '../../utils/centerFormat.js';
 import { getPatientAppointmentSummary } from '../../services/patientSummaryService.js';
 import './PatientDetails.css';

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Button from '../../shared/Button/Button.jsx';
 import { Feedback } from '../CenterUI.jsx';
 import useCenter from '../useCenter.js';
-import { saveCenterPreferences } from '../../../services/centerRemainingService.js';
+import { saveCenterPreferences } from '../../../services/crud/centerRemainingService.js';
 
 const options = ['appointments', 'appointmentChanges', 'reviews'];
 export default function NotificationPreferences() {

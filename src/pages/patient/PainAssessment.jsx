@@ -37,7 +37,7 @@ import {
   completeAssessment,
   intensityBand
 } from '../../services/patient/painAssessmentModel.js';
-import { submitAssessment } from '../../services/patientAssessmentService.js';
+import { submitAssessment } from '../../services/crud/patientAssessmentService.js';
 import '../../components/patient/PatientDiscovery.css';
 import '../../components/patient/pain-assessment/PainAssessment.css';
 

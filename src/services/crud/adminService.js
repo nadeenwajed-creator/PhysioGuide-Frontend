@@ -1,9 +1,9 @@
-import { ServiceError, normalizeServiceError } from './api/serviceError.js';
-import { createOperationAdapter } from './api/operationAdapter.js';
-import { adminOperations } from './api/backendContract.js';
-import { getAuthSnapshot, restoreSession } from './authService.js';
-import { httpClient, mockEnabled } from './runtime.js';
-import { adminMockApi } from './mock/adminData.js';
+import { ServiceError, normalizeServiceError } from '../api/serviceError.js';
+import { createOperationAdapter } from '../api/operationAdapter.js';
+import { adminOperations } from '../api/backendContract.js';
+import { getAuthSnapshot, restoreSession } from '../authService.js';
+import { httpClient, mockEnabled } from '../runtime.js';
+import { adminMockApi } from '../mock/adminData.js';
 
 // The backend URL is provided in the .env file as VITE_API_BASE_URL.
 const apiBaseUrl = import.meta.env?.VITE_API_BASE_URL ?? '';

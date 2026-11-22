@@ -15,7 +15,7 @@ import { formatDate } from '../../utils/centerFormat.js';
 import {
   getReviewStatistics,
   replyToCenterReview,
-} from '../../services/centerRemainingService.js';
+} from '../../services/crud/centerRemainingService.js';
 import '../../components/center/remaining/RemainingUI.css';
 import './Reviews.css';
 

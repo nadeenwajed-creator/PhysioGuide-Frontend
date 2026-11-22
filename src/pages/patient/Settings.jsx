@@ -7,7 +7,7 @@ import { AccountState, AccountTabs, PatientIdentity } from '../../components/pat
 import PatientSecurityForm from '../../components/patient/PatientSecurityForm.jsx';
 import usePatientAccount from '../../components/patient/usePatientAccount.js';
 import { preferenceKeys } from '../../services/patient/accountModel.js';
-import { savePatientPreferences } from '../../services/patientAccountService.js';
+import { savePatientPreferences } from '../../services/crud/patientAccountService.js';
 import '../../components/patient/PatientAccount.css';
 
 function SettingsContent({ state }) {

@@ -4,7 +4,7 @@ import {
   getPatientDiscovery,
   getPatientSavedCenters,
   subscribePatientDiscovery
-} from '../../services/patientDiscoveryService.js';
+} from '../../services/crud/patientDiscoveryService.js';
 
 export default function useDiscovery() {
   const { session: actor } = useAuth();

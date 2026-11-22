@@ -5,11 +5,11 @@ import FormField from '../shared/FormField/FormField.jsx';
 import { Feedback, SelectField } from './CenterUI.jsx';
 import Avatar from '../shared/Avatar/Avatar.jsx';
 import useCenter from './useCenter.js';
-import { saveCenterPatient } from '../../services/patientService.js';
-import { saveCenterTherapist } from '../../services/therapistService.js';
-import { saveCenterService } from '../../services/serviceService.js';
-import { saveCenterAppointment } from '../../services/appointmentService.js';
-import { prepareCenterImage } from '../../services/centerPortalService.js';
+import { saveCenterPatient } from '../../services/crud/patientService.js';
+import { saveCenterTherapist } from '../../services/crud/therapistService.js';
+import { saveCenterService } from '../../services/crud/serviceService.js';
+import { saveCenterAppointment } from '../../services/crud/appointmentService.js';
+import { prepareCenterImage } from '../../services/crud/centerPortalService.js';
 const saveMethods = {
   patient: saveCenterPatient,
   therapist: saveCenterTherapist,

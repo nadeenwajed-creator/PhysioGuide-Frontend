@@ -14,7 +14,7 @@ import RecordForm from '../../components/center/RecordForm.jsx';
 import useCenter from '../../components/center/useCenter.js';
 import usePagination from '../../components/center/usePagination.js';
 import { includesQuery } from '../../utils/centerFormat.js';
-import { updateAppointmentStatus } from '../../services/appointmentService.js';
+import { updateAppointmentStatus } from '../../services/crud/appointmentService.js';
 import { appointmentStatuses } from '../../services/center/appointmentRules.js';
 import './Appointments.css';
 

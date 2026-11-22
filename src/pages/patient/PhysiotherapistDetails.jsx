@@ -14,7 +14,7 @@ import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
 import { Panel, RecordImage, Feedback } from '../../components/center/CenterUI.jsx';
 import useDiscovery from '../../components/patient/useDiscovery.js';
 import { DiscoveryState } from '../../components/patient/DiscoveryUI.jsx';
-import { openPatientConversation } from '../../services/patientDiscoveryService.js';
+import { openPatientConversation } from '../../services/crud/patientDiscoveryService.js';
 import AppointmentDates from '../../components/patient/AppointmentDates.jsx';
 import TimeRail from '../../components/patient/TimeRail.jsx';
 import usePatientAvailability from '../../components/patient/usePatientAvailability.js';

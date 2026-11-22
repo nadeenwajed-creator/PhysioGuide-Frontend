@@ -1,5 +1,5 @@
 import { callCenter } from './centerPortalService.js';
-import { getDashboardSummary } from './centerSummaryService.js';
+import { getDashboardSummary } from '../centerSummaryService.js';
 
 export { saveCenterNotificationPreferences as saveCenterPreferences } from './notificationService.js';
 

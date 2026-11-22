@@ -13,7 +13,7 @@ import {
   downloadMessageAttachment,
   markConversationRead,
   sendMessage,
-} from '../../services/messageService.js';
+} from '../../services/crud/messageService.js';
 import { messageDay, messageTime } from '../../utils/messageFormat.js';
 import './Messages.css';
 

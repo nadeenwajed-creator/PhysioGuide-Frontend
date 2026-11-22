@@ -25,7 +25,7 @@ import useUnsavedChanges from '../../components/center/useUnsavedChanges.js';
 import {
   prepareTherapistImage,
   saveOwnTherapistProfile,
-} from '../../services/therapistService.js';
+} from '../../services/crud/therapistService.js';
 import { money } from '../../utils/centerFormat.js';
 import './Profile.css';
 

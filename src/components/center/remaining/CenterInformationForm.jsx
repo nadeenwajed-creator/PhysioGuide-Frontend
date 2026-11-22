@@ -3,7 +3,7 @@ import Button from '../../shared/Button/Button.jsx';
 import FormField from '../../shared/FormField/FormField.jsx';
 import { Feedback } from '../CenterUI.jsx';
 import useCenter from '../useCenter.js';
-import { saveCenterInformation } from '../../../services/centerRemainingService.js';
+import { saveCenterInformation } from '../../../services/crud/centerRemainingService.js';
 import ClinicLocationEditor from '../ClinicLocationEditor.jsx';
 import useUnsavedChanges from '../useUnsavedChanges.js';
 import { validCoordinates, hasSavedCenterLocation } from '../../../services/centerLocationService.js';

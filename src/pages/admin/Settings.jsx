@@ -15,7 +15,7 @@ import Modal from '../../components/shared/Modal/Modal.jsx';
 import { Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { loadSession } from '../../services/auth/session.js';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 import useAdminQuery, { errorText } from './useAdminQuery.js';
 import { QueryState } from './AdminUI.jsx';
 import './Settings.css';
@@ -391,23 +391,9 @@ function AdminSettings() {
             <section className="admin-settings__card">
               <h2>{t('admin.settingsPage.security')}</h2>
               <div className="admin-security">
-                <div className="admin-security__notice">
-                  <FontAwesomeIcon
-                    icon={faShieldHalved}
-                    className="admin-security__icon"
-                    aria-hidden="true"
-                  />
-                  <div className="admin-security__text">
-                    <strong>{t('admin.settingsPage.protectedTitle')}</strong>
-                    <span>{t('admin.settingsPage.protectedHint')}</span>
-                  </div>
-                </div>
                 <div className="admin-security__actions">
                   <Button variant="outline" icon={faLock} onClick={() => setShowPassword(true)}>
                     {t('admin.settingsPage.changePassword')}
-                  </Button>
-                  <Button variant="outline" icon={faShieldHalved}>
-                    {t('admin.settingsPage.manage2FA')}
                   </Button>
                 </div>
               </div>

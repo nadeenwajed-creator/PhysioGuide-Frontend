@@ -6,7 +6,7 @@ import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 import RowActions from './RowActions.jsx';
 import { PatientEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';

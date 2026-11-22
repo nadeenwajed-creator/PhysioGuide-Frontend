@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 
 // Loads one admin operation and reloads when its parameters change. The previous
 // rows stay on screen while new ones arrive, so filters never blank the table;

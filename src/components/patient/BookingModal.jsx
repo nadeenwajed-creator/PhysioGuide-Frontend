@@ -6,7 +6,7 @@ import FormField from '../shared/FormField/FormField.jsx';
 import { SelectField, Feedback } from '../center/CenterUI.jsx';
 import usePatientAvailability from './usePatientAvailability.js';
 import { dateKey } from '../../utils/centerFormat.js';
-import { requestPatientAppointment } from '../../services/appointmentService.js';
+import { requestPatientAppointment } from '../../services/crud/appointmentService.js';
 import { usePatientLabels } from './usePatientLabels.js';
 
 function BookingForm({ state, initial, onClose, center }) {

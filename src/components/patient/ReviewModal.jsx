@@ -6,7 +6,7 @@ import Modal from '../shared/Modal/Modal.jsx';
 import Button from '../shared/Button/Button.jsx';
 import { Feedback } from '../center/CenterUI.jsx';
 import { usePatientLabels } from './usePatientLabels.js';
-import { createPatientReview } from '../../services/patientDiscoveryService.js';
+import { createPatientReview } from '../../services/crud/patientDiscoveryService.js';
 import './PatientReview.css';
 
 // One review per completed appointment: the server attaches the review to the

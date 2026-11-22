@@ -8,7 +8,7 @@ import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx'
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 import RowActions from './RowActions.jsx';
 import { CenterEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';

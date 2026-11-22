@@ -1,6 +1,6 @@
 import { callCenter } from './centerPortalService.js';
-import { ServiceError } from './api/serviceError.js';
-import { toAssessmentSubmission } from './patient/painAssessmentModel.js';
+import { ServiceError } from '../api/serviceError.js';
+import { toAssessmentSubmission } from '../patient/painAssessmentModel.js';
 
 export function submitAssessment(actor, state) {
   const answers = toAssessmentSubmission(state);

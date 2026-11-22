@@ -10,7 +10,7 @@ import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import { TherapistViewDialog } from './AdminViewDialogs.jsx';

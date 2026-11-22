@@ -15,9 +15,9 @@ globalThis.localStorage = { getItem: key => saved.get(key) ?? null, setItem: (ke
 globalThis.window = new EventTarget();
 const auth = await import('../../services/authService.js');
 const { MOCK_PASSWORD } = await import('../../services/auth/mockAccounts.js');
-const { getPatientDiscovery } = await import('../../services/patientDiscoveryService.js');
-const { savePatientPreferences } = await import('../../services/patientAccountService.js');
-const { getMessagingWorkspace } = await import('../../services/messageService.js');
+const { getPatientDiscovery } = await import('../../services/crud/patientDiscoveryService.js');
+const { savePatientPreferences } = await import('../../services/crud/patientAccountService.js');
+const { getMessagingWorkspace } = await import('../../services/crud/messageService.js');
 const { createMockCenterAdapter } = await import('../../services/center/mockCenterAdapter.js');
 const repository = await import('../../services/mock/centerRepository.js');
 const { recipientPreferences, notificationPreference, syncAppointmentReminders, appointmentAlerts } = await import('../../services/patient/notificationPolicy.js');

@@ -1,14 +1,14 @@
-import { executePatientOperation } from './patient/mockPatientOperations.js';
-import { createMockCenterAdapter } from './center/mockCenterAdapter.js';
-import { centerStore, getCenterStore, readMockCenter, getMockTherapists } from './mock/centerRepository.js';
-import { getAuthSnapshot, restoreSession } from './authService.js';
-import { mockEnabled, httpClient } from './runtime.js';
-import { createOperationAdapter } from './api/operationAdapter.js';
-import { centerOperations } from './api/backendContract.js';
-import { ServiceError, normalizeServiceError } from './api/serviceError.js';
-import { authorizeCenterOperation } from './center/access.js';
-import { mockAccountStore } from './mock/accountRepository.js';
-import { mockAccounts } from './auth/mockAccounts.js';
+import { executePatientOperation } from '../patient/mockPatientOperations.js';
+import { createMockCenterAdapter } from '../center/mockCenterAdapter.js';
+import { centerStore, getCenterStore, readMockCenter, getMockTherapists } from '../mock/centerRepository.js';
+import { getAuthSnapshot, restoreSession } from '../authService.js';
+import { mockEnabled, httpClient } from '../runtime.js';
+import { createOperationAdapter } from '../api/operationAdapter.js';
+import { centerOperations } from '../api/backendContract.js';
+import { ServiceError, normalizeServiceError } from '../api/serviceError.js';
+import { authorizeCenterOperation } from '../center/access.js';
+import { mockAccountStore } from '../mock/accountRepository.js';
+import { mockAccounts } from '../auth/mockAccounts.js';
 
 const adapters = new Map();
 const listeners = new Set();

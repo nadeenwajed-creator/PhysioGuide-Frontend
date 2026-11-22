@@ -3,7 +3,7 @@ import Button from '../../shared/Button/Button.jsx';
 import FormField from '../../shared/FormField/FormField.jsx';
 import { Feedback } from '../CenterUI.jsx';
 import useCenter from '../useCenter.js';
-import { changeCenterPassword } from '../../../services/centerRemainingService.js';
+import { changeCenterPassword } from '../../../services/crud/centerRemainingService.js';
 
 export default function SecurityForm() {
   const { actor, tr } = useCenter();

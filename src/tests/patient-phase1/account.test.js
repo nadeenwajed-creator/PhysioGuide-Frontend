@@ -17,9 +17,9 @@ globalThis.localStorage = {
 globalThis.window = new EventTarget();
 const auth = await import('../../services/authService.js');
 const { MOCK_PASSWORD } = await import('../../services/auth/mockAccounts.js');
-const account = await import('../../services/patientAccountService.js');
-const discovery = await import('../../services/patientDiscoveryService.js');
-const messaging = await import('../../services/messageService.js');
+const account = await import('../../services/crud/patientAccountService.js');
+const discovery = await import('../../services/crud/patientDiscoveryService.js');
+const messaging = await import('../../services/crud/messageService.js');
 const repository = await import('../../services/mock/centerRepository.js');
 const { createMockCenterAdapter } = await import('../../services/center/mockCenterAdapter.js');
 assets.deregister();

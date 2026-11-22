@@ -4,7 +4,7 @@ import FormField from '../../components/shared/FormField/FormField.jsx';
 import Modal from '../../components/shared/Modal/Modal.jsx';
 import { Feedback } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 import useAdminQuery, { errorText } from './useAdminQuery.js';
 import { QueryState } from './AdminUI.jsx';
 

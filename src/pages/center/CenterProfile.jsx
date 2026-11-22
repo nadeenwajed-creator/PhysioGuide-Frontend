@@ -16,11 +16,11 @@ import {
 } from '../../components/center/CenterUI.jsx';
 import LocationPanel from '../../components/center/remaining/LocationPanel.jsx';
 import useCenter from '../../components/center/useCenter.js';
-import { prepareCenterImage } from '../../services/centerPortalService.js';
+import { prepareCenterImage } from '../../services/crud/centerPortalService.js';
 import {
   getReviewStatistics,
   updateCenterImages,
-} from '../../services/centerRemainingService.js';
+} from '../../services/crud/centerRemainingService.js';
 import { money } from '../../utils/centerFormat.js';
 import '../../components/center/remaining/RemainingUI.css';
 import './CenterProfile.css';

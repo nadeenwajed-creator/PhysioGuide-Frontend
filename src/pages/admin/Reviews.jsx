@@ -10,7 +10,7 @@ import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import { ConfirmDialog } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import { formatDate } from '../../utils/centerFormat.js';

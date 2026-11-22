@@ -24,7 +24,7 @@ import Button from '../../components/shared/Button/Button.jsx';
 import { ConfirmDialog } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { formatDate } from '../../utils/centerFormat.js';
-import { callAdmin } from '../../services/adminService.js';
+import { callAdmin } from '../../services/crud/adminService.js';
 import useAdminQuery from './useAdminQuery.js';
 import { QueryState } from './AdminUI.jsx';
 import './CenterDetail.css';

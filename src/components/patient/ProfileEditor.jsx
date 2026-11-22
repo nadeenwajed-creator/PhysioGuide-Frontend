@@ -4,7 +4,7 @@ import { personImage } from '../../utils/personImage.js';
 import Button from '../shared/Button/Button.jsx';
 import FormField from '../shared/FormField/FormField.jsx';
 import { Feedback, RecordImage } from '../center/CenterUI.jsx';
-import { preparePatientImage, savePatientProfile } from '../../services/patientAccountService.js';
+import { preparePatientImage, savePatientProfile } from '../../services/crud/patientAccountService.js';
 import { profileErrors } from '../../services/patient/accountModel.js';
 
 export default function ProfileEditor({ state, onClose, onSaved }) {

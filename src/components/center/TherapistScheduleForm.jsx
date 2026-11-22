@@ -3,7 +3,7 @@ import Modal from '../shared/Modal/Modal.jsx';
 import Button from '../shared/Button/Button.jsx';
 import { Feedback } from './CenterUI.jsx';
 import useCenter from './useCenter.js';
-import { callCenter } from '../../services/centerPortalService.js';
+import { callCenter } from '../../services/crud/centerPortalService.js';
 
 // The centre week runs Saturday to Thursday, with Friday shown last.
 const DAY_ORDER = [6, 0, 1, 2, 3, 4, 5];
