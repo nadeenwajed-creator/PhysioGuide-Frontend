@@ -2,7 +2,7 @@
 // This module is the single translation table between the two.
 //
 // Anything without an entry is dropped: a key the form does not render must not
-// produce a stray error message.
+// produce a stray error message.u
 
 const aliases = {
   // auth
