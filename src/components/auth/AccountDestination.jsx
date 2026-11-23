@@ -11,7 +11,7 @@ import LanguageSwitcher from '../shared/LanguageSwitcher/LanguageSwitcher.jsx';
 import ProfileMenu from '../shared/ProfileMenu/ProfileMenu.jsx';
 import QuickSettings from '../shared/QuickSettings/QuickSettings.jsx';
 import Button from '../shared/Button/Button.jsx';
-import logo from '../../assets/logo/physioguide-icon.svg';
+import logo from '../../../assets/logo/physioguide-icon.svg';
 import './AccountDestination.css';
 
 // A signed-in account destination until the separately owned portal pages are integrated.

@@ -129,7 +129,7 @@ test('runtime assets match handoff hashes; PNG rasters are intact and genuinely 
     ['pain-texture-background.jpg', 1536, 1152, 2, 'd0983b63b050bd62a960b93f0ce99ff35e5afa00624ea157d435f1881fcb13c0'],
   ];
   for (const [file, width, height, type, hash] of assets) {
-    const bytes = readFileSync(new URL(`../../assets/images/patient/pain-assessment/${file}`, import.meta.url));
+    const bytes = readFileSync(new URL(`../../../assets/images/patient/pain-assessment/${file}`, import.meta.url));
     assert.equal(createHash('sha256').update(bytes).digest('hex'), hash);
     if (file.endsWith('.jpg')) {
       assert.equal(bytes.readUInt16BE(0), 0xffd8);

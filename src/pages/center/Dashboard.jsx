@@ -20,7 +20,7 @@ import AppointmentDetails from '../../components/center/AppointmentDetails.jsx';
 import useCenter from '../../components/center/useCenter.js';
 import { getDashboardSummary } from '../../services/centerSummaryService.js';
 import { formatDate } from '../../utils/centerFormat.js';
-import hero from '../../assets/images/center/dashboard-treatment-room.jpeg';
+import hero from '../../../assets/images/center/dashboard-treatment-room.jpeg';
 import './Dashboard.css';
 function Dashboard() {
   const navigate = useNavigate();

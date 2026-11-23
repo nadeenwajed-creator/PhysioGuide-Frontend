@@ -7,7 +7,7 @@ import ThemeToggle from '../shared/ThemeToggle/ThemeToggle.jsx';
 import LanguageSwitcher from '../shared/LanguageSwitcher/LanguageSwitcher.jsx';
 import QuickSettings from '../shared/QuickSettings/QuickSettings.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import logo from '../../assets/logo/physioguide-icon.svg';
+import logo from '../../../assets/logo/physioguide-icon.svg';
 import './PublicHeader.css';
 
 const sections = [

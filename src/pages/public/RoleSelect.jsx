@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faHouseMedical, faUserInjured } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import logo from '../../assets/logo/physioguide-icon.svg';
+import logo from '../../../assets/logo/physioguide-icon.svg';
 import './RoleSelect.css';
 
 // Opens the login page for the selected role.

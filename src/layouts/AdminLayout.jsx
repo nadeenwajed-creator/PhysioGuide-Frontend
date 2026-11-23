@@ -20,7 +20,7 @@ import { startMessagingRealtime } from '../services/messagingRealtime.js';
 import { personFace } from '../utils/personImage.js';
 import { localized } from '../utils/centerFormat.js';
 import { ConfirmDialog } from '../components/center/CenterUI.jsx';
-import logo from '../assets/logo/physioguide-icon.svg';
+import logo from '../../assets/logo/physioguide-icon.svg';
 import './CenterLayout.css';
 
 // Types the admin settings page can toggle; any other type falls back to

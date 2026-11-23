@@ -23,7 +23,7 @@ import { logout as signOut } from '../services/authService.js';
 import { markNotificationsRead } from '../services/crud/notificationService.js';
 import { localized } from '../utils/centerFormat.js';
 import { notificationPreference } from '../services/patient/notificationPolicy.js';
-import logo from '../assets/logo/physioguide-icon.svg';
+import logo from '../../assets/logo/physioguide-icon.svg';
 import './CenterLayout.css';
 const centerNavigation = [
   ['dashboard', faHouse],

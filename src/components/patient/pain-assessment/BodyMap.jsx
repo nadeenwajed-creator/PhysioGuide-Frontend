@@ -1,5 +1,5 @@
-import front from '../../../assets/images/patient/pain-assessment/body-front-clean.png';
-import back from '../../../assets/images/patient/pain-assessment/body-back-clean.png';
+import front from '../../../../assets/images/patient/pain-assessment/body-front-clean.png';
+import back from '../../../../assets/images/patient/pain-assessment/body-back-clean.png';
 import { bodyHotspots } from './bodyHotspots.js';
 
 export default function BodyMap({

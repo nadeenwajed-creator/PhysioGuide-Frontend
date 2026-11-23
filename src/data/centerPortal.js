@@ -1,20 +1,20 @@
-import demoNote from '../assets/documents/demo-session-note.txt?url';
+import demoNote from '../../assets/documents/demo-session-note.txt?url';
 import { dateKey } from '../utils/centerFormat.js';
-import room from '../assets/images/center/center-treatment-room.webp';
-import gym from '../assets/images/center/center-gym.webp';
-import reception from '../assets/images/center/center-reception.webp';
-import manual from '../assets/images/landing/physiotherapy-hero.webp';
-import sports from '../assets/images/center/sports-rehabilitation.webp';
-import back from '../assets/images/center/back-pain.webp';
-import knee from '../assets/images/center/knee-rehabilitation.webp';
-import surgery from '../assets/images/center/post-surgery.webp';
-import pediatric from '../assets/images/center/pediatric-therapy.webp';
-import portrait1 from '../assets/images/center/portrait-01.webp';
-import portrait2 from '../assets/images/center/portrait-02.webp';
-import portrait3 from '../assets/images/center/portrait-03.webp';
-import portrait4 from '../assets/images/center/portrait-04.webp';
-import portrait5 from '../assets/images/center/portrait-05.webp';
-import portrait6 from '../assets/images/center/portrait-06.webp';
+import room from '../../assets/images/center/center-treatment-room.webp';
+import gym from '../../assets/images/center/center-gym.webp';
+import reception from '../../assets/images/center/center-reception.webp';
+import manual from '../../assets/images/landing/physiotherapy-hero.webp';
+import sports from '../../assets/images/center/sports-rehabilitation.webp';
+import back from '../../assets/images/center/back-pain.webp';
+import knee from '../../assets/images/center/knee-rehabilitation.webp';
+import surgery from '../../assets/images/center/post-surgery.webp';
+import pediatric from '../../assets/images/center/pediatric-therapy.webp';
+import portrait1 from '../../assets/images/center/portrait-01.webp';
+import portrait2 from '../../assets/images/center/portrait-02.webp';
+import portrait3 from '../../assets/images/center/portrait-03.webp';
+import portrait4 from '../../assets/images/center/portrait-04.webp';
+import portrait5 from '../../assets/images/center/portrait-05.webp';
+import portrait6 from '../../assets/images/center/portrait-06.webp';
 const bilingual = (en, ar) => ({
   en,
   ar

@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowDown, faArrowRight, faCalendarDays, faLocationDot, faClipboardCheck, faStar, faShieldHeart } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import logo from '../../assets/logo/physioguide-icon.svg';
-import hero from '../../assets/images/landing/physiotherapy-hero.webp';
+import logo from '../../../assets/logo/physioguide-icon.svg';
+import hero from '../../../assets/images/landing/physiotherapy-hero.webp';
 import './LandingPage.css';
 
 // Lists the services shown on the landing page.

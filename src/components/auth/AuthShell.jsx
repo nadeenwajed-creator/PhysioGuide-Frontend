@@ -12,7 +12,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
-import logo from "../../assets/logo/physioguide-icon.svg";
+import logo from "../../../assets/logo/physioguide-icon.svg";
 import "./AuthShell.css";
 
 // ==================================================
