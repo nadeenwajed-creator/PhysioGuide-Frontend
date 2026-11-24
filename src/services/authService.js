@@ -1,5 +1,8 @@
 import { AuthServiceError, normalizeAuthError } from './auth/authErrors.js';
 import { createMockAuthAdapter } from './auth/mockAuthAdapter.js';
+import { createBrowserStore } from './mock/browserStore.js';
+import { readMockCenter, activateMockCenter, getMockTherapists } from './mock/centerRepository.js';
+import { mockAccountStore } from './mock/accountRepository.js';
 import { createOperationAdapter } from './api/operationAdapter.js';
 import { authOperations } from './api/backendContract.js';
 import { httpClient, mockEnabled } from './runtime.js';
@@ -10,18 +13,34 @@ const apiBaseUrl = import.meta.env?.VITE_API_BASE_URL ?? '';
 // Every role talks to the same API through the shared operation contract.
 const liveAdapter = apiBaseUrl ? createOperationAdapter(httpClient, authOperations) : null;
 
-// Mock authentication exists only in mock mode; API mode never falls back to it.
-const demoAdapter = mockEnabled && import.meta.env?.DEV == true ? createMockAuthAdapter() : null;
+const sessionStore = createBrowserStore('physioguide.mock.session.v1');
+const accountStore = mockAccountStore;
+
+// Mock authentication exists only in mock mode; API mode never falls back to
+// it. Vite always defines DEV; plain-Node test runs have no import.meta.env at
+// all, so only an actual production build (DEV === false) is excluded. The
+// adapter persists through the app's shared account/session stores so
+// registrations, profile saves and session restores stay consistent, and it
+// resolves therapist/centre identities from the mock repositories.
+const demoAdapter = mockEnabled && import.meta.env?.DEV !== false ? createMockAuthAdapter({
+  accountStore,
+  sessionStore,
+  getTherapists: getMockTherapists,
+  getCenter: (id) => readMockCenter(id).center,
+  activateCenter: activateMockCenter,
+}) : null;
+
+export const authMode = liveAdapter?.mode ?? demoAdapter?.mode ?? 'unavailable';
+export const isAuthDemo = authMode === 'demo';
 
 function adapterFor(role) {
   // Patient sign-in has always used the real backend when one is configured.
   if (role === 'patient') return liveAdapter ?? demoAdapter;
+  // The admin demo account follows the data mode like the rest of the portal.
+  if (role === 'admin') return mockEnabled ? demoAdapter ?? liveAdapter : liveAdapter ?? demoAdapter;
   if (mockEnabled) return demoAdapter;
   return liveAdapter ?? demoAdapter;
 }
-
-export const authMode = liveAdapter?.mode ?? demoAdapter?.mode ?? 'unavailable';
-export const isAuthDemo = authMode === 'demo';
 
 // Executes one adapter method and converts failures into service errors.
 async function execute(adapter, method, request) {
@@ -76,99 +95,11 @@ async function callSessionAuth(method) {
   return null;
 }
 
-// Signing in publishes the session so the protected routes can open the portal.
-export const loginPatient = (credentials) =>
-  login('patient', 'loginPatient', credentials);
-export const loginCenter = (credentials) =>
-  login('center', 'loginCenter', credentials);
-export const registerPatient = (data) =>
-  callAuth('patient', 'registerPatient', data);
-export const registerCenter = (data) =>
-  callAuth('center', 'registerCenter', data);
-
-export function getAuthenticatedDestination(role) {
-  if (role === 'patient') return '/patient/dashboard';
-  if (role === 'center') return '/center/dashboard';
-  if (role === 'physiotherapist') return '/center/physiotherapist';
-  throw new AuthServiceError('unsupportedRole');
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//  ******************************************************** new ones **********************************************************
-
-
-
-
-
-
-
-
-// import { validCoordinates } from './center/remainingOperations.js';
-// import { AuthServiceError, normalizeAuthError } from './auth/authErrors.js';
-// import { createMockAuthAdapter } from './auth/mockAuthAdapter.js';
-import { createBrowserStore } from './mock/browserStore.js';
-// import { readMockCenter, activateMockCenter, getMockTherapists } from './mock/centerRepository.js';
-import { mockAccountStore } from './mock/accountRepository.js';
-// import { createOperationAdapter } from './api/operationAdapter.js';
-// import { authOperations } from './api/backendContract.js';
-
-const sessionStore = createBrowserStore('physioguide.mock.session.v1');
-const accountStore = mockAccountStore;
-// const adapter = mockEnabled ? createMockAuthAdapter({
-//   accountStore, sessionStore, getTherapists: getMockTherapists,
-//   getCenter: id => readMockCenter(id).center, activateCenter: activateMockCenter,
-// }) : createOperationAdapter(httpClient, authOperations);
 const listeners = new Set();
 let snapshot = { status: 'loading', session: null, error: null };
 let restoration;
 let generation = 0;
+
 function publish(session, error = null) {
   if (snapshot.status !== 'loading' && snapshot.error === error && JSON.stringify(snapshot.session) === JSON.stringify(session)) return;
   snapshot = { status: session ? 'authenticated' : 'anonymous', session, error };
@@ -177,14 +108,7 @@ function publish(session, error = null) {
 export const getAuthSnapshot = () => snapshot;
 export const subscribeAuth = listener => { listeners.add(listener); return () => listeners.delete(listener); };
 
-// async function callAuth(method, request) {
-//   try {
-//     return adapter.execute ? await adapter.execute(method, request) : await adapter[method](request);
-//   } catch (error) {
-//     throw normalizeAuthError(error);
-//   }
-// }
-
+// Signing in publishes the session so the protected routes can open the portal.
 async function login(role, method, credentials) {
   const current = ++generation;
   const result = await callAuth(role, method, credentials);
@@ -192,6 +116,39 @@ async function login(role, method, credentials) {
   getAuthenticatedDestination(result.role);
   if (current === generation) publish(result.session);
   return result;
+}
+
+export const loginPatient = (credentials) =>
+  login('patient', 'loginPatient', credentials);
+export const loginCenter = (credentials) =>
+  login('center', 'loginCenter', credentials);
+export const loginAdmin = (credentials) =>
+  login('admin', 'loginAdmin', credentials);
+export const registerPatient = (data) =>
+  callAuth('patient', 'registerPatient', data);
+export const registerCenter = (data) =>
+  callAuth('center', 'registerCenter', data);
+
+// A Google credential response already contains the session fields the backend
+// returns on password login, so it is stored and published identically.
+export async function loginWithGoogle(body) {
+  if (!liveAdapter) throw new AuthServiceError('unavailable');
+  const current = ++generation;
+  const result = await execute(liveAdapter, 'completeGoogleSession', body);
+  if (result.status !== 'authenticated' || !result.session || result.role !== result.session.role) {
+    throw new AuthServiceError('unexpected');
+  }
+  getAuthenticatedDestination(result.role);
+  if (current === generation) publish(result.session);
+  return result;
+}
+
+export function getAuthenticatedDestination(role) {
+  if (role === 'patient') return '/patient/dashboard';
+  if (role === 'center') return '/center/dashboard';
+  if (role === 'physiotherapist') return '/center/physiotherapist';
+  if (role === 'admin') return '/admin/dashboard';
+  throw new AuthServiceError('unsupportedRole');
 }
 
 async function applicationOperation(method, request = {}) {
