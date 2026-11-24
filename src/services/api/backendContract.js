@@ -622,7 +622,7 @@ async function unreadNotificationIds(client, role) {
   return (body?.notifications || []).filter((item) => !item.isRead).map((item) => item.id);
 }
 
-// --- portal operations -----------------------------------------------------
+// --- center portal operations -----------------------------------------------------
 
 export const centerOperations = {
   getWorkspace: {
