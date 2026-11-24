@@ -58,6 +58,52 @@ export function createGeoapifyReverseGeocoder({ apiKey, fetcher = globalThis.fet
   };
 }
 
+// Keyless OpenStreetMap fallback so a picked point still gets a name when no
+// Geoapify key is configured.
+export function createNominatimReverseGeocoder({ fetcher = globalThis.fetch, timeoutMs = 10000 } = {}) {
+  return async function reverseGeocode(coordinates, { language = 'en', signal } = {}) {
+    const { latitude, longitude } = coordinates ?? {};
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)
+      || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+      throw lookupError('lookupFailed');
+    }
+    const url = new URL('https://nominatim.openstreetmap.org/reverse');
+    url.search = new URLSearchParams({
+      format: 'jsonv2',
+      lat: latitude,
+      lon: longitude,
+      zoom: '18',
+      'accept-language': language === 'ar' ? 'ar' : 'en',
+    });
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    signal?.addEventListener('abort', cancel, { once: true });
+    const timer = setTimeout(cancel, timeoutMs);
+    try {
+      if (signal?.aborted) throw lookupError('cancelled');
+      const response = await fetcher(url.toString(), {
+        signal: controller.signal,
+        credentials: 'omit',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) {
+        throw lookupError([401, 403, 429].includes(response.status) ? 'lookupUnavailable' : 'lookupFailed');
+      }
+      const data = await response.json();
+      if (data?.error) return null;
+      const display = typeof data?.display_name === 'string' ? data.display_name.trim() : '';
+      return display || null;
+    } catch (error) {
+      const code = signal?.aborted ? 'cancelled' : controller.signal.aborted ? 'lookupTimeout' : error?.code;
+      throw lookupError(['lookupTimeout', 'lookupUnavailable', 'cancelled'].includes(code) ? code : 'lookupFailed');
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', cancel);
+    }
+  };
+}
+
 export function createCenterLocationService({ reverseGeocode = null } = {}) {
   function getCoordinates(geolocation = globalThis.navigator?.geolocation) {
     return new Promise((resolve, reject) => {
@@ -82,6 +128,10 @@ export function createCenterLocationService({ reverseGeocode = null } = {}) {
   return { getCoordinates, getAddress };
 }
 
+const geoapifyKey = import.meta.env?.VITE_GEOAPIFY_API_KEY;
+
 export const centerLocationService = createCenterLocationService({
-  reverseGeocode: createGeoapifyReverseGeocoder({ apiKey: import.meta.env?.VITE_GEOAPIFY_API_KEY }),
+  reverseGeocode: geoapifyKey?.trim()
+    ? createGeoapifyReverseGeocoder({ apiKey: geoapifyKey })
+    : createNominatimReverseGeocoder(),
 });
