@@ -1,3 +1,5 @@
+// Center and therapist routes: guards, layouts, pages and the therapist settings page.
+
 import { Route, Navigate } from 'react-router-dom';
 import CenterLayout from '../layouts/CenterLayout.jsx';
 import Dashboard from '../pages/center/Dashboard.jsx';
@@ -13,6 +15,7 @@ import Messages from '../pages/physiotherapist/Messages.jsx';
 import Conversation from '../pages/physiotherapist/Conversation.jsx';
 import TherapistLayout from '../layouts/TherapistLayout.jsx';
 import TherapistProfile from '../pages/physiotherapist/Profile.jsx';
+import TherapistSettings from '../pages/physiotherapist/Settings.jsx';
 
 // Keep the route-element contract consumed by the existing AppRoutes aggregator.
 const centerRoutes = (
@@ -36,6 +39,7 @@ const centerRoutes = (
       <Route path="profile" element={<TherapistProfile />} />
       <Route path="messages" element={<Messages />} />
       <Route path="messages/:conversationId" element={<Conversation />} />
+      <Route path="settings" element={<TherapistSettings />} />
     </Route>
   </Route>
   </>
