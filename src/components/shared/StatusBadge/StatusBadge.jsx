@@ -1,3 +1,5 @@
+// One translated status tag per record, with a tone for each status.
+
 
 import { useLanguage } from '../../../context/LanguageContext.jsx';
 
@@ -16,6 +18,15 @@ function StatusBadge({
     'pending',
     'completed',
     'cancelled',
+    // Admin moderation vocabulary (centers, patients, therapists, reviews).
+    'approved',
+    'rejected',
+    'active',
+    'inactive',
+    'suspended',
+    'published',
+    'hidden',
+    'reported',
   ];
 
   const badgeStatus = allowedStatuses.includes(status)
