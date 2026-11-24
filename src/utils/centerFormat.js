@@ -8,7 +8,10 @@ export function dateKey(date = new Date()) {
 }
 export function formatDate(value, language) {
   if (!value) return '—';
-  const date = new Date(`${value.slice(0, 10)}T12:00:00`);
+  // The API may send an ISO string, a Date or a timestamp; only strings carry
+  // the date prefix that keeps the calendar day stable across time zones.
+  const text = typeof value === 'string' ? value.slice(0, 10) : value;
+  const date = new Date(typeof text === 'string' ? `${text}T12:00:00` : text);
   return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat(language, {
     day: 'numeric',
     month: 'short',
