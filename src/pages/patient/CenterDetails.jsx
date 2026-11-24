@@ -1,16 +1,21 @@
+// Patient view of one center: services, therapists, reviews and booking.
+
 import { usePatientLabels } from '../../components/patient/usePatientLabels.js';
+import { personImage } from '../../utils/personImage.js';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import Button from '../../components/shared/Button/Button.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock } from '@fortawesome/free-solid-svg-icons';
-import { Panel, RecordImage } from '../../components/center/CenterUI.jsx';
+import { faClock, faStar } from '@fortawesome/free-solid-svg-icons';
+import { Panel, RecordImage, Feedback } from '../../components/center/CenterUI.jsx';
 import useDiscovery from '../../components/patient/useDiscovery.js';
 import { DiscoveryState, Favorite, CenterRating } from '../../components/patient/DiscoveryUI.jsx';
 import BookingModal from '../../components/patient/BookingModal.jsx';
 import CenterGallery from '../../components/patient/CenterGallery.jsx';
 import ReviewsCarousel from '../../components/patient/ReviewsCarousel.jsx';
+import ReviewModal from '../../components/patient/ReviewModal.jsx';
 import '../../components/patient/PatientDiscovery.css';
+import '../../components/patient/PatientReview.css';
 
 export default function CenterDetails() {
   const state = useDiscovery();
@@ -19,6 +24,8 @@ export default function CenterDetails() {
   const navigate = useNavigate();
   const { t, name, money, dir } = usePatientLabels();
   const [booking, setBooking] = useState(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [notice, setNotice] = useState('');
   const c = state.data?.centers.find(c => c.id === centerId);
   const tabs = ['overview', 'services', 'therapists', 'reviews'];
   // Keep the selected tab in the link and fall back for unknown values
@@ -147,7 +154,7 @@ export default function CenterDetails() {
           {tab === 'therapists' && <div className="pd-grid">
             {!c.therapists.length && <p>{t('empty')}</p>}
             {c.therapists.map(p => <Panel key={p.id} className="pd-therapist-card">
-              <RecordImage className="pd-portrait" src={p.imageUrl} alt={name(p.name)} />
+              <RecordImage className="pd-portrait" src={personImage(p.imageUrl, name(p.name), p.email)} alt={name(p.name)} />
               <h2>{name(p.name)}</h2>
               <p>{name(p.specialty)}</p>
               <Button
@@ -157,10 +164,25 @@ export default function CenterDetails() {
               </Button>
             </Panel>)}
           </div>}
-          {tab === 'reviews' && <ReviewsCarousel key={c.id} center={c} />}
+          {tab === 'reviews' && <>
+            <div className="pd-reviews-toolbar">
+              <Button icon={faStar} onClick={() => setReviewOpen(true)}>{t('writeReview')}</Button>
+            </div>
+            <Feedback resetKey={notice}>{notice}</Feedback>
+            <ReviewsCarousel key={c.id} center={c} />
+          </>}
         </div>
       </> : <p>{t('notFound')}</p>}
       {booking && <BookingModal key={centerId} state={state} initial={booking} onClose={() => setBooking(null)} />}
+      {reviewOpen && <ReviewModal
+        center={c}
+        state={state}
+        onClose={() => setReviewOpen(false)}
+        onSaved={() => {
+          setReviewOpen(false);
+          setNotice(t('reviewThanks'));
+        }}
+      />}
     </DiscoveryState>
   </div>;
 }
