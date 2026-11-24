@@ -1,6 +1,12 @@
+// Discovery hook: centers, therapists and specialties plus the patient's saved center ids.
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { getPatientDiscovery, subscribePatientDiscovery } from '../../services/patientDiscoveryService.js';
+import {
+  getPatientDiscovery,
+  getPatientSavedCenters,
+  subscribePatientDiscovery
+} from '../../services/crud/patientDiscoveryService.js';
 
 export default function useDiscovery() {
   const { session: actor } = useAuth();
@@ -15,9 +21,17 @@ export default function useDiscovery() {
     const refresh = async () => {
       const id = ++request;
       try {
-        const data = await getPatientDiscovery(actor);
+        // Favourites come from the patient's own rows; a list that loads
+        // without them is still usable, so that call may fail quietly.
+        const [data, favoriteIds] = await Promise.all([
+          getPatientDiscovery(actor),
+          getPatientSavedCenters(actor).catch(() => [])
+        ]);
         if (live && id === request) setState({
-          data,
+          data: {
+            ...data,
+            favoriteIds: Array.isArray(favoriteIds) ? favoriteIds : data?.favoriteIds || []
+          },
           error: null,
           actorId: actor.id
         });
