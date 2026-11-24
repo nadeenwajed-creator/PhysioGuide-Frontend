@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+// Center/therapist shell: sidebar, bell, realtime messaging and workspace refresh.
+
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { faHouse, faCalendarDays, faUsers, faUserDoctor, faBriefcaseMedical, faStar, faBuilding, faGear, faComments, faUser, faLocationDot, faClipboardList } from '@fortawesome/free-solid-svg-icons';
 import Navbar from '../components/shared/Navbar/Navbar.jsx';
@@ -13,15 +15,17 @@ import SearchBar from '../components/shared/SearchBar/SearchBar.jsx';
 import Button from '../components/shared/Button/Button.jsx';
 import { ConfirmDialog, Feedback } from '../components/center/CenterUI.jsx';
 import { useLanguage } from '../context/LanguageContext.jsx';
+import { personImage } from '../utils/personImage.js';
 import ThemeContext from '../context/ThemeContext.jsx';
-import { getCenterWorkspace, subscribeCenter } from '../services/centerPortalService.js';
-import { getMessagingWorkspace } from '../services/messageService.js';
+import { getCenterWorkspace, subscribeCenter } from '../services/crud/centerPortalService.js';
+import { getMessagingWorkspace } from '../services/crud/messageService.js';
+import { startMessagingRealtime } from '../services/messagingRealtime.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { logout as signOut } from '../services/authService.js';
-import { markNotificationsRead } from '../services/notificationService.js';
+import { markNotificationsRead } from '../services/crud/notificationService.js';
 import { localized } from '../utils/centerFormat.js';
 import { notificationPreference } from '../services/patient/notificationPolicy.js';
-import logo from '../assets/logo/physioguide-icon.svg';
+import logo from '../../assets/logo/physioguide-icon.svg';
 import './CenterLayout.css';
 const centerNavigation = [
   ['dashboard', faHouse],
@@ -54,6 +58,8 @@ function CenterLayout({ portal = 'center' }) {
   const [workspace, setWorkspace] = useState(null);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
+  const refreshRef = useRef(null);
+  const hasDataRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [flash, setFlash] = useState(null);
@@ -63,11 +69,13 @@ function CenterLayout({ portal = 'center' }) {
   useEffect(() => {
     let active = true;
     let request = 0;
+    hasDataRef.current = false;
     async function refresh() {
       const current = ++request;
       try {
         const result = await (patientPortal ? getMessagingWorkspace(actor) : getCenterWorkspace(actor));
         if (active && current === request) {
+          hasDataRef.current = true;
           setWorkspace({
             actorId: actor.id,
             role,
@@ -79,11 +87,14 @@ function CenterLayout({ portal = 'center' }) {
           setError('');
         }
       } catch (failure) {
-        if (active && current === request) setError(failure.code || 'network');
+        // A transient failure (poll, focus) must not blank a page that already
+        // has content; only the first load reports the error state.
+        if (active && current === request && !hasDataRef.current) setError(failure.code || 'network');
       }
     }
     const unsubscribe = subscribeCenter(refresh);
     window.addEventListener('focus', refresh);
+    refreshRef.current = refresh;
     refresh();
     return () => {
       active = false;
@@ -91,8 +102,23 @@ function CenterLayout({ portal = 'center' }) {
       window.removeEventListener('focus', refresh);
     };
   }, [actor, role, retry, patientPortal]);
+  // While a messaging page is open and visible, poll for messages the other
+  // side sent without any local action; focus and mutations still refresh too.
+  useEffect(() => {
+    if (!pathname.includes('/messages')) return undefined;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') refreshRef.current?.();
+    }, 20000);
+    return () => window.clearInterval(timer);
+  }, [pathname]);
+  // Server push replaces waiting for the poll: each hub event schedules one
+  // short coalesced refresh, so the other side's message lands instantly.
+  useEffect(() => {
+    if (!actor?.id) return undefined;
+    return startMessagingRealtime(() => refreshRef.current?.());
+  }, [actor]);
   const data = workspace?.actorId === actor.id && workspace.role === role && workspace.centerId === actor.centerId && workspace.therapistId === actor.therapistId && workspace.patientId === actor.patientId ? workspace.data : null;
-  const navigation = patientPortal ? [['dashboard', faHouse], ['centers', faLocationDot], ['pain-assessment', faClipboardList], ['appointments', faCalendarDays], ['messages', faComments], ['profile', faUser], ['settings', faGear]] : therapistPortal ? [['messages', faComments], ['profile', faUser]] : centerNavigation;
+  const navigation = patientPortal ? [['dashboard', faHouse], ['centers', faLocationDot], ['pain-assessment', faClipboardList], ['appointments', faCalendarDays], ['messages', faComments], ['profile', faUser], ['settings', faGear]] : therapistPortal ? [['messages', faComments], ['profile', faUser], ['settings', faGear]] : centerNavigation;
   const profilePath = patientPortal ? '/patient/profile' : therapistPortal ? '/center/physiotherapist/profile' : '/center/profile';
   const items = navigation.map(([id, icon]) => ({
     id,
@@ -110,21 +136,69 @@ function CenterLayout({ portal = 'center' }) {
   const account = patientPortal ? data?.patientProfile || data?.patients.find(item => item.id === actor.patientId) || actor : therapistPortal ? data?.therapists.find(item => item.id === actor.therapistId) : data?.center;
   const user = {
     name: name(account?.name),
-    avatar: account?.imageUrl
+    // Patients and therapists get a real portrait when they have no photo;
+    // the center's own account keeps the icon fallback.
+    avatar: patientPortal || therapistPortal
+      ? personImage(account?.imageUrl, name(account?.name), account?.email)
+      : account?.imageUrl
   };
   const results = search.trim() ? items.filter(item => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())) : [];
+  // API notifications store plain strings; derive the translation key from
+  // the type so Arabic UIs show localized copy. Explicit keys (mock) and
+  // bilingual mock titles keep their existing path.
+  const copyKeys = patientPortal ? {
+    message: 'therapistMessage',
+    appointment: 'appointmentUpdate',
+    appointmentChange: 'appointmentUpdate',
+    appointmentReminder: 'appointmentReminder',
+  } : therapistPortal ? {
+    message: 'message',
+    professional: 'professional',
+    services: 'services',
+    system: 'system',
+    appointment: 'appointmentUpdate',
+    appointmentChange: 'appointmentUpdate',
+    appointmentRequest: 'appointmentRequest',
+    appointmentReminder: 'appointmentReminder',
+  } : {
+    appointment: 'appointmentRequest',
+    appointmentRequest: 'appointmentRequest',
+    appointmentChange: 'appointmentUpdate',
+    patient: 'patient',
+    review: 'review',
+    center: 'centerStatus',
+  };
   const notifications = (data?.notifications || [])
     .filter(item => data.notificationPreferences?.[patientPortal ? notificationPreference(item) : notificationPreferences[item.type]] !== false)
-    .map(item => ({
-      ...item,
-      title: (therapistPortal || patientPortal) && item.titleKey ? tr(`therapistNotifications.${item.titleKey}`) : name(item.title),
-      message: (therapistPortal || patientPortal) && item.messageKey ? tr(`therapistNotifications.${item.messageKey}`) : name(item.message),
-      to: (therapistPortal || patientPortal) ? item.target?.kind === 'professional' && therapistPortal
-        ? '/center/physiotherapist/profile?tab=professional'
-        : item.target?.kind === 'conversation' && data.conversations?.some(conversation => conversation.id === item.target.id)
-          ? `${messagesBase}/${encodeURIComponent(item.target.id)}`
-          : item.target?.kind === 'appointment' && patientPortal ? `/patient/appointments?appointment=${encodeURIComponent(item.target.id)}` : undefined : undefined,
-    }));
+    .map(item => {
+      const base = item.titleKey
+        ? item.titleKey.replace(/Title$/, '')
+        : typeof item.title === 'string' ? copyKeys[item.type] : undefined;
+      let to;
+      if (patientPortal || therapistPortal) {
+        to = item.target?.kind === 'professional' && therapistPortal
+          ? '/center/physiotherapist/profile?tab=professional'
+          : item.target?.kind === 'conversation' && data.conversations?.some(conversation => conversation.id === item.target.id)
+            ? `${messagesBase}/${encodeURIComponent(item.target.id)}`
+            : item.target?.kind === 'appointment' && patientPortal
+              ? `/patient/appointments?appointment=${encodeURIComponent(item.target.id)}`
+              : undefined;
+      } else if (['appointment', 'appointmentRequest', 'appointmentChange'].includes(item.type)) {
+        to = '/center/appointments';
+      } else if (item.type === 'center') {
+        to = '/center/dashboard';
+      } else if (item.type === 'review') {
+        to = '/center/reviews';
+      } else if (item.type === 'patient') {
+        to = '/center/patients';
+      }
+      return {
+        ...item,
+        title: base ? tr(`therapistNotifications.${base}Title`) : name(item.title),
+        message: base ? tr(`therapistNotifications.${base}Body`) : name(item.message),
+        to,
+      };
+    });
 
   function notify(message, { error = false } = {}) {
     // A repeated save starts a fresh timer even when the translated text is identical.
@@ -133,6 +207,8 @@ function CenterLayout({ portal = 'center' }) {
   async function markRead(id) {
     try {
       await markNotificationsRead(actor, id);
+      // Refetch so the bell drops the notification that was just read.
+      await refreshRef.current?.();
     } catch (failure) {
       notify(tr(`error.${failure.code || 'network'}`), { error: true });
     }
