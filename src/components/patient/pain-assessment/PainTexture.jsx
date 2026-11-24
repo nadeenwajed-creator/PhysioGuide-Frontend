@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 // The supplied background is a JPEG, so keep the matching extension
-import background from '../../../assets/images/patient/pain-assessment/pain-texture-background.jpg';
+import background from '../../../../assets/images/patient/pain-assessment/pain-texture-background.jpg';
 
 // Keep the seven effects lightweight; animate at 30 fps
 function drawEffects(ctx, width, height, time, selected, still) {

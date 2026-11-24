@@ -1,3 +1,5 @@
+// Patient home: next appointment, quick actions and saved centers.
+
 import { usePatientLabels } from '../../components/patient/usePatientLabels.js';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +16,7 @@ import { Panel, PageHeader } from '../../components/center/CenterUI.jsx';
 import useDiscovery from '../../components/patient/useDiscovery.js';
 import { DiscoveryState, CenterCard } from '../../components/patient/DiscoveryUI.jsx';
 import BookingModal from '../../components/patient/BookingModal.jsx';
-import hero from '../../assets/images/patient/dashboard-rehabilitation-hero.jpeg';
+import hero from '../../../assets/images/patient/dashboard-rehabilitation-hero.jpeg';
 import '../../components/patient/PatientDiscovery.css';
 
 export default function Dashboard() {

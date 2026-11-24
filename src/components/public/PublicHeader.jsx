@@ -1,3 +1,5 @@
+// Public site header: brand mark, entry links, language and theme.
+
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -7,7 +9,7 @@ import ThemeToggle from '../shared/ThemeToggle/ThemeToggle.jsx';
 import LanguageSwitcher from '../shared/LanguageSwitcher/LanguageSwitcher.jsx';
 import QuickSettings from '../shared/QuickSettings/QuickSettings.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import logo from '../../assets/logo/physioguide-icon.svg';
+import logo from '../../../assets/logo/physioguide-icon.svg';
 import './PublicHeader.css';
 
 const sections = [

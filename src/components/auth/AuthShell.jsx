@@ -1,3 +1,5 @@
+// Frame shared by the auth pages: brand mark, back link, language and theme controls.
+
 import {
   useEffect,
   useLayoutEffect,
@@ -12,7 +14,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 import { useLanguage } from "../../context/LanguageContext.jsx";
 
-import logo from "../../assets/logo/physioguide-icon.svg";
+import logo from "../../../assets/logo/physioguide-icon.svg";
 import "./AuthShell.css";
 
 // ==================================================

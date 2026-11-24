@@ -1,7 +1,9 @@
+// Public footer: brand, links, language switch and copyright.
+
 
 import { useLanguage } from '../../../context/LanguageContext.jsx';
 
-import logoSrc from '../../../assets/logo/physioguide-icon.svg';
+import logoSrc from '../../../../assets/logo/physioguide-icon.svg';
 
 import './Footer.css';
 
