@@ -1,3 +1,5 @@
+// Center home: hero, today's appointments and the count cards.
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -20,7 +22,7 @@ import AppointmentDetails from '../../components/center/AppointmentDetails.jsx';
 import useCenter from '../../components/center/useCenter.js';
 import { getDashboardSummary } from '../../services/centerSummaryService.js';
 import { formatDate } from '../../utils/centerFormat.js';
-import hero from '../../assets/images/center/dashboard-treatment-room.jpeg';
+import hero from '../../../assets/images/center/dashboard-treatment-room.jpeg';
 import './Dashboard.css';
 function Dashboard() {
   const navigate = useNavigate();
@@ -107,6 +109,7 @@ function Dashboard() {
                     <Avatar
                       src={patient?.imageUrl}
                       name={name(patient?.name)}
+                      seed={patient?.id}
                       size="sm"
                     />
                     <div className="center-dashboard__patient">
