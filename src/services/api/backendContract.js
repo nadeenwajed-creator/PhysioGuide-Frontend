@@ -7,8 +7,11 @@
 import { ServiceError } from './serviceError.js';
 import { loadSession, saveSession, clearSession } from '../auth/session.js';
 import * as map from './mappers.js';
+import { toAssessmentResult } from '../patient/painAssessmentModel.js';
+import { fitImageFile } from '../../utils/imageFile.js';
 
 const CENTER_WORKSPACE = '/api/center/workspace';
+const SCHEDULES = '/api/Schedules';
 const THERAPIST_WORKSPACE = '/api/therapist/workspace';
 const PATIENT = '/api/patient';
 const AUTH = '/api/Auth';
@@ -31,6 +34,14 @@ function resolveAssets(value) {
 
 const resolved = (mapper) => (body, ...rest) => resolveAssets(mapper(body, ...rest));
 
+// A therapist's status is the account's IsActive flag, so the list filter has
+// to turn the chosen status back into the boolean the API filters on.
+function isActiveFilter(status) {
+  if (status === 'active') return true;
+  if (status === 'suspended' || status === 'inactive') return false;
+  return undefined;
+}
+
 // The backend refuses an empty payload, so a password change carries whichever
 // pair of names the form happens to use.
 function passwordPair(values) {
@@ -42,7 +53,7 @@ function passwordPair(values) {
 
 // Centres register with a single free-text location but the API stores a city
 // separately; the city is the last component of the address before the country.
-function cityFromAddress(address) {
+export function cityFromAddress(address) {
   const parts = String(address || '').split(',').map((part) => part.trim()).filter(Boolean);
   if (parts.length <= 1) return parts[0] || 'Unknown';
   return parts.length === 2 ? parts[0] : parts[parts.length - 2];
@@ -61,10 +72,13 @@ function signIn(body, credentials) {
   return session;
 }
 
-const login = () => ({
+// Every portal names the role it serves (patient / center / admin), so the
+// backend refuses an account that belongs to another portal: an admin cannot
+// sign in on the patient form or vice versa.
+const login = (role) => ({
   request: (credentials) => ({
     method: 'POST',
-    path: `${AUTH}/login`,
+    path: `${AUTH}/login?role=${encodeURIComponent(role)}`,
     data: { email: credentials?.email, password: credentials?.password },
     auth: false,
   }),
@@ -80,8 +94,11 @@ const login = () => ({
 });
 
 export const authOperations = {
-  loginPatient: login(),
-  loginCenter: login(),
+  loginPatient: login('patient'),
+  loginCenter: login('center'),
+  // The hidden admin entry shares the credential endpoint but names its own
+  // role, so only an admin account can complete it.
+  loginAdmin: login('admin'),
 
   registerPatient: {
     request: (data) => ({
@@ -122,6 +139,15 @@ export const authOperations = {
     },
     // A new centre is created Pending, so the form reports the review notice.
     response: () => ({ mode: 'api', status: 'pending-review', role: 'center' }),
+  },
+
+  // A Google sign-in response carries the same fields as password login, so
+  // the session is stored and shaped exactly the same way.
+  completeGoogleSession: {
+    execute: async (_client, body) => {
+      const session = signIn(body);
+      return { mode: 'api', status: 'authenticated', role: session.role, session };
+    },
   },
 
   // The session lives in localStorage; restoring it never touches the network.
@@ -165,6 +191,408 @@ export const authOperations = {
   },
 };
 
+// --- admin portal ----------------------------------------------------------
+// Every operation below is admin-only; the bearer token carries the role the
+// backend must enforce. List queries pass their filters straight through and
+// the gateway drops empty values.
+
+const ADMIN = '/api/admin';
+
+export const adminOperations = {
+  getAdminDashboard: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/dashboard`,
+      query: { year: params?.year },
+    }),
+    response: resolved(map.toAdminDashboard),
+  },
+
+  getAdminActivity: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/activity`,
+      query: { page: params?.page, pageSize: params?.pageSize },
+    }),
+    response: resolved(map.toAdminActivity),
+  },
+
+  getAdminCenters: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/centers`,
+      query: {
+        search: params?.search,
+        status: params?.status,
+        // The API filters a center by the specialty name of its therapists.
+        specialty: params?.specialty,
+        city: params?.city,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminCenters),
+  },
+
+  getAdminCenter: {
+    request: (_actor, { id } = {}) => ({
+      method: 'GET',
+      path: `${ADMIN}/centers/${encodeURIComponent(id)}`,
+    }),
+    response: resolved(map.toAdminCenter),
+  },
+
+  setAdminCenterStatus: {
+    request: (_actor, { id, status, reason } = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/centers/${encodeURIComponent(id)}/status`,
+      data: { status, ...(reason ? { reason } : {}) },
+    }),
+    response: resolved(map.toAdminCenter),
+  },
+
+  updateAdminCenter: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/centers/${encodeURIComponent(values.id)}`,
+      data: {
+        nameEnglish: values.nameEnglish,
+        nameArabic: values.nameArabic,
+        city: values.city,
+        address: values.address,
+        websiteUrl: values.websiteUrl,
+        phoneNumber: values.phoneNumber,
+        descriptionEnglish: values.descriptionEnglish,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminCenter: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/centers/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
+  },
+
+  getAdminPatients: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/patients`,
+      query: {
+        search: params?.search || undefined,
+        // The API filters on the account flag, not on the status word.
+        isActive:
+          params?.status === 'active'
+            ? true
+            : params?.status === 'suspended'
+              ? false
+              : undefined,
+        city: params?.city || undefined,
+        sort: params?.sort || undefined,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminPatients),
+  },
+
+  setAdminPatientStatus: {
+    request: (_actor, { id, status } = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/patients/${encodeURIComponent(id)}/status`,
+      data: { status },
+    }),
+    response: resolved((body) => map.toAdminPatient(body)),
+  },
+
+  getAdminPatient: {
+    request: (_actor, { id } = {}) => ({
+      method: 'GET',
+      path: `${ADMIN}/patients/${encodeURIComponent(id)}`,
+    }),
+    response: resolved(map.toAdminPatientProfile),
+  },
+
+  updateAdminPatient: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/patients/${encodeURIComponent(values.id)}`,
+      data: {
+        fullName: values.fullName,
+        phoneNumber: values.phoneNumber,
+        city: values.city,
+        gender: values.gender,
+        dateOfBirth: values.dateOfBirth || null,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminPatient: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/patients/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
+  },
+
+  getAdminPhysiotherapists: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/physiotherapists`,
+      query: {
+        search: params?.search,
+        // The API filters therapists by specialty id, not by label.
+        specialtyId: params?.specialty,
+        centerId: params?.center,
+        // A therapist's status is the account's IsActive flag; the server has
+        // no separate status column to filter on.
+        isActive: isActiveFilter(params?.status),
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminPhysiotherapists),
+  },
+
+  setAdminPhysiotherapistStatus: {
+    request: (_actor, { id, status } = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(id)}/status`,
+      data: { status },
+    }),
+    response: resolved((body) => map.toAdminPhysiotherapist(body)),
+  },
+
+  getAdminPhysiotherapist: {
+    request: (_actor, { id } = {}) => ({
+      method: 'GET',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(id)}`,
+    }),
+    response: resolved(map.toAdminTherapistProfile),
+  },
+
+  updateAdminPhysiotherapist: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(values.id)}`,
+      data: {
+        fullName: values.fullName,
+        phoneNumber: values.phoneNumber,
+        centerId: values.centerId || null,
+        specialtyId: values.specialtyId || null,
+        yearsOfExperience: values.yearsOfExperience === '' ? null : values.yearsOfExperience,
+        bio: values.bio,
+        isAvailable: values.isAvailable === undefined ? null : values.isAvailable,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminPhysiotherapist: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/physiotherapists/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
+  },
+
+  addAdminPhysiotherapist: {
+    request: (_actor, values) => ({
+      method: 'POST',
+      path: `${ADMIN}/physiotherapists`,
+      data: {
+        fullName: values?.fullName,
+        email: values?.email,
+        licenseId: values?.licenseId,
+        specialtyId: values?.specialty,
+        centerId: values?.centerId,
+        password: values?.Password,
+        phoneNumber: values?.PhoneNumber
+      },
+    }),
+    response: resolved((body) => map.toAdminPhysiotherapist(body)),
+  },
+
+  getAdminAppointments: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/appointments`,
+      query: {
+        search: params?.search,
+        status: params?.status,
+        centerId: params?.center,
+        // One patient's own history, used by the patient view dialog.
+        patientId: params?.patientId,
+        // One exact day rather than a range: the API matches the appointment's
+        // start date against it.
+        date: params?.date,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminAppointments),
+  },
+
+  getAdminAppointmentOptions: {
+    request: () => ({ method: 'GET', path: `${ADMIN}/appointments/options` }),
+    response: resolved(map.toAdminAppointmentOptions),
+  },
+
+  createAdminAppointment: {
+    request: (_actor, values) => ({
+      method: 'POST',
+      path: `${ADMIN}/appointments`,
+      data: {
+        patientId: values?.patientId,
+        centerId: values?.centerId,
+        therapistId: values?.therapistId,
+        serviceId: values?.serviceId,
+        date: values?.date,
+        time: values?.time,
+      },
+    }),
+    response: resolved((body) => map.toAdminAppointment(body)),
+  },
+
+  updateAdminAppointment: {
+    request: (_actor, values = {}) => ({
+      method: 'PUT',
+      path: `${ADMIN}/appointments/${encodeURIComponent(values.id)}`,
+      data: {
+        centerId: values.centerId || null,
+        therapistId: values.therapistId || null,
+        serviceId: values.serviceId || null,
+        startDateTime: values.startDateTime || null,
+        endDateTime: values.endDateTime || null,
+        status: values.status,
+        patientNotes: values.patientNotes,
+      },
+    }),
+    response: resolved((body) => body || {}),
+  },
+
+  deleteAdminAppointment: {
+    request: (_actor, { id } = {}) => ({
+      method: 'DELETE',
+      path: `${ADMIN}/appointments/${encodeURIComponent(id)}`,
+    }),
+    response: resolved((body) => ({ id: String(body?.id ?? ''), deleted: true })),
+  },
+
+  getAdminReviews: {
+    request: (_actor, params) => ({
+      method: 'GET',
+      path: `${ADMIN}/reviews`,
+      query: {
+        search: params?.search,
+        // The list page picks one rating; the API narrows with a min/max pair.
+        minRating: params?.rating || undefined,
+        maxRating: params?.rating || undefined,
+        // Published maps to the API's visibility flag; hidden is its inverse.
+        visibility:
+          params?.status === 'published'
+            ? 'visible'
+            : params?.status === 'hidden'
+              ? 'hidden'
+              : undefined,
+        sort: params?.sort || undefined,
+        // The activity log links to one review by id.
+        reviewId: params?.reviewId || undefined,
+        page: params?.page,
+        pageSize: params?.pageSize,
+      },
+    }),
+    response: resolved(map.toAdminReviews),
+  },
+
+  moderateAdminReview: {
+    request: (_actor, { id, action } = {}) => ({
+      method: 'POST',
+      path: `${ADMIN}/reviews/${encodeURIComponent(id)}/moderate`,
+      data: { action },
+    }),
+    response: resolved((body) => map.toAdminReview(body)),
+  },
+
+  getAdminSettings: {
+    request: () => ({ method: 'GET', path: `${ADMIN}/settings` }),
+    response: resolved(map.toAdminSettings),
+  },
+
+  saveAdminSettings: {
+    request: (_actor, values) => ({
+      method: 'PUT',
+      path: `${ADMIN}/settings`,
+      data: {
+        ...(values?.profile?.name ? { adminFullName: values.profile.name } : {}),
+        ...(values?.profile?.phone ? { contactPhone: values.profile.phone } : {}),
+        // The photo is uploaded first, then saved with the rest of the profile.
+        ...(values?.profile?.imageUrl
+          ? { profileImageUrl: values.profile.imageUrl }
+          : {}),
+        // UI toggles travel as the four generic flags the API stores.
+        notifications: values?.notifications
+          ? map.adminPreferencesRequest(values.notifications)
+          : undefined,
+      },
+    }),
+    response: resolved(map.toAdminSettings),
+  },
+
+  // Mirrors the patient/centre upload contract: multipart "file" in, { url } out.
+  prepareAdminImage: {
+    request: (_actor, file) => {
+      const form = new FormData();
+      form.append('file', file, file?.name || 'upload');
+      return { method: 'POST', path: `${ADMIN}/settings/image`, data: form };
+    },
+    response: (body) => resolveAssets(body?.url || ''),
+  },
+
+  // The navbar bell: the full list plus the preferences that filter it.
+  getAdminNotifications: {
+    request: () => ({ method: 'GET', path: `${ADMIN}/notifications` }),
+    response: (body) => ({
+      notifications: (body?.notifications || []).map((item) => map.toNotification(item)),
+      notificationPreferences: map.toAdminPreferences(body?.preferences),
+    }),
+  },
+
+  // "Mark one" posts the id; "mark all" walks the unread list like the
+  // other portals do through their workspaces.
+  markNotificationsRead: {
+    execute: async (client, _actor, id) => {
+      if (id !== undefined && id !== null) {
+        await client.post('/api/notifications/read', { data: { id } });
+        return undefined;
+      }
+      const body = await client.get(`${ADMIN}/notifications`);
+      const ids = (body?.notifications || [])
+        .filter((item) => !item.isRead)
+        .map((item) => item.id);
+      await Promise.all(
+        ids.map((item) =>
+          client.post('/api/notifications/read', { data: { id: item } }).catch(() => undefined)
+        )
+      );
+      return undefined;
+    },
+  },
+
+  // The admin settings page reuses the shared credential endpoint.
+  changeAdminPassword: {
+    request: (_actor, values) => ({
+      method: 'POST',
+      path: `${AUTH}/change-password`,
+      data: passwordPair(values),
+    }),
+    response: (body) => body ?? {},
+  },
+};
+
 // --- messaging helpers -----------------------------------------------------
 
 // Loads each conversation's messages; the workspaces only carry previews.
@@ -194,7 +622,7 @@ async function unreadNotificationIds(client, role) {
   return (body?.notifications || []).filter((item) => !item.isRead).map((item) => item.id);
 }
 
-// --- portal operations -----------------------------------------------------
+// --- center portal operations -----------------------------------------------------
 
 export const centerOperations = {
   getWorkspace: {
@@ -242,9 +670,74 @@ export const centerOperations = {
     response: resolved(map.toDiscovery),
   },
 
+  // Favourites are their own rows, so they load next to the discovery list
+  // and the hearts/tabs stay in sync with what the server stored.
+  getPatientSavedCenters: {
+    request: () => ({ method: 'GET', path: `${PATIENT}/saved-centers` }),
+    response: resolved((body) =>
+      (Array.isArray(body) ? body : [])
+        .map((row) => String(row?.centerId ?? row?.id ?? ''))
+        .filter(Boolean)
+    ),
+  },
+
+  setPatientFavorite: {
+    request: (_actor, { centerId, saved } = {}) => ({
+      method: saved ? 'PUT' : 'DELETE',
+      path: `${PATIENT}/saved-centers/${encodeURIComponent(centerId)}`,
+    }),
+    response: resolved((body) => body),
+  },
+
   getPatientAppointments: {
     request: () => ({ method: 'GET', path: `${PATIENT}/appointments` }),
     response: resolved(map.toAppointments),
+  },
+
+  // One review per completed appointment; the server attaches it to the
+  // patient's newest unreviewed visit at that center.
+  createPatientReview: {
+    request: (_actor, { centerId, rating, comment } = {}) => ({
+      method: 'POST',
+      path: `${PATIENT}/reviews`,
+      data: {
+        centerId: Number(centerId),
+        rating: Number(rating),
+        comment: comment ? String(comment).trim() : null,
+      },
+    }),
+    response: resolved((body) => ({
+      id: String(body?.id ?? ''),
+      rating: Number(body?.rating) || 0,
+      comment: body?.comment || '',
+      createdAt: body?.createdAt || '',
+    })),
+  },
+
+  submitAssessment: {
+    request: (_actor, answers) => ({
+      method: 'POST',
+      path: '/api/Assessment',
+      data: {
+        painLocation: answers?.painLocation,
+        painSeverity: answers?.painSeverity,
+        duration: answers?.duration,
+        painDescriptions: answers?.painDescriptions,
+        previousInjurySurgery: answers?.previousInjurySurgery,
+        ...(answers?.otherDescription ? { otherDescription: answers.otherDescription } : {}),
+      },
+    }),
+    response: (body) => toAssessmentResult(body),
+  },
+
+  getAssessmentHistory: {
+    request: () => ({ method: 'GET', path: '/api/Assessment/history' }),
+    response: (body) => (Array.isArray(body) ? body.map(toAssessmentResult) : []),
+  },
+
+  getAssessment: {
+    request: (_actor, id) => ({ method: 'GET', path: `/api/Assessment/${id}` }),
+    response: (body) => toAssessmentResult(body),
   },
 
   getPatientSlots: {
@@ -336,10 +829,15 @@ export const centerOperations = {
   // and it also inserts a gallery row. The row is removed immediately so the
   // caller receives a usable URL without silently changing the gallery.
   prepareImage: {
-    execute: async (client, file) => {
+    // Therapists upload through their own workspace endpoint: the centre route
+    // is restricted to the centre account and would answer 403.
+    execute: async (client, file, role) => {
+      // Phone photos are larger than the API's upload limit; shrink them here.
+      const upload = await fitImageFile(file);
       const form = new FormData();
-      form.append('file', file, file?.name || 'upload');
-      const created = await client.post(`${CENTER_WORKSPACE}/images`, { data: form });
+      form.append('file', upload, upload?.name || 'upload');
+      const base = role === 'physiotherapist' ? THERAPIST_WORKSPACE : CENTER_WORKSPACE;
+      const created = await client.post(`${base}/images`, { data: form });
       if (created?.id) {
         await client.delete(`${CENTER_WORKSPACE}/images/${created.id}`).catch(() => undefined);
       }
@@ -364,14 +862,22 @@ export const centerOperations = {
         });
       }
       if (values?.add) {
-        const form = new FormData();
-        form.append('imageUrl', values.add);
-        await client.post(`${CENTER_WORKSPACE}/images`, { data: form });
+        // The endpoint stores one gallery photo per call, so a multi-file
+        // upload walks the URLs it prepared instead of joining them.
+        const urls = Array.isArray(values.add) ? values.add : [values.add];
+        for (const url of urls) {
+          if (!url) continue;
+          const form = new FormData();
+          form.append('imageUrl', url);
+          await client.post(`${CENTER_WORKSPACE}/images`, { data: form });
+        }
       }
-      // Removing a gallery image needs its id, which the workspace only exposes
-      // as a URL, so a removal cannot be expressed against the API yet.
-      if (values?.remove) throw new ServiceError('unavailable');
-      if (!values?.imageUrl && !values?.add) throw new ServiceError('image');
+      // The workspace shows gallery photos as URLs, so removal addresses the
+      // photo by its URL and the server scopes it to this centre.
+      if (values?.remove) {
+        await client.delete(`${CENTER_WORKSPACE}/images`, { query: { url: values.remove } });
+      }
+      if (!values?.imageUrl && !values?.add && !values?.remove) throw new ServiceError('image');
       return undefined;
     },
   },
@@ -385,7 +891,10 @@ export const centerOperations = {
           descriptionEnglish: values?.about,
           descriptionArabic: values?.aboutAr,
           address: values?.address,
+          addressArabic: values?.addressAr,
           city: values?.city,
+          email: values?.email,
+          phoneNumber: values?.phone,
           profileImageUrl: values?.imageUrl,
           websiteUrl: values?.websiteUrl,
           latitude: values?.coordinates?.latitude,
@@ -401,9 +910,10 @@ export const centerOperations = {
   },
 
   saveNotificationPreferences: {
-    request: (_actor, values) => ({
+    request: (actor, values) => ({
       method: 'PUT',
-      path: `${CENTER_WORKSPACE}/preferences`,
+      // The therapist portal keeps its preferences on its own workspace.
+      path: `${actor?.role === 'physiotherapist' ? THERAPIST_WORKSPACE : CENTER_WORKSPACE}/preferences`,
       data: map.centerPreferencesRequest(values),
     }),
     response: (body) => map.toCenterPreferences(body),
@@ -425,49 +935,95 @@ export const centerOperations = {
   },
 
   markConversationRead: {
-    request: (_actor, id, messageIds) => ({
+    // The backend rejects an empty id list (MinLength 1), so an all-read
+    // conversation skips the request instead of failing the read effect.
+    execute: async (client, _actor, id, messageIds) => {
+      const ids = [...new Set(messageIds || [])];
+      if (!ids.length) return null;
+      await client.post(`/api/conversations/${id}/read`, { data: { messageIds: ids } });
+      return null;
+    },
+  },
+
+  // Opening a conversation finds the patient+therapist pair or creates it.
+  openPatientConversation: {
+    request: (_actor, values) => ({
       method: 'POST',
-      path: `/api/conversations/${id}/read`,
-      data: { messageIds: messageIds || [] },
+      path: '/api/conversations',
+      data: { therapistId: Number(values?.therapistId) },
     }),
-    response: () => null,
+    response: (body) => ({
+      id: String(body?.id ?? ''),
+      patientId: String(body?.patientId ?? ''),
+      therapistId: String(body?.therapistId ?? ''),
+    }),
   },
 
   sendMessage: {
-    request: (actor, id, payload) => ({
-      method: 'POST',
-      path: `/api/conversations/${id}/messages`,
-      data: {
-        text: payload?.text || '',
-        attachment: payload?.attachments?.[0]?.url,
-      },
-    }),
-    response: (body, actor) => {
-      return resolveAssets({
-        ...body,
-        attachments: body?.attachment
-          ? [{ url: body.attachment, name: String(body.attachment).split('/').pop() }]
-          : [],
-        direction: 'outgoing',
-        status: 'sent',
-        isRead: false,
-        senderRole: actor?.role,
-        senderId: actor?.patientId || actor?.therapistId || '',
+    // Composed files are local Blobs, so each one is uploaded to the role's
+    // image endpoint first; the message then carries the returned URL. Extra
+    // attachments follow as their own messages because the API stores one
+    // attachment URL per message.
+    execute: async (client, actor, id, payload) => {
+      const text = payload?.text || '';
+      const files = (payload?.attachments || []).filter((item) => item?.sourceFile || item?.file);
+      const uploadPath =
+        actor?.role === 'physiotherapist'
+          ? '/api/therapist/workspace/images'
+          : `${PATIENT}/account/image`;
+
+      const urls = [];
+      for (const file of files) {
+        const source = file.sourceFile || file.file;
+        const form = new FormData();
+        form.append('file', source, file.name || source.name || 'upload');
+        const uploaded = await client.post(uploadPath, { data: form });
+        if (uploaded?.url) urls.push(uploaded.url);
+      }
+
+      const first = await client.post(`/api/conversations/${id}/messages`, {
+        data: { text, attachment: urls[0] },
       });
+      for (const url of urls.slice(1)) {
+        await client.post(`/api/conversations/${id}/messages`, {
+          data: { text: '', attachment: url },
+        });
+      }
+
+      return mapSentMessage(first, actor);
+    },
+  },
+
+  savePatient: {
+    execute: async (client, _actor, values, id) => {
+      const payload = {
+        fullName: values?.name,
+        email: values?.email,
+        phoneNumber: values?.phone,
+        gender: values?.gender,
+        dateOfBirth: values?.birthDate || null,
+        profileImageUrl: values?.imageUrl || null,
+        isActive: values?.status !== 'inactive',
+      };
+
+      if (id) {
+        const body = await client.put(`${CENTER_WORKSPACE}/patients/${id}`, { data: payload });
+        return resolveAssets({ ...values, id: String(body?.id ?? id) });
+      }
+
+      // Adding a patient creates their login account as well, so it needs the
+      // temporary password the form collects.
+      const body = await client.post(`${CENTER_WORKSPACE}/patients`, {
+        data: { ...payload, password: values?.password },
+      });
+      return resolveAssets({ ...values, id: String(body?.id ?? '') });
     },
   },
 
   saveService: {
     execute: async (client, _actor, values, id) => {
-      // The API stores services under a specialty; the form does not ask for
-      // one, so an existing service's specialty is reused when possible.
-      const specialtyId =
-        values?.specialtyId ??
-        (await (async () => {
-          const workspace = await client.get(CENTER_WORKSPACE).catch(() => null);
-          return workspace?.services?.[0]?.specialtyId;
-        })());
-      if (!specialtyId) throw new ServiceError('unavailable');
+      const specialtyId = Number(values?.specialtyId);
+      if (!specialtyId) throw new ServiceError('validation', { fields: { specialtyId: 'required' } });
 
       const payload = {
         nameEnglish: values?.name,
@@ -476,7 +1032,9 @@ export const centerOperations = {
         descriptionArabic: values?.descriptionAr || values?.description,
         price: Number(values?.price) || 0,
         durationMinutes: Number(values?.duration) || 30,
-        specialtyId: Number(specialtyId),
+        specialtyId,
+        // The service card shows this photo to the centre and to patients.
+        imageUrl: values?.imageUrl,
         isActive: values?.status !== 'inactive',
       };
       const body = id
@@ -488,24 +1046,86 @@ export const centerOperations = {
 
   saveTherapist: {
     execute: async (client, _actor, values, id) => {
-      // Creating a staff account needs a password the form never collects, so
-      // only editing an existing therapist is supported today.
-      if (!id) throw new ServiceError('unavailable');
-      const body = await client.put(`${CENTER_WORKSPACE}/therapists/${id}`, {
+      const specialtyId = Number(values?.specialtyId);
+      if (!specialtyId) throw new ServiceError('validation', { fields: { specialtyId: 'required' } });
+
+      const professional = {
+        fullName: values?.name,
+        fullNameAr: values?.nameAr,
+        bioAr: values?.aboutAr,
+        specialtyId,
+        profileImageUrl: values?.imageUrl,
+        yearsOfExperience: values?.experience == null || values?.experience === ''
+          ? null
+          : Number(values.experience),
+        isAvailable: values?.availability !== 'unavailable',
+        isActive: values?.status !== 'inactive',
+        serviceIds: values?.serviceIds?.map(Number),
+      };
+
+      if (id) {
+        const body = await client.put(`${CENTER_WORKSPACE}/therapists/${id}`, { data: professional });
+        return resolveAssets({ ...values, id: String(body?.id ?? id), ...body });
+      }
+
+      // The staff account is created by its own endpoint, which needs the
+      // password the form collects for the new therapist.
+      const body = await client.post('/api/center/therapists', {
         data: {
-          fullName: values?.name,
-          specialtyId: values?.specialtyId,
-          bio: values?.about,
-          profileImageUrl: values?.imageUrl,
-          yearsOfExperience: values?.experience == null ? null : Number(values.experience),
-          qualifications: values?.credentials,
-          languages: values?.languages,
-          isAvailable: values?.availability !== 'unavailable',
-          isActive: values?.status !== 'inactive',
-          serviceIds: values?.serviceIds?.map(Number),
+          ...professional,
+          email: values?.email,
+          password: values?.password,
+          phoneNumber: values?.phone,
         },
       });
-      return resolveAssets({ ...values, id: String(body?.id ?? id), ...body });
+      return resolveAssets({ ...values, id: String(body?.therapistId ?? body?.id ?? '') });
+    },
+  },
+
+  getTherapistSchedule: {
+    request: (_actor, therapistId) => ({
+      method: 'GET',
+      path: `${SCHEDULES}/therapists/${therapistId}`,
+    }),
+    response: (body) => (Array.isArray(body) ? body : body?.windows ?? []).map(map.toScheduleWindow),
+  },
+
+  saveTherapistSchedule: {
+    // The API manages one window per request, so the desired week is applied
+    // as a diff: delete removed windows, then update kept ones, then create
+    // new ones. Deletes run first so re-assigned days cannot overlap mid-save.
+    execute: async (client, _actor, therapistId, desired = [], previous = []) => {
+      const existing = new Map(previous.map((window) => [String(window.id), window]));
+      // The Schedules binder only accepts "HH:mm:ss", while the centre-hours
+      // endpoint requires the opposite ("HH:mm" exactly) — so times are widened
+      // here on the wire, and toScheduleWindow slices them back for the UI.
+      const time = (value) => (/^\d{2}:\d{2}$/.test(String(value)) ? `${value}:00` : value);
+      const payload = (window) => ({
+        dayOfWeek: window.day,
+        startTime: time(window.start),
+        endTime: time(window.end),
+        isAvailable: window.isAvailable !== false,
+      });
+
+      for (const window of previous) {
+        const kept = desired.some((item) => item.id != null && String(item.id) === String(window.id));
+        if (!kept) await client.delete(`${SCHEDULES}/therapists/${therapistId}/${window.id}`);
+      }
+      for (const window of desired) {
+        if (window.id == null) continue;
+        const before = existing.get(String(window.id));
+        if (!before) continue;
+        if (before.day !== window.day || before.start !== window.start || before.end !== window.end) {
+          await client.put(`${SCHEDULES}/therapists/${therapistId}/${window.id}`, { data: payload(window) });
+        }
+      }
+      for (const window of desired) {
+        if (window.id != null) continue;
+        await client.post(`${SCHEDULES}/therapists/${therapistId}`, { data: payload(window) });
+      }
+
+      const body = await client.get(`${SCHEDULES}/therapists/${therapistId}`);
+      return (Array.isArray(body) ? body : []).map(map.toScheduleWindow);
     },
   },
 
@@ -517,13 +1137,28 @@ export const centerOperations = {
       const body = await client.put('/api/Therapist/profile', {
         data: {
           fullName: values?.name,
-          specialtyId: current?.specialty?.specialtyId,
+          fullNameAr: values?.nameAr,
+          phoneNumber: values?.phone,
+          specialtyId: values?.specialtyId
+            ? Number(values.specialtyId)
+            : current?.specialtyId ?? current?.specialty?.specialtyId,
           bio: values?.about,
+          bioAr: values?.aboutAr,
           profileImageUrl: values?.imageUrl,
-          yearsOfExperience: current?.yearsOfExperience ?? null,
+          //  The personal form does not carry experience; keep the stored value
+          //  instead of clearing it with an absent field.
+          yearsOfExperience:
+            values?.experience === undefined
+              ? current?.yearsOfExperience ?? null
+              : values.experience === '' || values.experience === null
+                ? null
+                : Number(values.experience),
           qualifications: current?.qualifications,
           languages: current?.languages,
-          isAvailable: current?.isAvailable ?? true,
+          isAvailable:
+            typeof values?.availability === 'string'
+              ? values.availability === 'available'
+              : current?.isAvailable ?? true,
         },
       });
       return resolveAssets({ ...values, id: String(current?.therapistId ?? ''), ...body });
@@ -558,6 +1193,22 @@ export const centerOperations = {
   },
 };
 
+// The message the composer gets back: shaped like the messages the workspace
+// reloads, so an optimistic render and the refreshed list agree.
+function mapSentMessage(body, actor) {
+  return resolveAssets({
+    ...body,
+    attachments: body?.attachment
+      ? [{ url: body.attachment, name: String(body.attachment).split('/').pop() }]
+      : [],
+    direction: 'outgoing',
+    status: 'sent',
+    isRead: false,
+    senderRole: actor?.role,
+    senderId: actor?.patientId || actor?.therapistId || '',
+  });
+}
+
 // Operations the API contract does not expose yet. They fail loudly rather
 // than silently succeeding so the interface can show its unavailable state.
 const notImplemented = () => {
@@ -565,12 +1216,9 @@ const notImplemented = () => {
 };
 
 for (const operation of [
-  'setPatientFavorite',
-  'openPatientConversation',
-  'savePatient',
   'saveAppointment',
 ]) {
   centerOperations[operation] = { execute: notImplemented };
 }
 
-export const transportOptions = {};
+export const transportOptions = {};
