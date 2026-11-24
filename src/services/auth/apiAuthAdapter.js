@@ -3,7 +3,8 @@ import { clearSession, loadSession, saveSession } from './session.js';
 
 // Backend endpoints provided by the API.
 const REGISTER_PATIENT_PATH = '/api/Auth/register/patient';
-const LOGIN_PATH = '/api/Auth/login';
+// Each portal names its role so the backend refuses another portal's account.
+const loginPath = (role) => `/api/Auth/login?role=${encodeURIComponent(role)}`;
 
 // A slow backend must not leave the form in a permanent loading state.
 const REQUEST_TIMEOUT_MS = 15000;
@@ -184,14 +185,29 @@ function extractUser(body) {
 function toSession(body, credentials) {
   const user = extractUser(body) ?? {};
   const id = String(user.id ?? user.userId ?? user.email ?? credentials?.email ?? '');
+  const role = (user.role ?? body?.role ?? body?.data?.role ?? 'patient').toString().toLowerCase();
 
-  return {
+  const session = {
     id,
-    role: 'patient',
-    patientId: String(user.patientId ?? user.id ?? user.userId ?? id),
+    role,
     name: user.fullName ?? user.name ?? credentials?.email ?? '',
     email: user.email ?? credentials?.email ?? '',
   };
+
+  if (role === 'patient') {
+    session.patientId = String(user.patientId ?? user.id ?? user.userId ?? id);
+  }
+  if (role === 'center') {
+    session.centerId = String(user.centerId ?? user.id ?? user.userId ?? id);
+  }
+  if (role === 'physiotherapist') {
+    session.therapistId = String(user.therapistId ?? user.id ?? user.userId ?? id);
+  }
+  if (role === 'admin') {
+    session.adminId = String(user.adminId ?? user.id ?? user.userId ?? id);
+  }
+
+  return session;
 }
 
 // Calls the real backend described by API_BASE_URL.
@@ -222,7 +238,7 @@ export function createApiAuthAdapter(baseUrl) {
     async loginPatient(credentials) {
       const body = await post(
         root,
-        LOGIN_PATH,
+        loginPath('patient'),
         {
           email: credentials.email,
           password: credentials.password,
@@ -231,6 +247,62 @@ export function createApiAuthAdapter(baseUrl) {
       );
 
       // Keep the session so the dashboard can use it after navigation.
+      const session = toSession(body, credentials);
+      console.log("session: " + session);
+      console.log("token: " + extractToken(body))
+
+      saveSession({
+        token: extractToken(body),
+        session,
+        authenticatedAt: Date.now(),
+      });
+
+      return {
+        mode: 'live',
+        status: 'authenticated',
+        role: session.role,
+        session,
+      };
+    },
+
+    async loginCenter(credentials) {
+      const body = await post(
+        root,
+        loginPath('center'),
+        {
+          email: credentials.email,
+          password: credentials.password,
+        },
+        { onBadRequest: 'invalidCredentials' }
+      );
+
+      const session = toSession(body, credentials);
+
+      saveSession({
+        token: extractToken(body),
+        session,
+        authenticatedAt: Date.now(),
+      });
+
+      return {
+        mode: 'live',
+        status: 'authenticated',
+        role: session.role,
+        session,
+      };
+    },
+
+    async loginAdmin(credentials) {
+      const body = await post(
+        root,
+        loginPath('admin'),
+        {
+          email: credentials.email,
+          password: credentials.password,
+        },
+        { onBadRequest: 'invalidCredentials' }
+      );
+
       const session = toSession(body, credentials);
 
       saveSession({
