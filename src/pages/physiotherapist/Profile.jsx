@@ -1,3 +1,5 @@
+// Therapist profile view and edit, including the photo and bilingual name/about.
+
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,17 +24,26 @@ import {
 } from '../../components/center/CenterUI.jsx';
 import useCenter from '../../components/center/useCenter.js';
 import useUnsavedChanges from '../../components/center/useUnsavedChanges.js';
-import { prepareCenterImage } from '../../services/centerPortalService.js';
-import { saveOwnTherapistProfile } from '../../services/therapistService.js';
+import {
+  prepareTherapistImage,
+  saveOwnTherapistProfile,
+} from '../../services/crud/therapistService.js';
 import { money } from '../../utils/centerFormat.js';
 import './Profile.css';
 
+// The workspace carries name/about as { en, ar } labels; plain strings from
+// older payloads still read as the English copy.
+const english = (value) =>
+  typeof value === 'string' ? value : (value?.en || '');
+const arabic = (value) =>
+  typeof value === 'string' ? '' : (value?.ar || '');
+
 const personalValues = (person) => ({
-  name: person.name?.en || '',
-  nameAr: person.name?.ar || '',
+  name: english(person.name),
+  nameAr: arabic(person.name),
   phone: person.phone || '',
-  about: person.about?.en || '',
-  aboutAr: person.about?.ar || '',
+  about: english(person.about),
+  aboutAr: arabic(person.about),
   imageUrl: person.imageUrl || '',
 });
 
@@ -89,8 +100,17 @@ function ProfileContent({ person }) {
     event.target.value = '';
     if (!file) return;
     setBusy(true);
+    setFeedback(null);
     try {
-      change('imageUrl', await prepareCenterImage(file));
+      //  Therapist uploads go through the therapist workspace endpoint, then the
+      //  portrait is saved on its own so the header avatar updates right away
+      //  instead of waiting for the rest of the form.
+      const imageUrl = await prepareTherapistImage(file);
+      const next = { ...saved, imageUrl };
+      await saveOwnTherapistProfile(actor, next);
+      setSaved(next);
+      setDraft((current) => ({ ...current, imageUrl }));
+      setFeedback({ message: tr('saved') });
     } catch (error) {
       setFeedback({ error: true, message: tr(`error.${error.code || 'image'}`) });
     } finally {
