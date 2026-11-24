@@ -27,3 +27,6 @@ dist-ssr
 
 .env
 src/tests/*
+
+.freebuff
+.cloud-attachments
