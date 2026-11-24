@@ -139,8 +139,14 @@ Over the limit → `429` + `Retry-After` + `{"code":"rate_limited",…}`.
 | POST | `/api/Auth/forgot-password` | public (rate limited) |
 | POST | `/api/Auth/reset-password` | public |
 
-**`POST /api/Auth/login`** — request
+**`POST /api/Auth/login?role=patient`** — request
 `{"email":"patient@physioguide.dev","password":"Patient123!"}`
+
+The optional `role` query names the portal the login page belongs to:
+`patient`, `center` (therapists sign in there too) or `admin`. An account that
+belongs to another portal receives the same `401 unauthenticated` body as a
+wrong password, so this endpoint never reveals which portal an email uses.
+Omitting `role` keeps the legacy behaviour.
 
 ```json
 {
@@ -162,7 +168,8 @@ Over the limit → `429` + `Retry-After` + `{"code":"rate_limited",…}`.
 otherwise, so one endpoint routes every portal.
 
 * `401 {"code":"unauthenticated","message":"Invalid email or password."}`
-  (no `errors`) for bad email **or** bad password — identical bodies.
+  (no `errors`) for bad email **or** bad password **or** an account signing in
+  from another portal's login page — identical bodies.
 * `403` `account_not_active` / `account_rejected` / `account_suspended` for a
   centre that is pending, rejected or suspended.
 * `429` after 10 attempts in a minute.
@@ -413,9 +420,11 @@ All under `/api/center`, `Roles = "Center"`.
 | POST | `/workspace/services` | `SaveServiceDto` → `201` |
 | PUT | `/workspace/services/{serviceId}` | `SaveServiceDto` → `200` |
 | DELETE | `/workspace/services/{serviceId}` | – → `204` (deactivates) |
+| POST | `/therapists` | `CreateTherapistDto` (adds `phoneNumber`, optional `serviceIds`) → `200`; creates the login account and links the chosen centre services |
 | PUT | `/workspace/therapists/{therapistId}` | `UpdateTherapistDto` |
 | DELETE | `/workspace/therapists/{therapistId}` | – → `204` (deactivates) |
-| GET | `/workspace/patients` | – |
+| GET/POST | `/workspace/patients` | `CreateCenterPatientDto` → `201` on POST |
+| PUT | `/workspace/patients/{patientId}` | `UpdateCenterPatientDto` → `200` |
 | GET/POST | `/workspace/patients/{patientId}/notes` | `{"text":"…"}` |
 | PUT | `/workspace/appointments/{appointmentId}/status` | `{"status":"approved\|rejected\|cancelled\|completed\|pending","reason"}` |
 | POST | `/workspace/reviews/{reviewId}/reply` | `{"reply":"…"}` |
@@ -423,16 +432,50 @@ All under `/api/center`, `Roles = "Center"`.
 
 `GET /workspace` returns
 `{center, therapists, services, patients, appointments, reviews,
-notifications, conversations, today}` where `center` is the public center
-object **plus** `nameArabic`, `descriptionArabic`, `email`, `phone`,
-`approvalStatus`, `reviewedAt`, `reviewReason`, and `today` is
-`{date, appointmentCount, appointments}` for the server's current date.
+notifications, conversations, specialties, today}` where `center` is the public
+center object **plus** `nameArabic`, `descriptionArabic`, `email`, `phone`,
+`approvalStatus`, `reviewedAt`, `reviewReason`, `specialties` is the active
+`{id, nameEnglish, nameArabic}` catalogue the creation forms choose from, and
+`today` is `{date, appointmentCount, appointments}` for the server's current
+date.
+
+`POST /workspace/patients` creates a `User` (`Role = Patient`, hashed password)
+and a `Patient` in one transaction, then links both to the centre, so the new
+record appears in `GET /workspace` immediately. It returns `201` with
+`{id, name, email, phone, gender, dateOfBirth, imageUrl, status,
+appointmentCount}`; a duplicate email returns `409 duplicate_email` with
+`errors.Email`. `PUT /workspace/patients/{patientId}` updates the same fields
+(no password) and refuses patients that do not belong to the centre. `POST
+/therapists` (`/api/center/therapists`) is the only therapist creation path
+because it also creates the staff login account.
 
 `DELETE` on services/therapists is a **soft delete** (`IsActive = false`):
 both can be referenced by existing appointments and a login account, so the
 row is hidden from public endpoints rather than dropped.
 
 Password change is shared: `POST /api/Auth/change-password`.
+
+#### Therapist weekly schedules
+
+`/api/Schedules`, `Roles = "Center"`; every route resolves the centre from the
+JWT, and `therapistId` must belong to it.
+
+| Method | Path | Body |
+|---|---|---|
+| GET | `/therapists/{therapistId}` | – → `[{scheduleId, therapistId, dayOfWeek, startTime, endTime, isAvailable}]` |
+| POST | `/therapists/{therapistId}` | `{dayOfWeek, startTime, endTime, isAvailable}` → `201` |
+| PUT | `/therapists/{therapistId}/{scheduleId}` | same body |
+| DELETE | `/therapists/{therapistId}/{scheduleId}` | – → `204` |
+
+`dayOfWeek` is the .NET enum as an integer (`0 = Sunday … 6 = Saturday`);
+`startTime`/`endTime` are `HH:mm:ss` in responses and accept `HH:mm` in
+requests. Rules enforced server-side: the window must sit inside the centre's
+`CenterWorkingHours` for that day (`400` with field errors), same-day windows
+must not overlap, and a change that would leave a pending/confirmed appointment
+outside an available window returns `409 {message}`. Centres registered before
+working hours existed receive default hours at registration, and
+`PUT /workspace/hours` now creates any missing day rows instead of silently
+updating none.
 
 ### 6.7 Therapist workspace (phase 2)
 
