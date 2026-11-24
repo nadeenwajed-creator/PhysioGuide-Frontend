@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import ActionsMenu from '../../components/shared/ActionsMenu/ActionsMenu.jsx';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { callAdmin } from '../../services/crud/adminService.js';
-import RowActions from './RowActions.jsx';
 import { PatientEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
@@ -180,24 +180,25 @@ function AdminPatients() {
                     </select>
                   </td>
                   <td>
-                    <RowActions
-                      label={t('center.actions')}
+                    <ActionsMenu
+                      portal
+                      compact
                       items={[
                         {
                           label: t('admin.actions.view'),
                           icon: faEye,
-                          onSelect: () => setViewTarget(patient),
+                          onClick: () => setViewTarget(patient),
                         },
                         {
                           label: t('admin.actions.edit'),
                           icon: faPen,
-                          onSelect: () => setEditId(patient.id),
+                          onClick: () => setEditId(patient.id),
                         },
                         {
                           label: t('admin.actions.delete'),
                           icon: faTrashCan,
-                          danger: true,
-                          onSelect: () => setDeleteTarget(patient),
+                          variant: 'danger',
+                          onClick: () => setDeleteTarget(patient),
                         },
                       ]}
                     />

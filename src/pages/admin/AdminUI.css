@@ -1,0 +1,32 @@
+/* Read-only rows behind the "View" dialog and the admin record dialog. */
+.admin-record {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.admin-record > div {
+  display: grid;
+  grid-template-columns: minmax(112px, 0.75fr) minmax(0, 1.4fr);
+  gap: 12px;
+  padding-block: 10px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.admin-record > div:last-child {
+  border-block-end: none;
+}
+
+.admin-record dt {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.admin-record dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}

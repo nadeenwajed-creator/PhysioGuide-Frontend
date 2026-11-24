@@ -114,6 +114,7 @@
 .pg-button__label {
   min-inline-size: 0;
   overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 /* Hidden text still names an icon-only button for screen readers. */

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { faEye, faPen, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import ActionsMenu from '../../components/shared/ActionsMenu/ActionsMenu.jsx';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
@@ -13,7 +14,6 @@ import { callAdmin } from '../../services/crud/adminService.js';
 import useAdminQuery, { useDebouncedValue, errorText } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
 import { AppointmentViewDialog } from './AdminViewDialogs.jsx';
-import RowActions from './RowActions.jsx';
 import { AppointmentEditDialog } from './AdminRecordDialogs.jsx';
 import './ListPages.css';
 
@@ -347,24 +347,25 @@ function AdminAppointments() {
                     <StatusBadge status={appointment.status} />
                   </td>
                   <td>
-                    <RowActions
-                      label={t('center.actions')}
+                    <ActionsMenu
+                      portal
+                      compact
                       items={[
                         {
                           label: t('admin.actions.view'),
                           icon: faEye,
-                          onSelect: () => setViewTarget(appointment),
+                          onClick: () => setViewTarget(appointment),
                         },
                         {
                           label: t('admin.actions.edit'),
                           icon: faPen,
-                          onSelect: () => setEditTarget(appointment),
+                          onClick: () => setEditTarget(appointment),
                         },
                         {
                           label: t('admin.actions.delete'),
                           icon: faTrashCan,
-                          danger: true,
-                          onSelect: () => setDeleteTarget(appointment),
+                          variant: 'danger',
+                          onClick: () => setDeleteTarget(appointment),
                         },
                       ]}
                     />

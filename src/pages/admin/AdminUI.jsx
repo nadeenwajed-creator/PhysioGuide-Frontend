@@ -3,6 +3,7 @@ import Modal from '../../components/shared/Modal/Modal.jsx';
 import { Feedback, EmptyState, Pager } from '../../components/center/CenterUI.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { errorText } from './useAdminQuery.js';
+import './AdminUI.css';
 
 // Renders the loading, error (with retry) and empty states of one admin query;
 // children render once data is present.

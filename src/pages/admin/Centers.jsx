@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { faBuilding, faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLanguage } from '../../context/LanguageContext.jsx';
+import ActionsMenu from '../../components/shared/ActionsMenu/ActionsMenu.jsx';
 import Button from '../../components/shared/Button/Button.jsx';
 import FilterSelect from '../../components/shared/FilterSelect/FilterSelect.jsx';
 import SearchBar from '../../components/shared/SearchBar/SearchBar.jsx';
 import StatusBadge from '../../components/shared/StatusBadge/StatusBadge.jsx';
 import { ConfirmDialog, Feedback } from '../../components/center/CenterUI.jsx';
 import { callAdmin } from '../../services/crud/adminService.js';
-import RowActions from './RowActions.jsx';
 import { CenterEditDialog } from './AdminRecordDialogs.jsx';
 import useAdminQuery, { useDebouncedValue } from './useAdminQuery.js';
 import { QueryState, AdminPagination } from './AdminUI.jsx';
@@ -158,24 +158,25 @@ function AdminCenters() {
                       >
                         {t('center.view')}
                       </Button>
-                      <RowActions
-                        label={t('center.actions')}
+                      <ActionsMenu
+                        portal
+                        compact
                         items={[
                           {
                             label: t('admin.actions.view'),
                             icon: faEye,
-                            onSelect: () => navigate(`/admin/centers/${center.id}`),
+                            onClick: () => navigate(`/admin/centers/${center.id}`),
                           },
                           {
                             label: t('admin.actions.edit'),
                             icon: faPen,
-                            onSelect: () => setEditId(center.id),
+                            onClick: () => setEditId(center.id),
                           },
                           {
                             label: t('admin.actions.delete'),
                             icon: faTrashCan,
-                            danger: true,
-                            onSelect: () => setDeleteTarget(center),
+                            variant: 'danger',
+                            onClick: () => setDeleteTarget(center),
                           },
                         ]}
                       />
