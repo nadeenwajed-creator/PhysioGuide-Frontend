@@ -1,4 +1,7 @@
+// Patient view of one therapist: profile, services, reviews and booking.
+
 import { usePatientLabels } from '../../components/patient/usePatientLabels.js';
+import { personImage } from '../../utils/personImage.js';
 import { useCallback, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,7 +16,7 @@ import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
 import { Panel, RecordImage, Feedback } from '../../components/center/CenterUI.jsx';
 import useDiscovery from '../../components/patient/useDiscovery.js';
 import { DiscoveryState } from '../../components/patient/DiscoveryUI.jsx';
-import { openPatientConversation } from '../../services/patientDiscoveryService.js';
+import { openPatientConversation } from '../../services/crud/patientDiscoveryService.js';
 import AppointmentDates from '../../components/patient/AppointmentDates.jsx';
 import TimeRail from '../../components/patient/TimeRail.jsx';
 import usePatientAvailability from '../../components/patient/usePatientAvailability.js';
@@ -61,7 +64,7 @@ function Details({ state, center, person }) {
     </nav>
     <div className="pd-therapist-top">
       <Panel className="pd-professional">
-        <RecordImage src={person.imageUrl} alt={name(person.name)} />
+        <RecordImage src={personImage(person.imageUrl, name(person.name), person.email)} alt={name(person.name)} />
         <div className="pd-professional-summary">
           <p className="pd-eyebrow">{name(person.specialty)}</p>
           <h1>{name(person.name)}</h1>
