@@ -1,3 +1,5 @@
+/* Shared button: variants, sizes, icon/label layout, focus and disabled states. */
+
 .pg-button {
   display: inline-flex;
   position: relative;
@@ -114,6 +116,7 @@
 .pg-button__label {
   min-inline-size: 0;
   overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 /* Hidden text still names an icon-only button for screen readers. */
