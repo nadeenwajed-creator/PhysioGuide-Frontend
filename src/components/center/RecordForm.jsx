@@ -1,3 +1,5 @@
+// Create/edit dialog for center records (patient, therapist, service, appointment) with per-type fields.
+
 import { useEffect, useState } from 'react';
 import Modal from '../shared/Modal/Modal.jsx';
 import Button from '../shared/Button/Button.jsx';
@@ -5,11 +7,11 @@ import FormField from '../shared/FormField/FormField.jsx';
 import { Feedback, SelectField } from './CenterUI.jsx';
 import Avatar from '../shared/Avatar/Avatar.jsx';
 import useCenter from './useCenter.js';
-import { saveCenterPatient } from '../../services/patientService.js';
-import { saveCenterTherapist } from '../../services/therapistService.js';
-import { saveCenterService } from '../../services/serviceService.js';
-import { saveCenterAppointment } from '../../services/appointmentService.js';
-import { prepareCenterImage } from '../../services/centerPortalService.js';
+import { saveCenterPatient } from '../../services/crud/patientService.js';
+import { saveCenterTherapist } from '../../services/crud/therapistService.js';
+import { saveCenterService } from '../../services/crud/serviceService.js';
+import { saveCenterAppointment } from '../../services/crud/appointmentService.js';
+import { prepareCenterImage } from '../../services/crud/centerPortalService.js';
 const saveMethods = {
   patient: saveCenterPatient,
   therapist: saveCenterTherapist,
@@ -41,10 +43,15 @@ function RecordForm({
     status: record?.status || 'active',
     specialty: record?.specialty?.en || '',
     specialtyAr: record?.specialty?.ar || '',
+    specialtyId: record?.specialtyId != null
+      ? String(record.specialtyId)
+      : record ? name(record.specialty) : '',
+    password: '',
     experience: record?.experience ?? '0',
     price: record?.price ?? '25',
     duration: record?.duration ?? '45',
     availability: record?.availability || 'available',
+    serviceIds: Array.isArray(record?.serviceIds) ? record.serviceIds.map(String) : [],
     description: record?.description?.en || '',
     descriptionAr: record?.description?.ar || '',
     imageUrl: record?.imageUrl || '',
@@ -78,17 +85,45 @@ function RecordForm({
     disabled={busy}
     {...options}
   />;
-  const select = (key, options) => <SelectField
+  const select = (key, options, onChange) => <SelectField
     key={key}
     id={`record-${key}`}
     label={tr(key)}
     value={values[key]}
-    onChange={value => set(key, value)}
+    onChange={value => (onChange ? onChange(value) : set(key, value))}
     options={options}
-    required={['patientId', 'therapistId', 'serviceId'].includes(key)}
+    required={['patientId', 'therapistId', 'serviceId', 'specialtyId'].includes(key)}
     disabled={busy}
     error={fields[key] ? tr(`error.${fields[key]}`) : undefined}
   />;
+  // API mode sends the specialty catalogue; the demo derives it from the
+  // therapists it already has so adding a service/therapist still works there.
+  const specialtyOptions = data.specialties?.length
+    ? data.specialties.map(item => ({
+      value: String(item.id),
+      label: name(item.name),
+      name: item.name
+    }))
+    : [...new Map(data.therapists
+      .filter(item => name(item.specialty))
+      .map(item => [name(item.specialty), {
+        value: name(item.specialty),
+        label: name(item.specialty),
+        name: item.specialty
+      }])).values()];
+  // The empty entry keeps the browser from silently showing the first
+  // specialty as chosen while the form value is still empty.
+  const specialtySelectOptions = [{
+    value: '',
+    label: tr('select')
+  }, ...specialtyOptions];
+  function chooseSpecialty(value) {
+    const chosen = specialtyOptions.find(option => option.value === value);
+    // The demo stores the label itself, so keep both representations in sync.
+    set('specialtyId', value);
+    set('specialty', name(chosen?.name || value));
+    set('specialtyAr', chosen?.name?.ar || name(chosen?.name || value));
+  }
   const choices = list => [{
     value: '',
     label: tr('select')
@@ -103,9 +138,10 @@ function RecordForm({
     setError('');
     setFields({});
     try {
+      const professional = ['specialtyId', 'specialty', 'specialtyAr', 'experience', 'availability', 'serviceIds', 'status', 'imageUrl'];
       const keys = professionalOnly
-        ? ['specialty', 'specialtyAr', 'experience', 'availability']
-        : ['name', 'nameAr', 'email', 'phone', 'specialty', 'specialtyAr', 'experience', 'availability', 'imageUrl'];
+        ? ['name', 'nameAr', ...professional]
+        : ['name', 'nameAr', 'email', 'phone', 'password', ...professional];
       const submitted = kind === 'therapist'
         ? Object.fromEntries(keys.map(key => [key, values[key]]))
         : { ...values };
@@ -165,6 +201,13 @@ function RecordForm({
               required: true,
               dir: 'ltr'
             })}
+            {!record && field('password', {
+              type: 'password',
+              required: true,
+              autoComplete: 'new-password',
+              helperText: tr('passwordHelp'),
+              showPasswordToggle: true
+            })}
           </>}
           {kind === 'patient' && <>
             {field('birthDate', {
@@ -180,12 +223,7 @@ function RecordForm({
             })))}
           </>}
           {kind === 'therapist' && <>
-            {field('specialty', {
-              required: true
-            })}
-            {field('specialtyAr', {
-              dir: 'rtl'
-            })}
+            {select('specialtyId', specialtySelectOptions, chooseSpecialty)}
             {field('experience', {
               type: 'number',
               required: true
@@ -194,8 +232,28 @@ function RecordForm({
               value,
               label: tr(value)
             })))}
+            <fieldset className="center-form-checks">
+              <legend>{tr('assignServices')}</legend>
+              <p className="center-form-help">{tr('assignServicesHelp')}</p>
+              {data.services.filter(item => item.status === 'active').length === 0
+                ? <p className="center-form-help">{tr('noServices')}</p>
+                : data.services.filter(item => item.status === 'active').map(service => (
+                  <label className="remaining-check" key={service.id}>
+                    <input
+                      type="checkbox"
+                      checked={values.serviceIds.includes(service.id)}
+                      disabled={busy}
+                      onChange={() => set('serviceIds', values.serviceIds.includes(service.id)
+                        ? values.serviceIds.filter(id => id !== service.id)
+                        : [...values.serviceIds, service.id])}
+                    />
+                    <span>{name(service.name)}</span>
+                  </label>
+                ))}
+            </fieldset>
           </>}
           {kind === 'service' && <>
+            {select('specialtyId', specialtySelectOptions, chooseSpecialty)}
             {field('price', {
               label: tr('servicePrice'),
               type: 'number',
