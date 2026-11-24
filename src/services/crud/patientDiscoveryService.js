@@ -1,5 +1,9 @@
+// Patient discovery, saved centers, slots, appointments, conversations and reviews.
+
 import { callCenter, subscribeCenter } from './centerPortalService.js';
 export const getPatientDiscovery = actor => callCenter('getPatientDiscovery', actor);
+export const getPatientSavedCenters = actor => callCenter('getPatientSavedCenters', actor);
+export const createPatientReview = (actor, values) => callCenter('createPatientReview', actor, values);
 export const setPatientFavorite = (actor, centerId, saved) => callCenter('setPatientFavorite', actor, {
   centerId,
   saved

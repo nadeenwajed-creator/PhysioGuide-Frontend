@@ -1,8 +1,10 @@
+// Patient account hook: profile and appointments, refreshed when the account service emits.
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import { getPatientAccount, subscribePatientAccount } from '../../services/patientAccountService.js';
-import { getPatientAppointments } from '../../services/patientDiscoveryService.js';
+import { getPatientAccount, subscribePatientAccount } from '../../services/crud/patientAccountService.js';
+import { getPatientAppointments } from '../../services/crud/patientDiscoveryService.js';
 import { localized } from '../../utils/centerFormat.js';
 
 export default function usePatientAccount() {

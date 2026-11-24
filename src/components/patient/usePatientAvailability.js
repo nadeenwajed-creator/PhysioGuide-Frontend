@@ -1,5 +1,7 @@
+// Bookable-slot hook for the chosen center, therapist and day.
+
 import { useEffect, useState } from 'react';
-import { getPatientSlots } from '../../services/patientDiscoveryService.js';
+import { getPatientSlots } from '../../services/crud/patientDiscoveryService.js';
 
 export default function usePatientAvailability(actor, { centerId, therapistId, serviceId, date }, revision, onResolved) {
   const [result, setResult] = useState(null);

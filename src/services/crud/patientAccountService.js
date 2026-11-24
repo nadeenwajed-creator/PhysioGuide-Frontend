@@ -1,3 +1,5 @@
+// Patient account reads/writes: profile, photo, preferences and password.
+
 import { callCenter, subscribeCenter } from './centerPortalService.js';
 export const getPatientAccount = actor => callCenter('getPatientAccount', actor);
 export const savePatientProfile = (actor, values) => callCenter('savePatientProfile', actor, values);

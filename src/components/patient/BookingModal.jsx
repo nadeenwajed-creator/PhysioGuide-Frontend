@@ -1,3 +1,5 @@
+// Booking dialog: choose a center or therapist slot and send the appointment request.
+
 import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../shared/Modal/Modal.jsx';
@@ -6,7 +8,7 @@ import FormField from '../shared/FormField/FormField.jsx';
 import { SelectField, Feedback } from '../center/CenterUI.jsx';
 import usePatientAvailability from './usePatientAvailability.js';
 import { dateKey } from '../../utils/centerFormat.js';
-import { requestPatientAppointment } from '../../services/appointmentService.js';
+import { requestPatientAppointment } from '../../services/crud/appointmentService.js';
 import { usePatientLabels } from './usePatientLabels.js';
 
 function BookingForm({ state, initial, onClose, center }) {

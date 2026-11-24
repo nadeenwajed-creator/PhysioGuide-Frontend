@@ -1,3 +1,5 @@
+// Appointment actions (request, status) through the center gateway.
+
 import { callCenter } from './centerPortalService.js';
 export const saveCenterAppointment = (actor, values, id) => callCenter('saveAppointment', actor, values, id);
 export const updateAppointmentStatus = (actor, id, status) => callCenter('updateAppointmentStatus', actor, id, status);

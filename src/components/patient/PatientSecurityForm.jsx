@@ -1,8 +1,10 @@
+// Patient password change form.
+
 import { useRef, useState } from 'react';
 import Button from '../shared/Button/Button.jsx';
 import FormField from '../shared/FormField/FormField.jsx';
 import { Feedback } from '../center/CenterUI.jsx';
-import { changePatientPassword } from '../../services/patientAccountService.js';
+import { changePatientPassword } from '../../services/crud/patientAccountService.js';
 
 export default function PatientSecurityForm({ state }) {
   const { actor, tr, common } = state;

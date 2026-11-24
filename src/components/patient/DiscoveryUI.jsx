@@ -6,7 +6,7 @@ import Button from '../shared/Button/Button.jsx';
 import RatingStars from '../shared/RatingStars/RatingStars.jsx';
 import { RecordImage, Feedback } from '../center/CenterUI.jsx';
 import { usePatientLabels } from './usePatientLabels.js';
-import { setPatientFavorite } from '../../services/patientDiscoveryService.js';
+import { setPatientFavorite } from '../../services/crud/patientDiscoveryService.js';
 
 // Show loading or retry before displaying the discovery content
 export function DiscoveryState({ state, children }) {
