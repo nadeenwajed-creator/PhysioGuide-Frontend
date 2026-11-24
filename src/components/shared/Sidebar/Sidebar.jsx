@@ -1,3 +1,5 @@
+// Sidebar navigation for the center and admin layouts; an offcanvas drawer below 992px.
+
 
 import { useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
@@ -5,7 +7,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faXmark } from '@fortawesome/free-solid-svg-icons';
 
-import { useLanguage } from '../../../context/LanguageContext.jsx';
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './Sidebar.css';
 

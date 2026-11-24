@@ -1,3 +1,5 @@
+// Account dropdown: name, role, profile link, settings and the sign-out confirmation.
+
 
 import { useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -9,7 +11,7 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 
-import { useLanguage } from '../../../context/LanguageContext.jsx';
+import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './ProfileMenu.css';
 
