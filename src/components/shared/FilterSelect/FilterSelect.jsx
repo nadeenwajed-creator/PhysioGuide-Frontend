@@ -1,3 +1,5 @@
+// Filter dropdown that drops repeated option values before rendering.
+
 import './FilterSelect.css';
 
 function FilterSelect({
@@ -26,6 +28,15 @@ function FilterSelect({
     onChange?.(event.target.value);
   }
 
+  // Backend filter lists can repeat a label (e.g. two therapists with the
+  // same specialty); duplicated values would collide as React keys.
+  const seenValues = new Set();
+  const uniqueOptions = options.filter((option) => {
+    if (seenValues.has(option.value)) return false;
+    seenValues.add(option.value);
+    return true;
+  });
+
   return (
     <select
       id={id}
@@ -39,7 +50,7 @@ function FilterSelect({
       disabled={disabled}
       required={required}
     >
-      {options.map((option) => (
+      {uniqueOptions.map((option) => (
         <option
           key={option.value}
           value={option.value}
