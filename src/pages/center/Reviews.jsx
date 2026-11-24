@@ -1,3 +1,5 @@
+// Center reviews: list and reply to (or edit the reply on) each review.
+
 import { useState } from 'react';
 import Avatar from '../../components/shared/Avatar/Avatar.jsx';
 import RatingStars from '../../components/shared/RatingStars/RatingStars.jsx';
@@ -15,7 +17,7 @@ import { formatDate } from '../../utils/centerFormat.js';
 import {
   getReviewStatistics,
   replyToCenterReview,
-} from '../../services/centerRemainingService.js';
+} from '../../services/crud/centerRemainingService.js';
 import '../../components/center/remaining/RemainingUI.css';
 import './Reviews.css';
 
@@ -71,7 +73,7 @@ export default function Reviews() {
           const patientName = name(patient?.name) || tr('remaining.patient');
           return (
             <article className="center-panel center-reviews__item" key={review.id}>
-              <Avatar src={patient?.imageUrl} name={patientName} size="sm" />
+              <Avatar src={patient?.imageUrl} name={patientName} seed={review.patientId} size="sm" />
               <div className="center-reviews__content">
                 <div className="center-reviews__identity">
                   <h3>{patientName}</h3>
