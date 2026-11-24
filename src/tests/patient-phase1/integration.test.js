@@ -20,10 +20,10 @@ globalThis.localStorage = {
 globalThis.window = new EventTarget();
 const auth = await import('../../services/authService.js');
 const { MOCK_PASSWORD } = await import('../../services/auth/mockAccounts.js');
-const discovery = await import('../../services/patientDiscoveryService.js');
-const messages = await import('../../services/messageService.js');
-const { requestPatientAppointment } = await import('../../services/appointmentService.js');
-const { subscribeCenter } = await import('../../services/centerPortalService.js');
+const discovery = await import('../../services/crud/patientDiscoveryService.js');
+const messages = await import('../../services/crud/messageService.js');
+const { requestPatientAppointment } = await import('../../services/crud/appointmentService.js');
+const { subscribeCenter } = await import('../../services/crud/centerPortalService.js');
 const repository = await import('../../services/mock/centerRepository.js');
 const { createMockCenterAdapter } = await import('../../services/center/mockCenterAdapter.js');
 assets.deregister();
@@ -81,7 +81,7 @@ test('registered Patient books and messages with one stable shared identity; fav
   const notification = workspace.notifications.find(n => n.id.endsWith(reply.id));
   assert.equal(notification.isRead, false);
   assert.equal(workspace.notifications.filter(n => n.id === notification.id).length, 1);
-  const { markNotificationsRead } = await import('../../services/notificationService.js');
+  const { markNotificationsRead } = await import('../../services/crud/notificationService.js');
   await markNotificationsRead(actor, notification.id);
   workspace = await messages.getMessagingWorkspace(actor);
   assert.equal(workspace.notifications.find(n => n.id === notification.id).isRead, true);

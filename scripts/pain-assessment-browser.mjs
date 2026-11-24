@@ -95,17 +95,17 @@ try {
   await call('Network.setBlockedURLs', { urls: [`${origin}/api/*`, 'https://*'] });
   // Simulate unavailable messaging, even in the existing local mock mode. This is
   // a browser-only source response override; no project service is changed.
-  const messaging = (await readFile(new URL('../src/services/messageService.js', import.meta.url), 'utf8'))
+  const messaging = (await readFile(new URL('../src/services/crud/messageService.js', import.meta.url), 'utf8'))
     .replace("callCenter('getMessagingWorkspace', actor)", "Promise.reject(Object.assign(new Error('offline QA'), { code: 'network' }))");
-  const patterns = [{ urlPattern: '*src/services/messageService.js*', requestStage: 'Request' }];
+  const patterns = [{ urlPattern: '*src/services/crud/messageService.js*', requestStage: 'Request' }];
   let discoverySource;
   if (centerMode !== 'offline') {
-    patterns.push({ urlPattern: '*src/services/patientDiscoveryService.js*', requestStage: 'Request' });
+    patterns.push({ urlPattern: '*src/services/crud/patientDiscoveryService.js*', requestStage: 'Request' });
     const fixture = { centers: ['a', 'b', 'c'].map((id, i) => ({
       id: `qa-center-${id}`, name: { en: `QA fixture ${id} (not a real center)`, ar: `بيانات اختبار ${id}` }, city: { en: i ? 'Nablus' : 'Ramallah', ar: i ? 'نابلس' : 'رام الله' },
-      imageUrl: '/src/assets/images/center/center-treatment-room.webp', rating: null, reviews: [], services: [{ id: 'qa-service', name: { en: 'Back Pain Treatment', ar: 'علاج آلام الظهر' } }],
+      imageUrl: '/assets/images/center/center-treatment-room.webp', rating: null, reviews: [], services: [{ id: 'qa-service', name: { en: 'Back Pain Treatment', ar: 'علاج آلام الظهر' } }],
     })), favoriteIds: [] };
-    discoverySource = (await readFile(new URL('../src/services/patientDiscoveryService.js', import.meta.url), 'utf8')).replace("callCenter('getPatientDiscovery', actor)", centerMode === 'error' ? "Promise.reject(new Error('offline center test'))" : `Promise.resolve(${JSON.stringify(centerMode === 'fixture' ? fixture : { centers: [], favoriteIds: [] })})`);
+    discoverySource = (await readFile(new URL('../src/services/crud/patientDiscoveryService.js', import.meta.url), 'utf8')).replace("callCenter('getPatientDiscovery', actor)", centerMode === 'error' ? "Promise.reject(new Error('offline center test'))" : `Promise.resolve(${JSON.stringify(centerMode === 'fixture' ? fixture : { centers: [], favoriteIds: [] })})`);
   }
   await call('Fetch.enable', { patterns });
   on('Fetch.requestPaused', async ({ requestId, request }) => {
