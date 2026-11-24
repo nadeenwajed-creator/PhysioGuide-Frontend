@@ -1,3 +1,5 @@
+// Navbar bell: unread items only, typed icons/tones, mark-read and empty state.
+
 
 import { useId, useRef, useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -5,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBell,
+  faBriefcaseMedical,
   faBuilding,
   faCalendarDays,
   faComments,
@@ -13,6 +16,7 @@ import {
   faGear,
   faStar,
   faUserDoctor,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 
 import { useLanguage } from '../../../context/LanguageContext.jsx';
@@ -23,9 +27,19 @@ import './NotificationsDropdown.css';
 const notificationTypes = {
   center: { icon: faBuilding, tone: 'danger' },
   appointment: { icon: faCalendarDays, tone: 'warning' },
+  appointmentRequest: { icon: faCalendarDays, tone: 'warning' },
+  appointmentChange: { icon: faCalendarDays, tone: 'warning' },
+  appointmentReminder: { icon: faCalendarDays, tone: 'warning' },
+  appointmentCancelled: { icon: faCalendarDays, tone: 'danger' },
   review: { icon: faStar, tone: 'warning' },
+  reviewReported: { icon: faStar, tone: 'warning' },
   therapist: { icon: faUserDoctor, tone: 'info' },
+  therapistVerified: { icon: faUserDoctor, tone: 'info' },
+  professional: { icon: faUserDoctor, tone: 'info' },
+  services: { icon: faBriefcaseMedical, tone: 'info' },
   message: { icon: faComments, tone: 'info' },
+  patient: { icon: faUsers, tone: 'info' },
+  centerApproval: { icon: faBuilding, tone: 'warning' },
   system: { icon: faGear, tone: 'info' },
 };
 
@@ -76,20 +90,22 @@ function NotificationsDropdown({
     showLess: t('notifications.showLess'),
     empty: t('notifications.empty'),
     unread: t('notifications.unread'),
-    read: t('notifications.read'),
     ...labels,
   };
 
-  // Count only unread notifications to update the number on the bell.
-  const unreadCount = notifications.filter(
-    (item) => item.isRead === false
-  ).length;
+  // The bell only lists what still needs attention: a read notification is
+  // gone from the list as soon as it is marked, for every role.
+  const unreadNotifications = notifications.filter(
+    (item) => !item.isRead
+  );
+
+  const unreadCount = unreadNotifications.length;
 
   const countLabel =
     `${text.title}: ${unreadCount} ${text.unread}`;
 
   // Sort notifications from newest to oldest without changing the original array.
-  const sortedNotifications = [...notifications].sort(
+  const sortedNotifications = [...unreadNotifications].sort(
     (first, second) =>
       new Date(second.createdAt) - new Date(first.createdAt)
   );
@@ -199,8 +215,6 @@ function NotificationsDropdown({
                 tone: 'info',
               };
 
-              const unread = item.isRead === false;
-
               return (
                 <li key={item.id}>
                   <Dropdown.Item
@@ -209,7 +223,9 @@ function NotificationsDropdown({
                     type={item.to ? undefined : 'button'}
                     className="pg-notifications__item"
                     onClick={() => {
-                      if (unread) {
+                      // Without an id the parent would read the call as "mark
+                      // all", so only mark a notification that has one.
+                      if (item.id != null) {
                         onMarkAsRead?.(item.id);
                       }
                       if (item.to) handleToggle(false);
@@ -237,16 +253,14 @@ function NotificationsDropdown({
                       </time>
 
                       <span className="visually-hidden">
-                        {unread ? text.unread : text.read}
+                        {text.unread}
                       </span>
                     </span>
 
-                    {unread && (
-                      <span
-                        className="pg-notifications__dot"
-                        aria-hidden="true"
-                      />
-                    )}
+                    <span
+                      className="pg-notifications__dot"
+                      aria-hidden="true"
+                    />
                   </Dropdown.Item>
                 </li>
               );
@@ -254,7 +268,7 @@ function NotificationsDropdown({
           )}
         </ul>
 
-        {notifications.length > 5 && (
+        {unreadNotifications.length > 5 && (
           <div className="pg-notifications__footer">
             <Dropdown.Item
               as="button"
