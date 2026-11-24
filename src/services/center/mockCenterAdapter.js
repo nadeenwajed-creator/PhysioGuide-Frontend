@@ -160,8 +160,10 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
     },
     async saveTherapist(actor, values, id) {
       requireCenter(actor);
-      const professional = ['specialty', 'specialtyAr', 'experience', 'availability', 'serviceIds'];
-      const allowed = id ? professional : [...professional, 'name', 'nameAr', 'email', 'phone', 'imageUrl'];
+      const professional = ['specialtyId', 'specialty', 'specialtyAr', 'experience', 'availability', 'serviceIds'];
+      const allowed = id
+        ? [...professional, 'name', 'nameAr', 'imageUrl', 'status']
+        : [...professional, 'name', 'nameAr', 'email', 'phone', 'imageUrl', 'status', 'password'];
       if (!values || Object.keys(values).some(key => !allowed.includes(key))) fail('forbidden');
       const previous = id ? find('therapists', id) : {
         id: crypto.randomUUID(),
@@ -171,6 +173,19 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
         about: pair('', '')
       };
       if (Object.hasOwn(values, 'serviceIds') && (!Array.isArray(values.serviceIds) || values.serviceIds.some(serviceId => !state.services.some(service => service.id === serviceId)))) fail('validation', { serviceIds: 'selection' });
+      // The edit form resends the personal fields unchanged (they are hidden
+      // for existing therapists), so a personal value that differs from the
+      // stored record is a tampered payload, not a legitimate centre edit.
+      if (id) {
+        const personalSameAsStored = {
+          name: clean(values.name) === clean(previous.name?.en),
+          nameAr: clean(values.nameAr) === clean(previous.name?.ar),
+          imageUrl: clean(values.imageUrl) === clean(previous.imageUrl),
+        };
+        for (const key of Object.keys(personalSameAsStored)) {
+          if (Object.hasOwn(values, key) && !personalSameAsStored[key]) fail('forbidden');
+        }
+      }
       validatePerson(id ? { ...values, name: previous.name.en, email: previous.email, phone: previous.phone } : values, true);
       if (!id && (reservedEmails().includes(clean(values.email).toLowerCase()) || state.therapists.some(item => item.email.toLowerCase() === clean(values.email).toLowerCase()))) fail('duplicateEmail');
       const record = {
@@ -184,6 +199,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
         specialty: pair(values.specialty, values.specialtyAr),
         experience: Number(values.experience),
         availability: values.availability,
+        status: values.status || previous.status || 'active',
         serviceIds: Object.hasOwn(values, 'serviceIds') ? [...new Set(values.serviceIds)] : previous.serviceIds || [],
       };
       state.therapists = id ? state.therapists.map(item => item.id === id ? record : item) : [...state.therapists, record];
@@ -193,6 +209,55 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       // The auth mock resolves provisioned staff identities from these records; no password is stored.
       emit();
       return clone(record);
+    },
+    async getTherapistSchedule(actor, therapistId) {
+      requireCenter(actor);
+      return clone(find('therapists', therapistId).schedule || []);
+    },
+    async saveTherapistSchedule(actor, therapistId, desired = []) {
+      requireCenter(actor);
+      const therapist = find('therapists', therapistId);
+      const hours = state.center.hours;
+      const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+      const fields = {};
+      for (const window of desired) {
+        if (!Number.isInteger(window.day) || window.day < 0 || window.day > 6) fields.dayOfWeek = 'selection';
+        if (!timePattern.test(window.start) || !timePattern.test(window.end)) {
+          fields.startTime = 'timeOrder';
+          fields.endTime = 'timeOrder';
+        } else if (window.start >= window.end) fields.endTime = 'timeOrder';
+      }
+      if (Object.keys(fields).length) fail('validation', fields);
+      // The same rule as the API: a window must sit inside the centre's hours.
+      if (!hours) fail('validation', { dayOfWeek: 'outsideHours' });
+      for (const window of desired) {
+        const [open, close] = window.day === 5
+          ? [hours.fridayStart, hours.fridayEnd]
+          : [hours.weekStart, hours.weekEnd];
+        if (window.start < open || window.end > close) fail('validation', { startTime: 'outsideHours' });
+      }
+      const days = desired.map((window) => window.day);
+      if (new Set(days).size !== days.length) fail('conflict');
+      // Pending and confirmed appointments must stay inside an available window.
+      const affected = new Set([...days, ...(therapist.schedule || []).map((window) => window.day)]);
+      for (const appointment of state.appointments) {
+        if (appointment.therapistId !== therapistId || !['pending', 'confirmed'].includes(appointment.status)) continue;
+        const day = new Date(`${appointment.date}T12:00:00`).getDay();
+        if (!affected.has(day)) continue;
+        const start = appointment.time;
+        const end = `${String(Number(start.slice(0, 2)) + Math.floor((Number(start.slice(3)) + appointment.durationMinutes) / 60)).padStart(2, '0')}:${String((Number(start.slice(3)) + appointment.durationMinutes) % 60).padStart(2, '0')}`;
+        const covered = desired.some((window) => window.isAvailable !== false && window.day === day && window.start <= start && window.end >= end);
+        if (!covered) fail('conflict');
+      }
+      therapist.schedule = desired.map((window) => ({
+        id: window.id || `schedule-${therapistId}-${window.day}`,
+        day: window.day,
+        start: window.start,
+        end: window.end,
+        isAvailable: window.isAvailable !== false
+      }));
+      emit();
+      return clone(therapist.schedule);
     },
     async saveService(actor, values, id) {
       requireCenter(actor);
@@ -398,7 +463,8 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       return url;
     },
     async saveNotificationPreferences(actor, values) {
-      requireCenter(actor);
+      // Therapists edit the same switches from their own settings page.
+      requireActor(actor);
       const keys = ['appointments', 'appointmentChanges', 'patients', 'reviews'];
       if (!values || typeof values !== 'object' || Array.isArray(values)) fail('validation');
       const provided = keys.filter(key => Object.hasOwn(values, key));
