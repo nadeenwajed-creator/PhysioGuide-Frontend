@@ -1,0 +1,368 @@
+/* Admin settings: profile card, security block and notification preferences.
+   Everything is laid out with logical properties so the page mirrors in RTL. */
+.admin-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-settings__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-settings__intro h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.admin-settings__tagline {
+  margin: 6px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admin-settings__hint {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.admin-settings__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.admin-settings__main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-settings__card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.admin-settings__card h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admin-settings__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Portrait, name, role and verified chip sit together on the start side. */
+.admin-profile {
+  display: grid;
+  grid-template-columns: minmax(130px, 170px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.admin-profile__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+/* The shared avatar tops out at 64px; the profile portrait is larger. */
+.admin-profile__avatar {
+  position: relative;
+  display: inline-flex;
+}
+
+.admin-profile__avatar .pg-avatar {
+  inline-size: 96px;
+  block-size: 96px;
+}
+
+/* Camera badge: the photo is changed in place on the portrait itself. */
+.admin-profile__photo-btn {
+  position: absolute;
+  inset-block-end: 2px;
+  inset-inline-end: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 30px;
+  block-size: 30px;
+  padding: 0;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.admin-profile__photo-btn:hover:not(:disabled),
+.admin-profile__photo-btn:focus-visible {
+  background: var(--color-primary-light);
+  transform: scale(1.06);
+}
+
+.admin-profile__photo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-profile__photo-input {
+  display: none;
+}
+
+.admin-profile__photo-spinner {
+  inline-size: 12px;
+  block-size: 12px;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-block-start-color: #fff;
+  border-radius: 50%;
+  animation: admin-photo-spin 0.7s linear infinite;
+}
+
+@keyframes admin-photo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-profile__name {
+  margin-block-start: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admin-profile__role {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.admin-profile__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Label/value rows with hairlines between them. */
+.admin-settings__fields {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.admin-settings__fields > div {
+  display: grid;
+  grid-template-columns: minmax(104px, 0.85fr) minmax(0, 1.4fr);
+  gap: 12px;
+  padding-block: 11px;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.admin-settings__fields > div:last-child {
+  border-block-end: none;
+}
+
+.admin-settings__fields--meta > div {
+  grid-template-columns: minmax(104px, 0.32fr) minmax(0, 1fr);
+}
+
+.admin-settings__fields dt {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.admin-settings__fields dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+  /* Emails and phone numbers keep their own direction inside Arabic. */
+  unicode-bidi: plaintext;
+}
+
+/* Security notice with the two account actions beside it. */
+.admin-security {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  align-items: center;
+}
+
+.admin-security__notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--color-success-bg);
+}
+
+.admin-security__icon {
+  flex-shrink: 0;
+  font-size: 20px;
+  color: var(--color-success);
+}
+
+.admin-security__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.admin-security__text strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admin-security__text span {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.admin-security__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-security__actions .pg-button {
+  inline-size: 100%;
+}
+
+.admin-security__actions .pg-button__content {
+  justify-content: flex-start;
+}
+
+/* One bordered row per preference: switch first, then label and description. */
+.admin-pref-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-pref {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.admin-pref input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 0;
+  block-size: 0;
+}
+
+.admin-pref__switch {
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 44px;
+  block-size: 24px;
+  margin-block-start: 2px;
+  border-radius: 999px;
+  background: var(--color-border);
+  transition: background 160ms ease;
+}
+
+.admin-pref__switch::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 3px;
+  /* Logical inset keeps the knob on the reading-start side in both directions. */
+  inset-inline-start: 3px;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 50%;
+  background: var(--color-white);
+  transition: inset-inline-start 160ms ease;
+}
+
+.admin-pref input:checked + .admin-pref__switch {
+  background: var(--color-primary);
+}
+
+.admin-pref input:checked + .admin-pref__switch::after {
+  inset-inline-start: 23px;
+}
+
+.admin-pref input:focus-visible + .admin-pref__switch {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.admin-pref__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.admin-pref__text strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.admin-pref__text span {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 991px) {
+  .admin-settings__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-profile {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-security {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-settings__fields--meta > div {
+    grid-template-columns: minmax(96px, 0.6fr) minmax(0, 1fr);
+  }
+}
