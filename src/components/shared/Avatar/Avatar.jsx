@@ -1,15 +1,23 @@
+// Avatar: the stored photo, otherwise a stable generated face chosen from the seed.
+
 
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 import { useLanguage } from '../../../context/LanguageContext.jsx';
+import { personFace } from '../../../utils/personImage.js';
 
 import './Avatar.css';
 
 function Avatar({
   src,
   name = '',
+  email = '',
+  // Record id: keeps two people who share a name on different faces.
+  seed = '',
+  // When known, the portrait comes from the matching face folder.
+  gender = '',
   alt,
   size = 'md',
   status = 'none',
@@ -20,14 +28,14 @@ function Avatar({
 
   const [imageState, setImageState] = useState({
     src,
-    failed: false,
+    failed: [],
   });
 
   // Reset the image error when the source changes.
   if (imageState.src !== src) {
     setImageState({
       src,
-      failed: false,
+      failed: [],
     });
   }
 
@@ -40,8 +48,18 @@ function Avatar({
     ? statusLabel ?? t(`avatar.${status}`)
     : undefined;
 
-  const showImage = Boolean(src) &&
-    !(imageState.src === src && imageState.failed);
+  // People without a profile photo get a real portrait from the face pool, one
+  // nobody else on the page shares, so it stays stable between reloads; the
+  // initials stay as the last resort when even that image cannot be loaded.
+  const face = personFace(displayName, email, seed, gender);
+  const failed = imageState.failed;
+  const resolvedSrc = src && !failed.includes(src)
+    ? src
+    : !failed.includes(face)
+      ? face
+      : null;
+
+  const showImage = Boolean(resolvedSrc);
 
   const nameParts = displayName ? displayName.split(/\s+/) : [];
   const initials = nameParts.length === 0
@@ -66,15 +84,15 @@ function Avatar({
       <span className="pg-avatar__visual">
         {showImage ? (
           <img
-            key={src}
+            key={resolvedSrc}
             className="pg-avatar__image"
-            src={src}
+            src={resolvedSrc}
             alt={accessibleLabel}
             onError={() => {
-              setImageState({
+              setImageState((previous) => ({
                 src,
-                failed: true,
-              });
+                failed: [...previous.failed, resolvedSrc],
+              }));
             }}
           />
         ) : (

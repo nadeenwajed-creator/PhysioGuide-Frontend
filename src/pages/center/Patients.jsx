@@ -1,3 +1,5 @@
+// Center patient list: add, edit, view and delete center patients.
+
 import { useState } from 'react';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../components/shared/Button/Button.jsx';
@@ -116,6 +118,7 @@ function Patients() {
                         <Avatar
                           src={patient.imageUrl}
                           name={name(patient.name)}
+                          seed={patient.id}
                           size="sm"
                         />
                         <button

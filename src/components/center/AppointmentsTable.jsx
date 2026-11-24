@@ -1,3 +1,5 @@
+// Center-side appointment table: patient avatars, status badge and the row action menu.
+
 import Avatar from '../shared/Avatar/Avatar.jsx';
 import Button from '../shared/Button/Button.jsx';
 import ActionsMenu from '../shared/ActionsMenu/ActionsMenu.jsx';
@@ -39,7 +41,7 @@ function AppointmentsTable({
         }] : [];
         return <tr key={appointment.id} data-status={appointment.status}>
         <td className="center-table__identity" data-label={tr('patientId')}><div className="center-identity">
-            <Avatar src={patient?.imageUrl} name={name(patient?.name)} size="sm" />
+            <Avatar src={patient?.imageUrl} name={name(patient?.name)} seed={patient?.id} size="sm" />
             <div>
               <strong>{name(patient?.name)}</strong>
               <small><bdi>{patient?.phone}</bdi></small>
