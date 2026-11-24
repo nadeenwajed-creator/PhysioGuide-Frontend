@@ -2,7 +2,7 @@
 // This module is the single translation table between the two.
 //
 // Anything without an entry is dropped: a key the form does not render must not
-// produce a stray error message.
+// produce a stray error message.u
 
 const aliases = {
   // auth
@@ -23,6 +23,7 @@ const aliases = {
 
   // patient account
   dateofbirth: 'dateOfBirth',
+  birthdate: 'birthDate',
   profileimageurl: 'imageUrl',
   imageurl: 'imageUrl',
   language: 'language',
@@ -116,6 +117,18 @@ const codeAliases = {
   account_rejected: 'accountRejected',
   account_suspended: 'accountRejected',
   center_profile_missing: 'accountPending',
+
+  // admin record protection
+  center_has_therapists: 'centerHasTherapists',
+
+  // Google sign-in states, each carrying its own guidance
+  invalid_google_credentials: 'googleCredentials',
+  invalid_registration_ticket: 'googleTicket',
+  account_conflict: 'googleConflict',
+  center_not_approved: 'centerNotApproved',
+  account_unavailable: 'accountUnavailable',
+  rate_limit_exceeded: 'rateLimited',
+  google_auth_unavailable: 'unavailable',
 };
 
 export function uiErrorCode(body, fallback) {
