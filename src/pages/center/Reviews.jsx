@@ -21,6 +21,7 @@ import {
 import '../../components/center/remaining/RemainingUI.css';
 import './Reviews.css';
 
+// Center reviews with the reply form.
 export default function Reviews() {
   const { data, actor, tr, name, language, notify } = useCenter();
   const [editing, setEditing] = useState(null);

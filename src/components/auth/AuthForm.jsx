@@ -103,6 +103,7 @@ const knownErrors = [
   'accountUnavailable',
 ];
 
+// Sign-in and sign-up form, role-aware, with the Google flow.
 function AuthForm({ role, mode }) {
   // Provides translation and current language information from LanguageContext.
   const { t, language } = useLanguage();
@@ -204,6 +205,7 @@ function AuthForm({ role, mode }) {
     let cancelled = false;
     let generation = 0;
 
+    // Requests a Google challenge and prepares the attempt.
     async function startFlow() {
       const attempt = ++generation;
       try {
@@ -589,6 +591,7 @@ function AuthForm({ role, mode }) {
     }
   }
 
+  // Finds the center address from the device or a typed search.
   async function findLocation(useDevice) {
     lookupRef.current?.abort();
 
@@ -627,6 +630,7 @@ function AuthForm({ role, mode }) {
     }
   }
 
+  // Stores the address the user picked.
   function confirmLocation(selection) {
     setValues(previous => ({ ...previous, location: selection.address }));
     setCoordinates(selection.coordinates);
@@ -637,6 +641,7 @@ function AuthForm({ role, mode }) {
     setLocationChoices([]);
   }
 
+  // Renders one labelled input together with its error.
   function field(
     name,
     label,

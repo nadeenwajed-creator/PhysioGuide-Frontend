@@ -11,19 +11,24 @@ import './AdminViewDialogs.css';
 // it reuses that dialog's layout and its patient-details styles.
 import '../../components/center/PatientDetails.css';
 
+// Value or a dash when the field is empty.
 const value = (input) => (input == null || input === '' ? '—' : input);
+// Date part of an API date-time value.
 const dateOf = (input) => (input ? String(input).slice(0, 10) : '');
+// Time part of an API date-time value.
 const timeOf = (input) => (input ? String(input).slice(11, 16) : '');
 
 // Appointment slots arrive as local wall-clock text, so the parts are formatted
 // by hand instead of through a UTC conversion.
 const dateLabel = (input, language) => (dateOf(input) ? formatDate(dateOf(input), language) : '—');
+// Start and end time of an appointment as one label.
 const timeRange = (start, end) => {
   const from = timeOf(start);
   const to = timeOf(end);
   return from && to ? `${from} – ${to}` : from || '—';
 };
 
+// Minutes between two API date-time values.
 function minutesBetween(start, end) {
   const from = dateOf(start) && timeOf(start) ? new Date(`${dateOf(start)}T${timeOf(start)}:00`) : null;
   const to = dateOf(end) && timeOf(end) ? new Date(`${dateOf(end)}T${timeOf(end)}:00`) : null;
@@ -32,12 +37,14 @@ function minutesBetween(start, end) {
   return Number.isFinite(minutes) && minutes > 0 ? minutes : 0;
 }
 
+// Current status of the record, as a coloured pill.
 function StatusPill({ status }) {
   const { t } = useLanguage();
   if (!status) return null;
   return <span className={`admin-badge admin-badge--${status}`}>{t(`admin.status.${status}`)}</span>;
 }
 
+// Shell of the read-only detail dialogs.
 function ViewModal({ title, onClose, children }) {
   const { t } = useLanguage();
   return (
@@ -80,6 +87,7 @@ function ViewHeader({ imageUrl, name, email, seed, gender, status, subtitle, id 
   );
 }
 
+// Titled group of label and value rows.
 function ViewSection({ title, rows }) {
   if (!rows.length) return null;
   return (
@@ -97,6 +105,7 @@ function ViewSection({ title, rows }) {
   );
 }
 
+// Loading, error or retry message inside a detail dialog.
 function StateMessage({ state, onRetry, children }) {
   const { t } = useLanguage();
   if (state.error) {
@@ -119,6 +128,7 @@ function StateMessage({ state, onRetry, children }) {
   return children;
 }
 
+// Read-only profile of one patient.
 export function PatientViewDialog({ patient, onClose, onEdit }) {
   const { t, language } = useLanguage();
   const [tab, setTab] = useState('overview');
@@ -233,6 +243,7 @@ export function PatientViewDialog({ patient, onClose, onEdit }) {
   );
 }
 
+// Read-only details of one appointment.
 export function AppointmentViewDialog({ appointment, onClose }) {
   const { t, language } = useLanguage();
   const duration = minutesBetween(appointment.datetime, appointment.endDateTime);
@@ -277,6 +288,7 @@ export function AppointmentViewDialog({ appointment, onClose }) {
   );
 }
 
+// Read-only profile of one therapist.
 export function TherapistViewDialog({ therapist, onClose }) {
   const { t, language } = useLanguage();
   const detailState = useAdminQuery('getAdminPhysiotherapist', { id: therapist.id });

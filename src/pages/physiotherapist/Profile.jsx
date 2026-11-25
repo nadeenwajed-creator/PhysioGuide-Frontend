@@ -35,9 +35,11 @@ import './Profile.css';
 // older payloads still read as the English copy.
 const english = (value) =>
   typeof value === 'string' ? value : (value?.en || '');
+// Arabic part of a name that may be bilingual.
 const arabic = (value) =>
   typeof value === 'string' ? '' : (value?.ar || '');
 
+// Personal fields of the therapist read from the profile.
 const personalValues = (person) => ({
   name: english(person.name),
   nameAr: arabic(person.name),
@@ -47,11 +49,14 @@ const personalValues = (person) => ({
   imageUrl: person.imageUrl || '',
 });
 
+// Profile tabs with the personal and professional fields.
 function ProfileContent({ person }) {
   const { data, actor, name, tr, language, dir } = useCenter();
+  // Translates a key from the therapist profile copy.
   const text = (key, variables) => tr(`therapistProfile.${key}`, variables);
   const [params, setParams] = useSearchParams();
   const tab = params.get('tab') === 'professional' ? 'professional' : 'personal';
+  // Selects a tab and keeps it in the URL.
   function setTab(value) {
     setParams(previous => {
       const next = new URLSearchParams(previous);
@@ -83,11 +88,13 @@ function ProfileContent({ person }) {
     if (!busy && first) document.getElementById(`therapist-${first}`)?.focus();
   }, [fields, busy]);
 
+  // Updates one field of the profile draft.
   function change(key, value) {
     setDraft((previous) => ({ ...previous, [key]: value }));
     setFields((previous) => ({ ...previous, [key]: undefined }));
     setFeedback(null);
   }
+  // Restores the values that are stored on the server.
   function discard() {
     const latest = personalValues(person);
     setDraft(latest);
@@ -95,6 +102,7 @@ function ProfileContent({ person }) {
     setFields({});
     setFeedback(null);
   }
+  // Uploads a new profile photo.
   async function chooseImage(event) {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -117,6 +125,7 @@ function ProfileContent({ person }) {
       setBusy(false);
     }
   }
+  // Validates and saves the profile.
   async function save(event) {
     event.preventDefault();
     if (busy || !dirty) return;
@@ -135,6 +144,7 @@ function ProfileContent({ person }) {
       setBusy(false);
     }
   }
+  // Renders one labelled input of the profile form.
   function field(key, options = {}) {
     return (
       <FormField
@@ -148,6 +158,7 @@ function ProfileContent({ person }) {
       />
     );
   }
+  // Moves the tab selection with the arrow, Home and End keys.
   function tabKeys(event) {
     const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
     if (!keys.includes(event.key)) return;
@@ -163,6 +174,7 @@ function ProfileContent({ person }) {
     setTab(next);
     tabsRef.current.querySelector(`#therapist-tab-${next}`)?.focus();
   }
+  // Formats a number for the current language.
   const number = (value) =>
     Number.isFinite(value)
       ? new Intl.NumberFormat(language).format(value)
@@ -393,6 +405,7 @@ function ProfileContent({ person }) {
   );
 }
 
+// Therapist profile page, with the loading and error states.
 export default function Profile() {
   const { data, actor } = useCenter();
   const person = data.therapists.find((item) => item.id === actor.therapistId);

@@ -4,7 +4,9 @@ import { ServiceError } from '../api/serviceError.js';
 import { MOCK_PASSWORD } from '../auth/mockAccounts.js';
 
 const now = Date.now();
+// ISO timestamp some hours before the demo "now".
 const hoursAgo = (hours) => new Date(now - hours * 3600 * 1000).toISOString();
+// ISO timestamp some days before the demo "now".
 const daysAgo = (days) => new Date(now - days * 24 * 3600 * 1000).toISOString();
 
 // Records are mutable in memory: moderation and status changes are visible
@@ -141,6 +143,7 @@ const state = {
   },
 };
 
+// Artificial delay so the demo behaves like a real request.
 const wait = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Mock role checks are test behavior; the real API must authorize its own session.
@@ -148,6 +151,7 @@ function requireAdmin(actor) {
   if (actor?.role !== 'admin') throw new ServiceError('forbidden');
 }
 
+// True when any of the listed fields contains the query.
 function matches(row, query, fields) {
   const needle = String(query || '').trim().toLowerCase();
   if (!needle) return true;
@@ -168,9 +172,12 @@ function paginate(items, params = {}) {
   };
 }
 
+// Sorted list of the distinct non-empty values.
 const unique = (values) => [...new Set(values.filter(Boolean))].sort();
+// Center id and name pairs for the filter selects.
 const centerOptions = () => state.centers.map((center) => ({ id: center.id, name: center.name }));
 
+// Demo center profile with its staff, services and reviews.
 function centerDetail(center) {
   return {
     id: center.id,
@@ -187,14 +194,17 @@ function centerDetail(center) {
   };
 }
 
+// Copy of one patient as the admin table shows it.
 function patientRow(patient) {
   return { ...patient };
 }
 
+// Copy of one therapist as the admin table shows it.
 function therapistRow(therapist) {
   return { ...therapist };
 }
 
+// Average rating and rating counts of the demo reviews.
 function reviewSummary() {
   const ratings = state.reviews.map((review) => Number(review.rating) || 0);
   const score = ratings.length ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : 0;
@@ -215,6 +225,7 @@ function reviewSummary() {
 }
 
 export const adminMockApi = {
+  // KPI cards, chart series and recent activity for the demo dashboard.
   async getAdminDashboard(actor, params = {}) {
     await wait();
     requireAdmin(actor);
@@ -262,6 +273,7 @@ export const adminMockApi = {
     };
   },
 
+  // Marks one demo notification, or all of them, as read.
   async markNotificationsRead(actor, id) {
     requireAdmin(actor);
     state.dashboard.notifications.forEach((item) => {
@@ -270,6 +282,7 @@ export const adminMockApi = {
     return undefined;
   },
 
+  // Filtered page of demo centers.
   async getAdminCenters(actor, params = {}) {
     await wait();
     requireAdmin(actor);
@@ -289,6 +302,7 @@ export const adminMockApi = {
     };
   },
 
+  // Demo center profile by id.
   async getAdminCenter(actor, { id } = {}) {
     await wait();
     requireAdmin(actor);
@@ -297,6 +311,7 @@ export const adminMockApi = {
     return centerDetail(center);
   },
 
+  // Approves, rejects or suspends a demo center.
   async setAdminCenterStatus(actor, { id, status, reason } = {}) {
     await wait();
     requireAdmin(actor);
@@ -308,6 +323,7 @@ export const adminMockApi = {
     return centerDetail(center);
   },
 
+  // Saves the editable fields of a demo center.
   async updateAdminCenter(actor, values = {}) {
     await wait();
     requireAdmin(actor);
@@ -320,6 +336,7 @@ export const adminMockApi = {
     return centerDetail(center);
   },
 
+  // Removes a demo center from the in-memory list.
   async deleteAdminCenter(actor, { id } = {}) {
     await wait();
     requireAdmin(actor);
@@ -332,6 +349,7 @@ export const adminMockApi = {
     return { id, deleted: true };
   },
 
+  // Filtered page of demo patients.
   async getAdminPatients(actor, params = {}) {
     await wait();
     requireAdmin(actor);
@@ -350,6 +368,7 @@ export const adminMockApi = {
     };
   },
 
+  // Activates, deactivates or suspends a demo patient.
   async setAdminPatientStatus(actor, { id, status } = {}) {
     await wait();
     requireAdmin(actor);
@@ -360,6 +379,7 @@ export const adminMockApi = {
     return patientRow(patient);
   },
 
+  // Demo patient profile by id.
   async getAdminPatient(actor, { id } = {}) {
     await wait();
     requireAdmin(actor);
@@ -378,6 +398,7 @@ export const adminMockApi = {
     };
   },
 
+  // Saves the editable fields of a demo patient.
   async updateAdminPatient(actor, values = {}) {
     await wait();
     requireAdmin(actor);
@@ -391,6 +412,7 @@ export const adminMockApi = {
     return patientRow(patient);
   },
 
+  // Removes a demo patient from the in-memory list.
   async deleteAdminPatient(actor, { id } = {}) {
     await wait();
     requireAdmin(actor);
@@ -401,6 +423,7 @@ export const adminMockApi = {
     return { id, deleted: true };
   },
 
+  // Filtered page of demo therapists.
   async getAdminPhysiotherapists(actor, params = {}) {
     await wait();
     requireAdmin(actor);
@@ -424,6 +447,7 @@ export const adminMockApi = {
     };
   },
 
+  // Activates, deactivates or suspends a demo therapist.
   async setAdminPhysiotherapistStatus(actor, { id, status } = {}) {
     await wait();
     requireAdmin(actor);
@@ -434,6 +458,7 @@ export const adminMockApi = {
     return therapistRow(therapist);
   },
 
+  // Demo therapist profile by id.
   async getAdminPhysiotherapist(actor, { id } = {}) {
     await wait();
     requireAdmin(actor);
@@ -457,6 +482,7 @@ export const adminMockApi = {
     };
   },
 
+  // Saves the editable fields of a demo therapist.
   async updateAdminPhysiotherapist(actor, values = {}) {
     await wait();
     requireAdmin(actor);
@@ -476,6 +502,7 @@ export const adminMockApi = {
     return therapistRow(therapist);
   },
 
+  // Removes a demo therapist from the in-memory list.
   async deleteAdminPhysiotherapist(actor, { id } = {}) {
     await wait();
     requireAdmin(actor);
@@ -485,6 +512,7 @@ export const adminMockApi = {
     return { id, deleted: true };
   },
 
+  // Adds a therapist the admin created in the demo.
   async addAdminPhysiotherapist(actor, values = {}) {
     await wait();
     requireAdmin(actor);
@@ -516,6 +544,7 @@ export const adminMockApi = {
     return therapistRow(therapist);
   },
 
+  // Filtered page of demo appointments.
   async getAdminAppointments(actor, params = {}) {
     await wait();
     requireAdmin(actor);
@@ -541,6 +570,7 @@ export const adminMockApi = {
     };
   },
 
+  // Patients, therapists, services and times for the appointment form.
   async getAdminAppointmentOptions(actor) {
     await wait();
     requireAdmin(actor);
@@ -557,6 +587,7 @@ export const adminMockApi = {
     };
   },
 
+  // Creates a demo appointment.
   async createAdminAppointment(actor, values = {}) {
     await wait();
     requireAdmin(actor);
@@ -584,6 +615,7 @@ export const adminMockApi = {
     return { ...appointment };
   },
 
+  // Reschedules or reassigns a demo appointment.
   async updateAdminAppointment(actor, values = {}) {
     await wait();
     requireAdmin(actor);
@@ -611,6 +643,7 @@ export const adminMockApi = {
     return { ...appointment };
   },
 
+  // Removes a demo appointment from the in-memory list.
   async deleteAdminAppointment(actor, { id } = {}) {
     await wait();
     requireAdmin(actor);
@@ -620,6 +653,7 @@ export const adminMockApi = {
     return { id, deleted: true };
   },
 
+  // Filtered page of demo reviews.
   async getAdminReviews(actor, params = {}) {
     await wait();
     requireAdmin(actor);
@@ -650,6 +684,7 @@ export const adminMockApi = {
     };
   },
 
+  // Hides, restores or removes a demo review.
   async moderateAdminReview(actor, { id, action } = {}) {
     await wait();
     requireAdmin(actor);
@@ -664,12 +699,14 @@ export const adminMockApi = {
     return { id, isVisible: review.isVisible, action };
   },
 
+  // Demo admin profile, password state and notification switches.
   async getAdminSettings(actor) {
     await wait();
     requireAdmin(actor);
     return { ...state.settings, profile: { ...state.settings.profile } };
   },
 
+  // Saves the demo admin profile and switches.
   async saveAdminSettings(actor, values = {}) {
     await wait();
     requireAdmin(actor);
@@ -686,6 +723,7 @@ export const adminMockApi = {
     return { ...state.settings, profile: { ...state.settings.profile } };
   },
 
+  // Changes the demo admin password after checking the current one.
   async changeAdminPassword(actor, values = {}) {
     await wait();
     requireAdmin(actor);

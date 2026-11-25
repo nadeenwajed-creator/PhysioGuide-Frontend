@@ -32,6 +32,7 @@ const professional = {
   experience: 8,
   availability: 'available',
 };
+// Seeded center whose store the tests can rewrite.
 function setup() {
   let saved = {
     center: { id: 'clinic', name: { en: 'Clinic' } },
@@ -76,6 +77,7 @@ function setup() {
       saved = structuredClone(value);
     },
   };
+  // Demo adapter over the stored seed.
   const create = () => createMockCenterAdapter(store.read(), { store });
   return {
     adapter: create(),

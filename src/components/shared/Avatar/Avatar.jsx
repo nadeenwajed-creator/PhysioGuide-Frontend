@@ -10,6 +10,7 @@ import { personFace } from '../../../utils/personImage.js';
 
 import './Avatar.css';
 
+// Person photo, or the seeded face when there is none.
 function Avatar({
   src,
   name = '',

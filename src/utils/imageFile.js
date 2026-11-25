@@ -7,14 +7,17 @@ const MAX_BYTES = 1_900_000;
 // Re-encoding an animated GIF would drop the animation, so it is left alone.
 const SKIP_TYPES = new Set(['image/gif']);
 
+// File extension that matches the re-encoded MIME type.
 const extensionFor = (type) =>
   type === 'image/webp' ? 'webp' : type === 'image/png' ? 'png' : 'jpg';
 
+// Keeps the base name and swaps the extension for the new type.
 function renamed(name, type) {
   const base = String(name || 'photo').replace(/\.[^.]+$/, '') || 'photo';
   return `${base}.${extensionFor(type)}`;
 }
 
+// Promise wrapper around canvas.toBlob.
 function toBlob(canvas, type, quality) {
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }

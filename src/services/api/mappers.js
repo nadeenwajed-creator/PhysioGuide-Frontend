@@ -13,7 +13,9 @@ import { participantKey } from '../center/messagingModel.js';
 const fromApiStatus = { approved: 'confirmed', rejected: 'cancelled' };
 const toApiStatus = { confirmed: 'approved', cancelled: 'cancelled' };
 
+// API status string to the app's status key.
 export const statusFromApi = (status) => fromApiStatus[status] || status;
+// App status key back to the API status string.
 export const statusToApi = (status) => toApiStatus[status] || status;
 
 // --- session ---------------------------------------------------------------
@@ -39,8 +41,10 @@ export function toSession(body, credentials) {
 // The mapping is fixed and lossless in both directions, and `language` rides
 // along in the session so a save never silently resets it to English.
 
+// Interface language of the stored session, English by default.
 const language = () => loadSession()?.language || 'en';
 
+// Remembers the language chosen at sign-in.
 function rememberLanguage(value) {
   if (!value) return;
   const stored = loadSession();
@@ -68,6 +72,7 @@ const adminPreferenceMap = {
   systemAlerts: 'marketing',
 };
 
+// Maps an API preferences object onto the UI switches.
 export function toPreferences(api, map = patientPreferenceMap) {
   const result = {};
   for (const [uiKey, apiKey] of Object.entries(map)) {
@@ -77,6 +82,7 @@ export function toPreferences(api, map = patientPreferenceMap) {
   return result;
 }
 
+// Request body for saving the UI switches.
 export function preferencesRequest(values, map = patientPreferenceMap) {
   const body = { marketing: false, language: language() };
   for (const [uiKey, apiKey] of Object.entries(map)) {
@@ -85,18 +91,25 @@ export function preferencesRequest(values, map = patientPreferenceMap) {
   return body;
 }
 
+// Patient switches read from the API shape.
 export const toPatientPreferences = (api) => toPreferences(api, patientPreferenceMap);
+// Patient switches written in request shape.
 export const patientPreferencesRequest = (values) =>
   preferencesRequest(values, patientPreferenceMap);
+// Center switches read from the API shape.
 export const toCenterPreferences = (api) => toPreferences(api, centerPreferenceMap);
+// Center switches written in request shape.
 export const centerPreferencesRequest = (values) =>
   preferencesRequest(values, centerPreferenceMap);
+// Admin switches read from the API shape.
 export const toAdminPreferences = (api) => toPreferences(api, adminPreferenceMap);
+// Admin switches written in request shape.
 export const adminPreferencesRequest = (values) =>
   preferencesRequest(values, adminPreferenceMap);
 
 // --- patient account -------------------------------------------------------
 
+// Patient profile read from the API shape.
 export function toProfile(profile) {
   const gender = String(profile?.gender || '').toLowerCase();
   return {
@@ -110,6 +123,7 @@ export function toProfile(profile) {
   };
 }
 
+// Request body for saving the patient profile.
 export function profileRequest(values) {
   const body = {
     fullName: String(values?.name ?? '').trim(),
@@ -125,6 +139,7 @@ export function profileRequest(values) {
 
 // --- appointments ----------------------------------------------------------
 
+// One appointment with the app status key and display fields.
 export function toAppointment(item) {
   const status = statusFromApi(item?.status);
   const duration = Number(item?.duration) || 0;
@@ -141,10 +156,12 @@ export function toAppointment(item) {
   };
 }
 
+// Maps a list of appointments.
 export const toAppointments = (items) => (items || []).map(toAppointment);
 
 // --- discovery -------------------------------------------------------------
 
+// Centers and specialties of the discovery response.
 export function toDiscovery(centers) {
   return {
     mode: 'api',
@@ -165,6 +182,7 @@ export function toDiscovery(centers) {
 
 // --- messaging -------------------------------------------------------------
 
+// Attachment name taken from its URL.
 function fileName(url) {
   const [name] = String(url || '').split('?').slice(-1);
   const clean = name.split('/').pop() || '';
@@ -213,6 +231,7 @@ function toMessage(message, conversation, viewer) {
   };
 }
 
+// Conversation with its messages and the other participant.
 export function toConversation(conversation, viewer) {
   const messages = (conversation?.messages || [])
     .map((message) => toMessage(message, conversation, viewer))
@@ -257,6 +276,7 @@ function notificationTarget(notification) {
   }
 }
 
+// One notification row with the type and tone the bell reads.
 export function toNotification(notification) {
   return {
     id: String(notification.id),
@@ -270,6 +290,7 @@ export function toNotification(notification) {
   };
 }
 
+// Conversations of the messaging workspace.
 export function toMessagingWorkspace(body, viewer) {
   return {
     patientProfile: body?.patientProfile ? toProfile(body.patientProfile) : undefined,
@@ -322,6 +343,7 @@ const bilingual = (value, arabic) => (value && typeof value === 'object'
   ? value
   : { en: value || '', ar: arabic ?? value ?? '' });
 
+// One patient of the center workspace.
 function toCenterPatient(patient) {
   return {
     ...patient,
@@ -332,6 +354,7 @@ function toCenterPatient(patient) {
   };
 }
 
+// Center workspace with staff, patients, services and specialties.
 export function toCenterWorkspace(body, preferences) {
   // Creation forms pick a specialty from this list instead of guessing one
   // from an existing record.
@@ -339,6 +362,7 @@ export function toCenterWorkspace(body, preferences) {
     id: String(item.id),
     name: bilingual(item.nameEnglish || item.nameArabic),
   }));
+  // Name of a specialty id, falling back to the record label.
   const specialtyName = (id, fallback) =>
     specialties.find((item) => item.id === String(id))?.name || bilingual(fallback);
   return {
@@ -388,6 +412,7 @@ export function toCenterWorkspace(body, preferences) {
   };
 }
 
+// Therapist workspace: own profile, patients and messages.
 export function toTherapistWorkspace(body, preferences, conversations, viewer) {
   const therapist = body?.therapist || {};
   const hydrated = (body?.conversations || []).map((item) => {
@@ -443,6 +468,7 @@ export function toTherapistWorkspace(body, preferences, conversations, viewer) {
 
 // --- admin -----------------------------------------------------------------
 
+// One center application in the review queue.
 export function toApplication(item) {
   return {
     ...item,
@@ -465,6 +491,7 @@ const adminList = (body) => {
   };
 };
 
+// Lower-cased text used for comparisons.
 const lower = (value, fallback = '') =>
   value == null || value === '' ? fallback : String(value).toLowerCase();
 
@@ -483,6 +510,7 @@ const label = (value, fallback = '') => {
 const labels = (value) =>
   (Array.isArray(value) ? value : []).map((item) => label(item)).filter(Boolean);
 
+// Select options built from reference records.
 const refOptions = (value) =>
   (Array.isArray(value) ? value : []).map((item, index) =>
     typeof item === 'string' || typeof item === 'number'
@@ -498,12 +526,14 @@ const uniqueOptions = (value) =>
       list.findIndex((other) => other.name === option.name) === index
   );
 
+// Numeric value of a field, or the fallback.
 const num = (value, fallback = 0) => {
   if (value == null || value === '') return fallback;
   const parsed = Number(String(value).replace(/,/g, ''));
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+// Percentage change, or null when the API sent none.
 const pct = (value) => {
   if (value == null || value === '') return null;
   const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
@@ -520,6 +550,7 @@ const activityKinds = [
   'patientJoined',
 ];
 
+// Splits an activity id into its kind and record id.
 const splitActivityId = (id) => {
   const text = String(id ?? '');
   const kind = activityKinds.find((name) => text.startsWith(`${name}-`));
@@ -528,6 +559,7 @@ const splitActivityId = (id) => {
     : { kind: null, relatedId: null };
 };
 
+// One activity log entry with the route it opens.
 const toActivityEvent = (item, index) => {
   const id = String(item?.id ?? index);
   const fallback = splitActivityId(id);
@@ -544,7 +576,9 @@ const toActivityEvent = (item, index) => {
   };
 };
 
+// Admin dashboard metrics, chart series and recent activity.
 export function toAdminDashboard(body) {
+  // One dashboard metric with its change and its series.
   const metric = (entry) => ({
     value: num(entry?.value ?? entry),
     change: pct(entry?.change ?? entry?.delta),
@@ -586,6 +620,7 @@ export function toAdminDashboard(body) {
   };
 }
 
+// One row of the admin centers table.
 export function toAdminCenterRow(item) {
   return {
     id: String(item?.id ?? item?.centerId ?? ''),
@@ -599,6 +634,7 @@ export function toAdminCenterRow(item) {
   };
 }
 
+// Center rows together with the paging information.
 export function toAdminCenters(body) {
   const list = adminList(body);
   return {
@@ -631,6 +667,7 @@ export function toAdminActivity(body) {
   };
 }
 
+// Full admin center profile.
 export function toAdminCenter(body) {
   const specialties = body?.specialties;
   // The endpoint sends the staff list, not a count; the header row shows how
@@ -691,6 +728,7 @@ export function toAdminCenter(body) {
   };
 }
 
+// One row of the admin patients table.
 export function toAdminPatient(item) {
   return {
     id: String(item?.id ?? item?.patientId ?? ''),
@@ -707,6 +745,7 @@ export function toAdminPatient(item) {
   };
 }
 
+// Patient rows together with the paging information.
 export function toAdminPatients(body) {
   const list = adminList(body);
   return {
@@ -716,6 +755,7 @@ export function toAdminPatients(body) {
   };
 }
 
+// One row of the admin therapists table.
 export function toAdminPhysiotherapist(item) {
   const id = String(item?.id ?? item?.therapistId ?? '');
   return {
@@ -733,6 +773,7 @@ export function toAdminPhysiotherapist(item) {
   };
 }
 
+// Therapist rows together with the paging information.
 export function toAdminPhysiotherapists(body) {
   const list = adminList(body);
   return {
@@ -747,6 +788,7 @@ export function toAdminPhysiotherapists(body) {
   };
 }
 
+// One row of the admin appointments table.
 export function toAdminAppointment(item) {
   return {
     id: String(item?.id ?? item?.appointmentId ?? ''),
@@ -788,6 +830,7 @@ export function toAdminPatientProfile(body) {
   };
 }
 
+// Read-only therapist profile for the detail dialog.
 export function toAdminTherapistProfile(body) {
   return {
     id: String(body?.id ?? ''),
@@ -811,6 +854,7 @@ export function toAdminTherapistProfile(body) {
 const statusOptions = (value) =>
   (Array.isArray(value) ? value : []).map((item) => lower(item)).filter(Boolean);
 
+// Appointment rows together with the paging information.
 export function toAdminAppointments(body) {
   const list = adminList(body);
   return {
@@ -843,6 +887,7 @@ const optionList = (value) =>
         }
   );
 
+// Patients, therapists, services and times for the appointment forms.
 export function toAdminAppointmentOptions(body) {
   return {
     patients: optionList(body?.patients),
@@ -852,6 +897,7 @@ export function toAdminAppointmentOptions(body) {
   };
 }
 
+// One admin review with its reviewer and linked record.
 export function toAdminReview(item) {
   const context =
     label(item?.context) ||
@@ -878,6 +924,7 @@ export function toAdminReview(item) {
   };
 }
 
+// Review rows together with the paging information.
 export function toAdminReviews(body) {
   const list = adminList(body);
   const summary = body?.summary ?? {};
@@ -921,6 +968,7 @@ export function toScheduleWindow(body) {
   };
 }
 
+// Admin profile, password state and notification switches.
 export function toAdminSettings(body) {
   // The mock stores UI keys under `profile`; the API answers with flat
   // adminFullName/email fields at the top level.

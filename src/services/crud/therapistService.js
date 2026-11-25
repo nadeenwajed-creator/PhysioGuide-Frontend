@@ -1,5 +1,7 @@
 import { callCenter } from './centerPortalService.js';
+// Creates or updates a therapist of the center.
 export const saveCenterTherapist = (actor, values, id) => callCenter('saveTherapist', actor, values, id);
+// Saves the signed-in therapist's own profile.
 export const saveOwnTherapistProfile = (actor, values) => callCenter('saveOwnProfile', actor, values);
 //  صورة المعالج تُرفع عبر مساحة المعالج، لا مساحة المركز
 export const prepareTherapistImage = file =>

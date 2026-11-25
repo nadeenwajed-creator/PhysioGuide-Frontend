@@ -2,19 +2,23 @@ import { centerLocationService } from './auth/centerLocation.js';
 import { validCoordinates } from './center/remainingOperations.js';
 export { validCoordinates } from './center/remainingOperations.js';
 
+// True when the center already has confirmed coordinates.
 export function hasSavedCenterLocation(center) {
   // Registration saved coordinates before the confirmation flag was introduced.
   return validCoordinates(center.coordinates) && center.locationConfirmed !== false;
 }
 
+// Address search backed by Geoapify.
 export function createCenterAddressSearch({ apiKey, fetcher = globalThis.fetch, timeoutMs = 10000 } = {}) {
   return async (text, { language = 'en', signal } = {}) => {
+    // Error carrying the code the UI translates.
     const fail = code => Object.assign(new Error(code), { code });
     if (!apiKey?.trim()) throw fail('lookupUnavailable');
     if (!text?.trim()) return [];
     const url = new URL('https://api.geoapify.com/v1/geocode/search');
     url.search = new URLSearchParams({ text: text.trim(), lang: language === 'ar' ? 'ar' : 'en', format: 'json', limit: '5', apiKey: apiKey.trim() });
     const controller = new AbortController();
+    // Aborts the search when it times out or the caller cancels.
     const cancel = () => controller.abort();
     signal?.addEventListener('abort', cancel, { once: true });
     const timer = setTimeout(cancel, timeoutMs);
@@ -43,11 +47,13 @@ export function createCenterAddressSearch({ apiKey, fetcher = globalThis.fetch, 
 // per second, which suits a search typed by hand.
 export function createNominatimAddressSearch({ fetcher = globalThis.fetch, timeoutMs = 10000 } = {}) {
   return async (text, { language = 'en', signal } = {}) => {
+    // Error carrying the code the UI translates.
     const fail = code => Object.assign(new Error(code), { code });
     if (!text?.trim()) return [];
     const url = new URL('https://nominatim.openstreetmap.org/search');
     url.search = new URLSearchParams({ format: 'jsonv2', limit: '5', 'accept-language': language === 'ar' ? 'ar' : 'en', q: text.trim() });
     const controller = new AbortController();
+    // Aborts the search when it times out or the caller cancels.
     const cancel = () => controller.abort();
     signal?.addEventListener('abort', cancel, { once: true });
     const timer = setTimeout(cancel, timeoutMs);
@@ -86,6 +92,7 @@ export const searchCenterAddress = geoapifyKey?.trim()
 export async function locateCenterDevice(geolocation = globalThis.navigator?.geolocation) {
   let accuracy = null;
   const provider = geolocation && {
+    // Wraps the geolocation callback API in a promise.
     getCurrentPosition(success, error, options) {
       geolocation.getCurrentPosition(position => {
         accuracy = position.coords.accuracy;
@@ -96,8 +103,10 @@ export async function locateCenterDevice(geolocation = globalThis.navigator?.geo
   const coordinates = await centerLocationService.getCoordinates(provider);
   return { coordinates, accuracy };
 }
+// Address for coordinates through the shared location service.
 export const lookupCenterAddress = (coordinates, options) => centerLocationService.getAddress(coordinates, options);
 
+// External map links for a center's coordinates.
 export function centerMapLinks(coordinates) {
   const { latitude, longitude } = coordinates;
   const box = [Math.max(-180, longitude - .006), Math.max(-90, latitude - .004), Math.min(180, longitude + .006), Math.min(90, latitude + .004)].join(',');

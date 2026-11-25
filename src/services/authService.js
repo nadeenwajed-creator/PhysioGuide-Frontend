@@ -33,6 +33,7 @@ const demoAdapter = mockEnabled && import.meta.env?.DEV !== false ? createMockAu
 export const authMode = liveAdapter?.mode ?? demoAdapter?.mode ?? 'unavailable';
 export const isAuthDemo = authMode === 'demo';
 
+// Adapter that serves a role: the live API when configured, demo otherwise.
 function adapterFor(role) {
   // Patient sign-in has always used the real backend when one is configured.
   if (role === 'patient') return liveAdapter ?? demoAdapter;
@@ -100,12 +101,15 @@ let snapshot = { status: 'loading', session: null, error: null };
 let restoration;
 let generation = 0;
 
+// Publishes a new session snapshot to every subscriber.
 function publish(session, error = null) {
   if (snapshot.status !== 'loading' && snapshot.error === error && JSON.stringify(snapshot.session) === JSON.stringify(session)) return;
   snapshot = { status: session ? 'authenticated' : 'anonymous', session, error };
   listeners.forEach(listener => listener());
 }
+// Current session snapshot.
 export const getAuthSnapshot = () => snapshot;
+// Subscribes to session changes and returns the unsubscribe function.
 export const subscribeAuth = listener => { listeners.add(listener); return () => listeners.delete(listener); };
 
 // Signing in publishes the session so the protected routes can open the portal.
@@ -118,14 +122,19 @@ async function login(role, method, credentials) {
   return result;
 }
 
+// Patient sign-in.
 export const loginPatient = (credentials) =>
   login('patient', 'loginPatient', credentials);
+// Center sign-in.
 export const loginCenter = (credentials) =>
   login('center', 'loginCenter', credentials);
+// Admin sign-in.
 export const loginAdmin = (credentials) =>
   login('admin', 'loginAdmin', credentials);
+// Patient registration.
 export const registerPatient = (data) =>
   callAuth('patient', 'registerPatient', data);
+// Center registration.
 export const registerCenter = (data) =>
   callAuth('center', 'registerCenter', data);
 
@@ -143,6 +152,7 @@ export async function loginWithGoogle(body) {
   return result;
 }
 
+// Landing route of a role after sign-in.
 export function getAuthenticatedDestination(role) {
   if (role === 'patient') return '/patient/dashboard';
   if (role === 'center') return '/center/dashboard';
@@ -151,16 +161,22 @@ export function getAuthenticatedDestination(role) {
   throw new AuthServiceError('unsupportedRole');
 }
 
+// Runs a center-application operation as the signed-in actor.
 async function applicationOperation(method, request = {}) {
   const actor = await callSessionAuth('restoreSession');
   if (actor?.role !== 'admin') throw new AuthServiceError('forbidden');
   return callAuth(null, method, { ...request, actor });
 }
+// Center applications, optionally filtered by status.
 export const listCenterApplications = status => applicationOperation('listCenterApplications', { status });
+// One center application.
 export const getCenterApplication = id => applicationOperation('getCenterApplication', { id });
+// Approves a center application.
 export const approveCenterApplication = id => applicationOperation('reviewCenterApplication', { id, decision: 'approved' });
+// Rejects a center application with a reason.
 export const rejectCenterApplication = (id, reason) => applicationOperation('reviewCenterApplication', { id, decision: 'rejected', reason });
 
+// Restores the stored session once.
 export function restoreSession({ force = false } = {}) {
   if (restoration && !force) return restoration;
   const current = ++generation;
@@ -174,6 +190,7 @@ export function restoreSession({ force = false } = {}) {
   });
   return restoration;
 }
+// Signs out and clears the cached session.
 export async function logout() {
   await callSessionAuth('logout');
   generation += 1;

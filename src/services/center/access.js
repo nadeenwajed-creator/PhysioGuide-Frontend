@@ -8,6 +8,7 @@ const permissions = {
   patient: ['getPatientAccount', 'savePatientProfile', 'preparePatientImage', 'savePatientPreferences', 'changePatientPassword', 'getPatientDiscovery', 'getPatientSavedCenters', 'setPatientFavorite', 'createPatientReview', 'getPatientSlots', 'getPatientAppointments', 'openPatientConversation', 'requestAppointment', 'getMessagingWorkspace', 'markConversationRead', 'sendMessage', 'markNotificationsRead', 'submitAssessment', 'getAssessmentHistory', 'getAssessment'],
 };
 
+// Rejects an operation the actor's role may not perform.
 export function authorizeCenterOperation(session, operation) {
   if (!session) throw new ServiceError('unauthenticated');
   if (!permissions[session.role]?.includes(operation)) throw new ServiceError('forbidden');

@@ -7,6 +7,7 @@ import { Feedback, RecordImage } from '../center/CenterUI.jsx';
 import { preparePatientImage, savePatientProfile } from '../../services/crud/patientAccountService.js';
 import { profileErrors } from '../../services/patient/accountModel.js';
 
+// Dialog that edits the patient profile.
 export default function ProfileEditor({ state, onClose, onSaved }) {
   const { data, actor, name, tr, common, dir } = state;
   // Copy only editable fields into the draft and keep email outside it
@@ -20,10 +21,12 @@ export default function ProfileEditor({ state, onClose, onSaved }) {
   const [feedback, setFeedback] = useState(null);
   // Use the same lock for saving the profile and preparing a photo
   const submitting = useRef(false);
+  // Updates one field of the profile draft.
   const update = (key, value) => setValues(current => ({
     ...current,
     [key]: value
   }));
+  // Validates and saves the patient profile.
   async function submit(event) {
     event.preventDefault();
     if (submitting.current) return;

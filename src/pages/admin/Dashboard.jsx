@@ -18,6 +18,7 @@ import { QueryState } from './AdminUI.jsx';
 import { activityPath } from './activityLinks.js';
 import './Dashboard.css';
 
+// One KPI card with its icon, value, change and chart.
 function MetricCard({ icon, label, value, change, chart }) {
   return (
     <div className="admin-metric-card">
@@ -69,6 +70,7 @@ function MiniBarChart({ values = [] }) {
   );
 }
 
+// Admin overview: KPIs, charts and the recent activity feed.
 function AdminDashboard() {
   const { t, language } = useLanguage();
   const { session } = useAuth();

@@ -11,6 +11,7 @@ import { dateKey } from '../../utils/centerFormat.js';
 import { requestPatientAppointment } from '../../services/crud/appointmentService.js';
 import { usePatientLabels } from './usePatientLabels.js';
 
+// Service, therapist, date and time picker of the booking dialog.
 function BookingForm({ state, initial, onClose, center }) {
   const { t, name, money } = usePatientLabels();
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ function BookingForm({ state, initial, onClose, center }) {
     serviceId: validService ? values.serviceId : '',
     therapistId: validTherapist ? values.therapistId : ''
   }, center, reconcileTime);
+  // Updates one booking field and clears the last error.
   function set(key, value) {
     setError('');
     // Recheck the time after any change, and the therapist after a service change
@@ -50,6 +52,7 @@ function BookingForm({ state, initial, onClose, center }) {
       } : {})
     }));
   }
+  // Checks the slot again and books the appointment.
   async function submit(e) {
     e.preventDefault();
     if (submitting.current) return;
@@ -146,6 +149,7 @@ function BookingForm({ state, initial, onClose, center }) {
   </Modal>;
 }
 
+// Booking dialog, with the slot availability around it.
 export default function BookingModal(props) {
   const { t } = usePatientLabels();
   // Handle an old booking link if its center is no longer in the list

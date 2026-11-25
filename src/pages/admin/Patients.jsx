@@ -19,6 +19,7 @@ import './ListPages.css';
 
 const patientStatuses = ['active', 'suspended'];
 
+// Patient list with status changes and record actions.
 function AdminPatients() {
   const { t, language } = useLanguage();
   const [filters, setFilters] = useState({
@@ -61,6 +62,7 @@ function AdminPatients() {
   const options = data?.filters ?? { cities: [] };
   const number = new Intl.NumberFormat(language);
 
+  // Activates, deactivates or suspends one patient.
   async function changeStatus(id, status) {
     setSavingId(id);
     setNotice(null);

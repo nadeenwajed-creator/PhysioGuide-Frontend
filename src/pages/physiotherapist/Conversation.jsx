@@ -19,6 +19,7 @@ import {
 import { messageDay, messageTime } from '../../utils/messageFormat.js';
 import './Messages.css';
 
+// Message list and reply box of one conversation.
 function ConversationContent({ conversation }) {
   const { data, actor, name } = useCenter();
   const { language, t } = useLanguage();
@@ -42,6 +43,7 @@ function ConversationContent({ conversation }) {
       .map((message) => message.id)
   );
   useEffect(() => {
+    // Follows whether the tab is visible, so messages refresh only while seen.
     const update = () => setVisible(document.visibilityState === 'visible');
     document.addEventListener('visibilitychange', update);
     return () => document.removeEventListener('visibilitychange', update);
@@ -62,6 +64,7 @@ function ConversationContent({ conversation }) {
     if (follow.current && logRef.current)
       logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [conversation.messages.length]);
+  // Downloads one attachment, reporting a failure.
   async function attachment(file) {
     try {
       await downloadMessageAttachment(file);
@@ -152,6 +155,7 @@ function ConversationContent({ conversation }) {
   );
 }
 
+// Conversation page, showing a loading state before it is called missing.
 export default function Conversation() {
   const { conversationId } = useParams();
   const { data, actor } = useCenter();

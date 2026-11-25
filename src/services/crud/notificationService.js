@@ -8,4 +8,5 @@ export const markNotificationsRead = (actor, id) =>
     ? callAdmin('markNotificationsRead', id)
     : callCenter('markNotificationsRead', actor, id);
 export const markCenterNotificationsRead = markNotificationsRead;
+// Saves the notification switches of a center account.
 export const saveCenterNotificationPreferences = (actor, values) => callCenter('saveNotificationPreferences', actor, values);

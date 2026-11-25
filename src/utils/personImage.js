@@ -9,6 +9,7 @@ const STORAGE_KEY = 'physioguide.face-slots.v2';
 const slotFolder = (slot) => (slot % 2 === 0 ? 'women' : 'men');
 const FACE_FOLDERS = { female: 'women', male: 'men' };
 
+// Builds the portrait URL for one slot out of the two face folders.
 const faceUrl = (slot) => {
   const index = Math.floor((slot - 1) / 2) % 100;
   return `https://randomuser.me/api/portraits/${slotFolder(slot)}/${index}.jpg`;
@@ -48,6 +49,7 @@ function preferredSlot(seed) {
 // same in every tab instead of reshuffling on each visit.
 const slots = new Map(readStoredSlots());
 
+// Reads the portraits already handed out in this browser.
 function readStoredSlots() {
   if (typeof window === 'undefined') return [];
   try {
@@ -58,6 +60,7 @@ function readStoredSlots() {
   }
 }
 
+// Stores the handed-out portraits so a reload keeps the same faces.
 function persistSlots() {
   if (typeof window === 'undefined') return;
   try {

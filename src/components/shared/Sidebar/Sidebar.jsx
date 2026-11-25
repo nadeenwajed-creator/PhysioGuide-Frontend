@@ -11,6 +11,7 @@ import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './Sidebar.css';
 
+// Side navigation, a drawer on small screens.
 function Sidebar({
   id = 'pg-sidebar',
   items = [],
@@ -40,11 +41,13 @@ function Sidebar({
     const desktopQuery = window.matchMedia('(min-width: 992px)');
     let focusInSidebar = false;
 
+    // Remembers whether the focus is inside the sidebar.
     function trackFocus(event) {
       focusInSidebar =
         document.getElementById(id)?.contains(event.target) ?? false;
     }
 
+    // Closes the drawer once the desktop layout takes over.
     function handleResize() {
       if (desktopQuery.matches) {
         // Returning to desktop should not reopen the drawer later.
@@ -66,6 +69,7 @@ function Sidebar({
     };
   }, [id]);
 
+  // Closes the drawer after a navigation on small screens.
   function handleNavigation(event) {
     if (
       !event.defaultPrevented &&

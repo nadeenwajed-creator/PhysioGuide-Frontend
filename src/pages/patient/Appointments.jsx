@@ -27,6 +27,7 @@ import {
 } from "../../services/patient/accountModel.js";
 import "../../components/patient/PatientAccount.css";
 
+// Patient appointments grouped by their date.
 export default function Appointments() {
   const state = usePatientAccount();
   const { tr, common, name, language, dir, data } = state;
@@ -45,6 +46,7 @@ export default function Appointments() {
       `${row.centerId}:${row.id}` === detailKey ||
       (!detailKey && row.id === params.get("appointment"))
   );
+  // Closes the appointment details and drops it from the URL.
   function closeDetails() {
     setDetailKey(null);
     setParams(

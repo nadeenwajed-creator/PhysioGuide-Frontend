@@ -28,6 +28,7 @@ function hubUrl() {
   return `${root}/hubs/messages`;
 }
 
+// One trailing refresh for a burst of push events.
 function notifyChanged() {
   // Message + read + list events often land together; one trailing refresh
   // absorbs the burst instead of refetching the workspace for each event.
@@ -38,6 +39,7 @@ function notifyChanged() {
   }, FLUSH_DELAY);
 }
 
+// Reconnects a little later after the connection drops.
 function scheduleRestart() {
   if (!active || restartTimer) return;
   restartTimer = window.setTimeout(() => {
@@ -46,6 +48,7 @@ function scheduleRestart() {
   }, RESTART_DELAY);
 }
 
+// Starts the connection and wires the push events.
 async function connect() {
   if (!active || connecting || connection) return;
   // Re-read the session on every attempt: the gateway rotates the token on
@@ -87,6 +90,7 @@ async function connect() {
   }
 }
 
+// Stops the connection and its timers.
 function stopAll() {
   active = false;
   window.clearTimeout(restartTimer);

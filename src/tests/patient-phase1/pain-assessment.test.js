@@ -10,6 +10,7 @@ import { initialAssessment, assessmentReducer as reduce, intensityBand, validSte
 import { bodyHotspots } from '../../components/patient/pain-assessment/bodyHotspots.js';
 import { painAssessmentEn, painAssessmentAr } from '../../locales/painAssessment.js';
 
+// Assessment with every step answered, before the override.
 const answered = overrides => ({ ...initialAssessment(), painAreas: ['lower_back'], intensity: 5, duration: 'weeks_1_4', descriptions: ['aching'], relatedHistory: 'none', ...overrides });
 
 test('fresh assessment has no answers and all steps reject empty input', () => {
@@ -93,6 +94,7 @@ test('entire assessment completes and calculates care with network and storage f
 });
 
 test('center matching requires genuine source, explicit Palestinian city and offered service; caps at two', () => {
+  // Center fixture used by the care-matching tests.
   const fixture = id => ({ id, name: { en: 'Test fixture' }, city: { en: 'Ramallah' }, services: [{ id: 's', name: { en: 'Knee Rehabilitation' } }] });
   const centers = [fixture('center-demo'), { ...fixture('outside'), city: 'Riyadh' }, { ...fixture('unknown'), city: null }, { ...fixture('inactive'), status: 'inactive' }, { ...fixture('wrong-service'), services: [{ id: 's', name: 'Pediatric Physiotherapy' }] }, fixture('test-a'), fixture('test-b'), fixture('test-c')];
   assert.deepEqual(matchingCenters(centers, 'knee').map(c => c.id), ['test-a', 'test-b']);
@@ -115,6 +117,7 @@ test('each anatomical area maps to real image coordinates within its wrapper', (
   assert.equal(bodyHotspots.front.lower_back, undefined);
 });
 
+// CRC32 of a buffer, needed to build the PNG fixture.
 function crc32(data) {
   let crc = 0xffffffff;
   for (const byte of data) {
@@ -163,6 +166,7 @@ test('runtime assets match handoff hashes; PNG rasters are intact and genuinely 
     if (type === 6) {
       // Reverse PNG scanline filters to verify genuine transparent and opaque pixels.
       let previous = Buffer.alloc(stride), transparent = 0, opaque = 0;
+      // Paeth predictor used while building the PNG fixture.
       const paeth = (a, b, c) => { const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c); return pa <= pb && pa <= pc ? a : pb <= pc ? b : c; };
       for (let y = 0; y < height; y++) {
         const filter = raster[y * (stride + 1)], row = Buffer.from(raster.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1)));

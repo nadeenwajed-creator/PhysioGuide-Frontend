@@ -41,8 +41,10 @@ function NewAppointmentModal({ onClose, onCreated }) {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Updates one field of the new appointment.
   const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
+  // Select options with the empty choice in front.
   const toOptions = (items, placeholder) => [
     { value: '', label: placeholder },
     ...(items || []).map((item) => ({ value: item.id, label: item.name })),
@@ -78,6 +80,7 @@ function NewAppointmentModal({ onClose, onCreated }) {
     }));
   };
 
+  // Validates and books the appointment.
   async function submit(event) {
     event.preventDefault();
     setSaving(true);
@@ -192,6 +195,7 @@ function NewAppointmentModal({ onClose, onCreated }) {
   );
 }
 
+// Appointment list with filters, status changes and CRUD dialogs.
 function AdminAppointments() {
   const { t, language } = useLanguage();
   const [filters, setFilters] = useState({
@@ -208,6 +212,7 @@ function AdminAppointments() {
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  // Changes one filter and goes back to the first page.
   const update = (values) =>
     setFilters((previous) => ({
       ...previous,

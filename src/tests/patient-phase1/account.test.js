@@ -26,6 +26,7 @@ const repository = await import('../../services/mock/centerRepository.js');
 const { createMockCenterAdapter } = await import('../../services/center/mockCenterAdapter.js');
 assets.deregister();
 const draft = { name: 'Patient Updated', phone: '0591234567', dateOfBirth: '1998-03-12', gender: 'female', city: 'Nablus', imageUrl: '' };
+// Signs the demo patient in and returns the session.
 const login = async () => { await auth.loginPatient({ email: 'patient@example.com', password: MOCK_PASSWORD }); return auth.getAuthSnapshot().session; };
 
 test('appointment groups preserve Center statuses and care counts agree with lists', () => {

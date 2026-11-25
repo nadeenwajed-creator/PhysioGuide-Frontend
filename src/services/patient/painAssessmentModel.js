@@ -52,6 +52,7 @@ const careMatch = {
   GeneralPhysiotherapy: 'musculoskeletal'
 };
 
+// Empty assessment with every step unanswered.
 export function initialAssessment() {
   return {
     step: 1,
@@ -65,12 +66,15 @@ export function initialAssessment() {
   };
 }
 
+// Severity band of a 0-10 pain score.
 export function intensityBand(value) {
   if (!Number.isInteger(value) || value < 0 || value > 10) return null;
   return value === 0 ? 'none' : value <= 3 ? 'mild' : value <= 6 ? 'moderate' : 'severe';
 }
 
+// True when the answers of one step are complete and allowed.
 export function validStep(state, step = state.step) {
+  // True when a list of answers is non-empty and within the allowed ids.
   const validList = (values, allowed) => Array.isArray(values) && values.length > 0 && values.every(v => allowed.includes(v));
   return [
     false,
@@ -82,11 +86,14 @@ export function validStep(state, step = state.step) {
   ][step] === true;
 }
 
+// True when every step of the assessment has a valid answer.
 export function completeAssessment(state) {
   return [1, 2, 3, 4, 5].every(step => validStep(state, step));
 }
 
+// Applies one answer, or a navigation action, to the assessment.
 export function assessmentReducer(state, action) {
+  // Adds an id to a list of answers, or removes it when it is there.
   const toggle = (values, id) => values.includes(id) ? values.filter(v => v !== id) : [...values, id];
   switch (action.type) {
     case 'area':
@@ -145,6 +152,7 @@ export function assessmentReducer(state, action) {
   }
 }
 
+// Request body of a completed assessment.
 export function toAssessmentSubmission(state) {
   if (!completeAssessment(state)) return null;
   const answers = {
@@ -159,10 +167,12 @@ export function toAssessmentSubmission(state) {
   return answers;
 }
 
+// Care category used to match centers for a suggestion.
 export function careMatchKey(code) {
   return careMatch[code] || 'musculoskeletal';
 }
 
+// Care categories implied by the result and the answers.
 export function matchingCareKeys(result, state) {
   const keys = new Set();
   const mapped = careMatchKey(result?.suggestedCare?.code);
@@ -174,6 +184,7 @@ export function matchingCareKeys(result, state) {
   return [...keys];
 }
 
+// Severity class of a pain score.
 function interpretSeverity(severity) {
   if (severity === 0) return 'NoPain';
   if (severity <= 3) return 'Mild';
@@ -243,6 +254,7 @@ export function suggestedCareFromAnswers(answers) {
   };
 }
 
+// Result panel content built from the submitted answers.
 export function buildAssessmentResult(answers, extras = {}) {
   const suggestedCare = suggestedCareFromAnswers(answers);
   return {
@@ -259,6 +271,7 @@ export function buildAssessmentResult(answers, extras = {}) {
   };
 }
 
+// Result built from an API assessment response.
 export function toAssessmentResult(body) {
   if (!body) return null;
   const suggestedCare = body.suggestedCare ? {
@@ -282,12 +295,15 @@ export function toAssessmentResult(body) {
   };
 }
 
+// Suggests care for the answers the patient has given so far.
 export function suggestCare(state) {
   const answers = toAssessmentSubmission(state);
   if (!answers) return null;
   return careMatchKey(suggestedCareFromAnswers(answers).code);
 }
+// Comparison form of a label.
 const normalize = value => String(value ?? '').normalize('NFKC').trim().toLocaleLowerCase();
+// Label strings of a bilingual value or a list.
 const labels = value => typeof value === 'string'
   ? [value]
   : value && typeof value === 'object' ? Object.values(value).filter(v => typeof v === 'string') : [];
@@ -328,6 +344,7 @@ const palestinianCities = [
   'دير البلح'
 ];
 
+// Centers that offer one of the suggested care services.
 export function matchingCenters(centers, care, {
   allowMock = false
 } = {}) {

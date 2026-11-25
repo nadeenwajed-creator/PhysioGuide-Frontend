@@ -21,6 +21,7 @@ export function DiscoveryState({ state, children }) {
   return children;
 }
 
+// Button that saves a center, or removes it from the saved centers.
 export function Favorite({ center, state }) {
   const { t } = usePatientLabels();
   // Read the saved state from discovery data so the cards stay in sync
@@ -55,6 +56,7 @@ export function Favorite({ center, state }) {
   </>;
 }
 
+// Average rating of a center as stars and a number.
 export function CenterRating({ center }) {
   const { t } = usePatientLabels();
   // A missing rating should show a label instead of empty stars
@@ -70,6 +72,7 @@ export function CenterRating({ center }) {
   </div>;
 }
 
+// One center in the discovery list, with its booking action.
 export function CenterCard({ center, state, onBook }) {
   const { t, name, money } = usePatientLabels();
   const navigate = useNavigate();

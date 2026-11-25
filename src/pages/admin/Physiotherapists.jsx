@@ -24,6 +24,7 @@ import './ListPages.css';
 // API can filter and store are Active and Suspended.
 const therapistStatuses = ['active', 'suspended'];
 
+// Form that creates a therapist from the admin portal.
 function AddTherapistModal({ centers, specialties, onClose, onAdded }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({
@@ -38,8 +39,10 @@ function AddTherapistModal({ centers, specialties, onClose, onAdded }) {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Updates one field of the new therapist.
   const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
+  // Validates and creates the therapist.
   async function submit(event) {
     event.preventDefault();
     setSaving(true);
@@ -154,6 +157,7 @@ function AddTherapistModal({ centers, specialties, onClose, onAdded }) {
   );
 }
 
+// Therapist list with verification state and record actions.
 function AdminPhysiotherapists() {
   const { t, language } = useLanguage();
   const [filters, setFilters] = useState({
@@ -171,6 +175,7 @@ function AdminPhysiotherapists() {
   const [editId, setEditId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  // Changes one filter and goes back to the first page.
   const update = (values) =>
     setFilters((previous) => ({
       ...previous,
@@ -196,6 +201,7 @@ function AdminPhysiotherapists() {
   const options = data?.filters ?? { specialties: [], centers: [] };
   const number = new Intl.NumberFormat(language);
 
+  // Activates, deactivates or suspends one therapist.
   async function changeStatus(id, status) {
     setSavingId(id);
     setNotice(null);

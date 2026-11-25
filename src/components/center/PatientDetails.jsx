@@ -11,6 +11,7 @@ import { addPatientNote } from '../../services/crud/patientService.js';
 import { formatDate } from '../../utils/centerFormat.js';
 import { getPatientAppointmentSummary } from '../../services/patientSummaryService.js';
 import './PatientDetails.css';
+// Patient panel with the details and the note form.
 function PatientDetails({
   patient,
   onClose,
@@ -29,6 +30,7 @@ function PatientDetails({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const { history, total, lastVisit } = getPatientAppointmentSummary(data.appointments, patient.id);
+  // Appends the typed note to the patient record.
   async function saveNote(event) {
     event.preventDefault();
     setBusy(true);

@@ -7,11 +7,13 @@ import useCenter from '../useCenter.js';
 import { saveCenterPreferences } from '../../../services/crud/centerRemainingService.js';
 
 const options = ['appointments', 'appointmentChanges', 'reviews'];
+// Notification switches of the center account.
 export default function NotificationPreferences() {
   const { data, actor, tr } = useCenter();
   const [values, setValues] = useState(() => Object.fromEntries(options.map(key => [key, data.notificationPreferences?.[key] !== false])));
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  // Saves the notification switches.
   async function save(event) {
     event.preventDefault(); if (busy) return;
     setBusy(true); setFeedback(null);

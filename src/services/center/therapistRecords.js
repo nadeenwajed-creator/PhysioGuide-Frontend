@@ -1,5 +1,6 @@
 // Capture the old name-based relationship once, before catalog/profile edits.
 export function normalizeTherapistServices(state) {
+  // Comparison form of a service name.
   const normalize = (value) =>
     String(value || '')
       .trim()
@@ -31,10 +32,12 @@ export function defaultTherapistSchedule(therapistId) {
   }));
 }
 
+// Services the workspace has assigned to one therapist.
 export function assignedTherapistServices(therapist, services = []) {
   return services.filter((service) => therapist?.serviceIds?.includes(service.id));
 }
 
+// Prices of a therapist's assigned services.
 export function therapistServicePrices(therapist, services) {
   return assignedTherapistServices(therapist, services)
     .map((service) => service.price)

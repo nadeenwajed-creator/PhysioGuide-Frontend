@@ -19,6 +19,7 @@ import useCenter from '../../components/center/useCenter.js';
 import usePagination from '../../components/center/usePagination.js';
 import { includesQuery, formatDate } from '../../utils/centerFormat.js';
 import './Patients.css';
+// Patient list with search and the patient panel.
 function Patients() {
   const { data, tr, name, language } = useCenter();
   const [query, setQuery] = useState('');
@@ -41,6 +42,7 @@ function Patients() {
     start,
   } = usePagination(matches.length);
   const selected = data.patients.find((item) => item.id === selectedId);
+  // Changes one filter and goes back to the first page.
   function filter(setter, value) {
     setter(value);
     setPage(1);

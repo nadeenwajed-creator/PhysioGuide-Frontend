@@ -22,6 +22,7 @@ import './Reviews.css';
 // hidden from patients, and "reported"/"pending" have no data source.
 const reviewStatuses = ['published', 'hidden'];
 
+// Review moderation with reported reviews filtered in.
 function AdminReviews() {
   const { t, language } = useLanguage();
   const [filters, setFilters] = useState({
@@ -34,6 +35,7 @@ function AdminReviews() {
   });
   const [pending, setPending] = useState(null);
 
+  // Changes one filter and goes back to the first page.
   const update = (values) =>
     setFilters((previous) => ({
       ...previous,
@@ -45,6 +47,7 @@ function AdminReviews() {
   // review until the link is cleared.
   const [searchParams, setSearchParams] = useSearchParams();
   const linkedReviewId = searchParams.get('review');
+  // Drops the review id from the URL once its dialog closes.
   const clearLinkedReview = () => setSearchParams({}, { replace: true });
 
   const search = useDebouncedValue(filters.search, 300);

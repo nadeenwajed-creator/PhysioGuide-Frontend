@@ -1,9 +1,12 @@
 import { callCenter } from './centerPortalService.js';
 
+// Conversations and messages of the signed-in account.
 export const getMessagingWorkspace = (actor) =>
   callCenter('getMessagingWorkspace', actor);
+// Marks messages of one conversation as read.
 export const markConversationRead = (actor, id, messageIds) =>
   callCenter('markConversationRead', actor, id, messageIds);
+// Sends a message in one conversation.
 export const sendMessage = (actor, id, payload) =>
   callCenter('sendMessage', actor, id, payload);
 
@@ -19,6 +22,7 @@ const apiOrigin = () => {
   }
 };
 
+// Downloads one attachment through the authenticated client.
 export async function downloadMessageAttachment(file) {
   const url = new URL(file.url, window.location.origin);
   const allowed = new Set([window.location.origin, apiOrigin()].filter(Boolean));

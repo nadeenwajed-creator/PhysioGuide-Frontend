@@ -27,6 +27,7 @@ import { money } from '../../utils/centerFormat.js';
 import '../../components/center/remaining/RemainingUI.css';
 import './CenterProfile.css';
 
+// Center profile page with its logo and gallery.
 export default function CenterProfile() {
   const { data, actor, name, tr, language, dir } = useCenter();
   const navigate = useNavigate();
@@ -35,10 +36,12 @@ export default function CenterProfile() {
   const [savingImages, setSavingImages] = useState(false);
   const [imageFeedback, setImageFeedback] = useState(null);
   const center = data.center;
+  // Saves the logo and gallery changes.
   async function changeImages(values) {
     await updateCenterImages(actor, values);
     setImageFeedback({ text: tr('saved') });
   }
+  // Adds the selected photos to the logo or the gallery.
   async function upload(event, gallery = false) {
     const files = [...(event.target.files || [])];
     event.target.value = '';
@@ -54,6 +57,7 @@ export default function CenterProfile() {
       setSavingImages(false);
     }
   }
+  // Removes one gallery photo.
   async function removePhoto(src) {
     if (savingImages) return;
     setSavingImages(true);

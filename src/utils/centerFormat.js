@@ -3,9 +3,11 @@ export function localized(value, language) {
   if (typeof value === 'string') return value;
   return value?.[language] || value?.en || value?.ar || '';
 }
+// Local YYYY-MM-DD key used for today and schedule lookups.
 export function dateKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
+// Formats an ISO string, a Date or a timestamp for display.
 export function formatDate(value, language) {
   if (!value) return '—';
   // The API may send an ISO string, a Date or a timestamp; only strings carry
@@ -18,6 +20,7 @@ export function formatDate(value, language) {
     year: 'numeric'
   }).format(date);
 }
+// Formats an amount as currency without decimals.
 export function money(value, language, currency = 'USD') {
   return new Intl.NumberFormat(language, {
     style: 'currency',
@@ -25,6 +28,7 @@ export function money(value, language, currency = 'USD') {
     maximumFractionDigits: 0
   }).format(value);
 }
+// Case-insensitive contains check across several fields.
 export function includesQuery(query, ...values) {
   const needle = query.trim().toLocaleLowerCase();
   return values.some(value => String(value ?? '').toLocaleLowerCase().includes(needle));

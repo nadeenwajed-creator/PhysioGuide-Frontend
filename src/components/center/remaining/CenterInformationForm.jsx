@@ -11,6 +11,7 @@ import { validCoordinates, hasSavedCenterLocation } from '../../../services/cent
 // The API sends one string per field (with the Arabic copy on nameAr/aboutAr),
 // while the mock keeps bilingual objects, so both shapes fill the form.
 function readFields(center) {
+  // Plain string of a value that may also be bilingual.
   const text = value => (typeof value === 'string' ? value : '');
   return {
     name: center.name?.en || center.nameEn || text(center.name),
@@ -27,6 +28,7 @@ function readFields(center) {
   };
 }
 
+// Form that edits the name, address and about text of the center.
 export default function CenterInformationForm() {
   const { data: { center }, actor, tr, language } = useCenter();
   const [values, setValues] = useState(() => readFields(center));
@@ -45,18 +47,21 @@ export default function CenterInformationForm() {
   //  Only the primary address stands for the map pin; the Arabic label is a
   //  translation of it and does not need a new location confirmation.
   const set = (key, value) => { if (key === 'address') { setConfirmed(false); setLocationTouched(true); } setValues(current => ({ ...current, [key]: value })); setFeedback(null); };
+  // Renders one labelled input of the form.
   const field = (key, props = {}) => <FormField id={`information-${key}`} label={tr(key)} value={values[key]} onChange={value => set(key, value)} disabled={disabled} error={fields[key] && tr(`error.${fields[key]}`)} {...props} />;
   const serialized = JSON.stringify({ values, coordinates, confirmed });
   const [saved, setSaved] = useState(serialized);
   const [editorVersion, setEditorVersion] = useState(0);
   const dirty = serialized !== saved;
   useUnsavedChanges(dirty, tr('remaining.unsavedWarning'));
+  // Restores the values that are stored on the server.
   function discard() {
     const previous = { values: readFields(center), coordinates: center.coordinates || null, confirmed: hasSavedCenterLocation(center) };
     setSaved(JSON.stringify(previous));
     setValues(previous.values); setCoordinates(previous.coordinates); setConfirmed(previous.confirmed);
     setLocationTouched(false); setFields({}); setFeedback(null); setEditorVersion(v => v + 1);
   }
+  // Validates and saves the center information.
   async function save(event) {
     event.preventDefault(); if (disabled) return;
     setFields({}); setFeedback(null);

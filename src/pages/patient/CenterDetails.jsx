@@ -17,6 +17,7 @@ import ReviewModal from '../../components/patient/ReviewModal.jsx';
 import '../../components/patient/PatientDiscovery.css';
 import '../../components/patient/PatientReview.css';
 
+// Center page with its services, therapists and reviews.
 export default function CenterDetails() {
   const state = useDiscovery();
   const { centerId } = useParams();

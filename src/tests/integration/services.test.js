@@ -12,6 +12,7 @@ import { appointmentActions } from '../../services/center/appointmentRules.js';
 import { getDashboardSummary } from '../../services/centerSummaryService.js';
 import { authorizeCenterOperation } from '../../services/center/access.js';
 
+// In-memory stand-in for localStorage.
 function storage() {
   const values = new Map();
   return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key), values };
@@ -24,15 +25,19 @@ const response = (data, status = 200) => ({
   json: async () => data,
   text: async () => (data == null ? '' : JSON.stringify(data)),
 });
+// Login credentials for one demo account email.
 const credentials = email => ({ email, password: 'PhysioGuide123!' });
 const center = { id: 'account-center', role: 'center', centerId: 'center-demo' };
+// Fixed date the demo schedule is tested against.
 const clock = () => new Date(2030, 0, 10, 12);
+// Seeded center workspace used by the service tests.
 const seed = () => ({
   today: '2030-01-10', center: { id: 'center-demo', name: { en: 'Center' } },
   patients: ['p1', 'p2'].map(id => ({ id, name: { en: id }, status: 'active', notes: [] })),
   therapists: ['t1', 't2'].map(id => ({ id, name: { en: id }, availability: 'available' })),
   services: [{ id: 's1', duration: 45, status: 'active' }], appointments: [], reviews: [], conversations: [], notifications: [],
 });
+// Appointment payload with the required fields filled in.
 const booking = (extra = {}) => ({ patientId: 'p1', therapistId: 't1', serviceId: 's1', date: '2030-01-10', time: '09:00', ...extra });
 
 test('malformed saved envelopes fail without silently replacing existing records', () => {
@@ -64,6 +69,7 @@ test('HTTP client supports REST verbs, query encoding, headers, bodies and 204',
 
 test('transport rejects unconfigured/cross-origin paths before sending credentials', async () => {
   let calls = 0;
+  // Fetcher that counts its calls and answers with an empty body.
   const fetcher = async () => { calls++; return response({}); };
   await assert.rejects(createHttpClient({ fetcher }).get('/unconfigured'), { code: 'unavailable' });
   await assert.rejects(createHttpClient({ fetcher, baseUrl: 'https://api.example.test' }).get('https://other.example.test'), { code: 'unavailable' });
@@ -78,6 +84,7 @@ test('HTTP failures normalize status and do not expose raw messages', async () =
 });
 
 test('timeouts cover session headers, fetch and response-body reading; caller cancellation works', async () => {
+  // Promise that never settles, used for the timeout tests.
   const hanging = () => new Promise(() => {});
   const waitingForSession = createHttpClient({ baseUrl: 'https://api.example.test', getHeaders: hanging, timeoutMs: 15 });
   await assert.rejects(waitingForSession.get('/test'), { code: 'timeout' });
@@ -127,6 +134,7 @@ test('signup persists metadata, keeps Center pending, and stores no passwords or
 
 test('session restoration resolves canonical roles, expires, and logout removes the marker', async () => {
   const memory = storage();const sessionStore = createBrowserStore('session', { storage: () => memory }); let time = 100;
+  // Demo auth adapter over the test session store.
   const create = () => createMockAuthAdapter({ delay: 0, sessionStore, now: () => time });
   await create().loginPatient(credentials('patient@example.com'));
   const marker = sessionStore.read(); sessionStore.write({ ...marker, role: 'center' });

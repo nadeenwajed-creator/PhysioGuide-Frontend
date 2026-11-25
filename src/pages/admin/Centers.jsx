@@ -32,6 +32,7 @@ function CenterThumb({ src }) {
   );
 }
 
+// Center list with search, status filter, row actions and paging.
 function AdminCenters() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();

@@ -39,6 +39,7 @@ const confirmCopy = {
   suspended: { title: 'admin.confirm.suspendTitle', text: 'admin.confirm.suspendText' },
 };
 
+// Center profile with its staff, services and approval state.
 function AdminCenterDetail() {
   const { id } = useParams();
   const { t, dir, language } = useLanguage();

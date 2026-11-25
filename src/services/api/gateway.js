@@ -25,6 +25,7 @@ const statusCodes = {
 
 const REFRESH_PATH = '/api/Auth/refresh';
 
+// HTTP client bound to a base URL, headers and a fetcher.
 export function createGateway({
   baseUrl = '',
   fetcher = globalThis.fetch,
@@ -37,6 +38,7 @@ export function createGateway({
   // Concurrent 401s must share one refresh instead of racing each other.
   let refreshing = null;
 
+  // Absolute URL for a path, refusing origins outside the API.
   function urlFor(path) {
     if (!root) throw new ServiceError('unavailable');
     const base = new URL(root, globalThis.location?.origin || 'http://localhost');
@@ -46,6 +48,7 @@ export function createGateway({
     return url;
   }
 
+  // Parsed JSON body, or null for an empty response.
   async function parseBody(response) {
     if (response.status === 204) return null;
     const text = await response.text();
@@ -90,6 +93,7 @@ export function createGateway({
     }
   }
 
+  // Shares one in-flight refresh between concurrent requests.
   function runRefresh() {
     refreshing ??= refreshSession().finally(() => {
       refreshing = null;
@@ -97,6 +101,7 @@ export function createGateway({
     return refreshing;
   }
 
+  // Sends one request with timeout, abort handling and session refresh.
   async function send(method, path, options = {}) {
     const {
       data,
@@ -121,8 +126,10 @@ export function createGateway({
     // An abort that lands after the request already settled has no race left
     // to deliver it to; swallow it so it never becomes an unhandled rejection.
     aborted.catch(() => {});
+    // Rejects the pending request when the caller aborts.
     const onAbort = () => rejectAbort(new ServiceError('cancelled'));
     controller.signal.addEventListener('abort', onAbort, { once: true });
+    // Aborts the underlying request when the timeout fires.
     const abort = () => controller.abort();
     if (signal?.aborted) throw new ServiceError('cancelled');
     signal?.addEventListener('abort', abort, { once: true });

@@ -11,6 +11,7 @@ import { locateCenterDevice, centerMapLinks, hasSavedCenterLocation, createCente
 const actor = { id: 'owner', role: 'center', centerId: 'clinic' };
 const hours = { weekStart: '09:00', weekEnd: '18:00', fridayStart: '10:00', fridayEnd: '14:00' };
 const profile = { name: 'Clinic', nameAr: 'المركز', email: 'clinic@example.com', phone: '0591234567', address: 'Clinic Street', about: 'Care', imageUrl: '' };
+// Seeded center whose store writes can be made to fail.
 function setup() {
   const seed = {
     today: '2030-01-10', center: { id: 'clinic', name: { en: 'Clinic' }, hours, gallery: [], coordinates: { latitude: 32, longitude: 35 } },
@@ -23,6 +24,7 @@ function setup() {
   const storage = { getItem: key => memory.get(key), setItem: (key, value) => { if (failed) throw new Error(); memory.set(key, value); } };
   const store = createBrowserStore('test-center', { storage: () => storage });
   store.write(seed);
+  // Demo adapter over the seeded store, with a fixed clock.
   const create = () => createMockCenterAdapter(seed, { store, now: () => new Date(2030, 0, 10, 12) });
   return { create, adapter: create(), store, memory, failWrites: () => { failed = true; } };
 }

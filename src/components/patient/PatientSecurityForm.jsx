@@ -6,6 +6,7 @@ import FormField from '../shared/FormField/FormField.jsx';
 import { Feedback } from '../center/CenterUI.jsx';
 import { changePatientPassword } from '../../services/crud/patientAccountService.js';
 
+// Form that changes the patient password.
 export default function PatientSecurityForm({ state }) {
   const { actor, tr, common } = state;
   const [values, setValues] = useState({
@@ -18,6 +19,7 @@ export default function PatientSecurityForm({ state }) {
     [busy, setBusy] = useState(false);
   // Block a second submit before the loading state updates
   const submitting = useRef(false);
+  // Checks the new passwords match and saves them.
   async function submit(event) {
     event.preventDefault();
     if (submitting.current) return;

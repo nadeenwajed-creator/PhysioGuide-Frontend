@@ -1,27 +1,3 @@
-# What changed after `293a366` — file by file
-
-Baseline: **`293a366`** (`Merge branch 'feature/center-core-pages' …`, 2026-10-26).
-Everything listed here is the work that landed after that merge on `feature/center-core-pages`.
-
-The history in that range was rewritten into **69 small commits** so that every commit covers one
-screen, one component or one service and its message says what it does. No file, export or
-behaviour was removed: compared with the pre-rewrite commit `c44e75c`, the only difference is one
-header comment in each of the 80 touched files that had none (80 files, +160 lines, 0 deletions).
-Re-reading the log now shows *how* the app was built instead of the original 41 broad "feat: …"
-commits.
-
-This document is the only file added on top of the replay, and every file it lists carries a short
-comment saying what the file is — at the very top, or just above its exports for the 29 files that
-already had one inside. The 80 files that had none got a header comment added in their own commit,
-so the explanation lives next to the code instead of only in a table here.
-
-* Backup of the old history: branch **`backup/pre-rewrite-293a366`** (points at `c44e75c`).
-* Commit dates are the rewrite date; the order of commits is the build order (tooling → utils →
-  services → components → layouts/routes → screens → tests → docs).
-* Totals: **169 paths** — 39 added, 93 modified, 33 renamed, 4 deleted, in **69 commits** plus this document.
-
----
-
 ## 1. Repository, tooling and docs
 
 | File | Status | What it does | Commit |

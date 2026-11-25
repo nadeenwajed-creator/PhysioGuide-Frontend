@@ -7,6 +7,7 @@ import { getPatientAccount, subscribePatientAccount } from '../../services/crud/
 import { getPatientAppointments } from '../../services/crud/patientDiscoveryService.js';
 import { localized } from '../../utils/centerFormat.js';
 
+// Patient account, appointments and preferences of the signed-in patient.
 export default function usePatientAccount() {
   const { session: actor } = useAuth();
   const { t, language, dir } = useLanguage();
@@ -18,6 +19,7 @@ export default function usePatientAccount() {
   useEffect(() => {
     let active = true,
       request = 0;
+    // Reloads the patient account, keeping only the latest answer.
     const load = async () => {
       const current = ++request;
       try {

@@ -28,6 +28,7 @@ import { includesQuery, money } from '../../utils/centerFormat.js';
 import { therapistServicePrices } from '../../services/center/therapistRecords.js';
 import '../../components/center/remaining/RemainingUI.css';
 import './Physiotherapists.css';
+// Therapist list with schedules and assigned services.
 function Physiotherapists() {
   const { data, tr, name, language } = useCenter();
   const [query, setQuery] = useState('');
@@ -36,8 +37,11 @@ function Physiotherapists() {
   const [sort, setSort] = useState('rating');
   const [form, setForm] = useState(null);
   const [schedule, setSchedule] = useState(null);
+  // Prices of the services assigned to one therapist.
   const prices = therapist => therapistServicePrices(therapist, data.services);
+  // Cheapest service of one therapist.
   const lowestPrice = therapist => Math.min(...prices(therapist));
+  // Price range shown in the therapist row.
   function priceLabel(therapist) {
     const values = prices(therapist);
     if (!values.length) return tr('therapistProfile.notAvailable');
@@ -77,6 +81,7 @@ function Physiotherapists() {
     setPageSize,
     start,
   } = usePagination(matches.length);
+  // Changes one filter and goes back to the first page.
   function filter(setter, value) {
     setter(value);
     setPage(1);

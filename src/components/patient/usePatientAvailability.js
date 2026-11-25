@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getPatientSlots } from '../../services/crud/patientDiscoveryService.js';
 
+// Free slots of one therapist, reloaded when the booking changes.
 export default function usePatientAvailability(actor, { centerId, therapistId, serviceId, date }, revision, onResolved) {
   const [result, setResult] = useState(null);
   const key = JSON.stringify([actor.id, centerId, therapistId, serviceId, date]);

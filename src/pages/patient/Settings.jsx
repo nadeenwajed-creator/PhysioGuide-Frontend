@@ -12,6 +12,7 @@ import { preferenceKeys } from '../../services/patient/accountModel.js';
 import { savePatientPreferences } from '../../services/crud/patientAccountService.js';
 import '../../components/patient/PatientAccount.css';
 
+// Account settings: profile, password and notifications.
 function SettingsContent({ state }) {
   const { data, tr, common, dir, name, actor } = state;
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ function SettingsContent({ state }) {
   const submitting = useRef(false);
   // Show saved preferences until the patient starts editing
   const values = draft || data.preferences;
+  // Saves the notification switches.
   async function save(event) {
     event.preventDefault();
     // Stop repeated submits before React updates the loading button
@@ -122,6 +124,7 @@ function SettingsContent({ state }) {
   </Panel>;
 }
 
+// Patient settings page, with the loading and error states.
 export default function Settings() {
   const state = usePatientAccount();
   return <div className="pa-page">

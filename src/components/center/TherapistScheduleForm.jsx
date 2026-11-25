@@ -25,6 +25,7 @@ function rowsFromWindows(windows) {
   });
 }
 
+// Dialog that edits a therapist's weekly working hours.
 function TherapistScheduleForm({ therapist, onClose }) {
   const { actor, tr, name, dir, notify } = useCenter();
   const [rows, setRows] = useState([]);
@@ -51,6 +52,7 @@ function TherapistScheduleForm({ therapist, onClose }) {
     return () => { alive = false; };
   }, [actor, therapist.id]);
 
+  // Changes one field of one day.
   function update(day, patch) {
     setRows((current) => current.map((row) => (row.day === day ? { ...row, ...patch } : row)));
     setFields((current) => {
@@ -61,6 +63,7 @@ function TherapistScheduleForm({ therapist, onClose }) {
     });
   }
 
+  // Checks the week and sends only the changed days.
   async function submit(event) {
     event.preventDefault();
     if (busy || loading) return;

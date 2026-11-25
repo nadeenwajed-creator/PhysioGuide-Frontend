@@ -30,6 +30,7 @@ export function AccountTabs({
   const [mobile, setMobile] = useState(() => window.matchMedia('(max-width:767px)').matches);
   useEffect(() => {
     const query = window.matchMedia('(max-width:767px)');
+    // Follows the media query that decides between tabs and a select.
     const change = () => setMobile(query.matches);
     query.addEventListener('change', change);
     return () => query.removeEventListener('change', change);

@@ -37,8 +37,11 @@ function EditDialog({ title, formId, saving, error, onClose, onSubmit, children 
   );
 }
 
+// Two-digit number used inside a date-time string.
 const pad = (value) => String(value).padStart(2, '0');
+// Date part of an API date-time value.
 const datePart = (value) => (value ? String(value).slice(0, 10) : '');
+// Time part of an API date-time value.
 const timePart = (value) => (value ? String(value).slice(11, 16) : '');
 
 // The API reads and writes local wall-clock values without a zone, so the
@@ -46,12 +49,14 @@ const timePart = (value) => (value ? String(value).slice(11, 16) : '');
 function toApiDateTime(date, time, minutesToAdd = 0) {
   const start = new Date(`${date}T${time}:00`);
   const end = new Date(start.getTime() + minutesToAdd * 60000);
+  // Local date-time string without a time zone.
   const format = (value) =>
     `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}` +
     `T${pad(value.getHours())}:${pad(value.getMinutes())}:00`;
   return { start: format(start), end: format(end) };
 }
 
+// Minutes between two API date-time values.
 function minutesBetween(start, end) {
   if (!start || !end) return 0;
   const from = new Date(`${datePart(start)}T${timePart(start)}:00`);
@@ -60,6 +65,7 @@ function minutesBetween(start, end) {
   return Number.isFinite(minutes) && minutes > 0 ? minutes : 0;
 }
 
+// Create or edit form of a patient.
 export function PatientEditDialog({ id, onClose, onSaved }) {
   const { t } = useLanguage();
   const state = useAdminQuery('getAdminPatient', { id });
@@ -75,6 +81,7 @@ export function PatientEditDialog({ id, onClose, onSaved }) {
     gender: patient?.gender ?? '',
     dateOfBirth: patient?.dateOfBirth ?? '',
   };
+  // Updates one field of the patient draft.
   const set = (key, value) => setDraft({ ...form, [key]: value });
 
   // A stored value outside the two known genders is kept selectable.
@@ -87,6 +94,7 @@ export function PatientEditDialog({ id, onClose, onSaved }) {
       : []),
   ];
 
+  // Validates and saves the patient, reporting errors inline.
   async function submit(event) {
     event.preventDefault();
     setSaving(true);
@@ -157,6 +165,7 @@ export function PatientEditDialog({ id, onClose, onSaved }) {
   );
 }
 
+// Create or edit form of a therapist.
 export function TherapistEditDialog({ id, centers = [], specialties = [], onClose, onSaved }) {
   const { t } = useLanguage();
   const state = useAdminQuery('getAdminPhysiotherapist', { id });
@@ -174,13 +183,16 @@ export function TherapistEditDialog({ id, centers = [], specialties = [], onClos
     bio: therapist?.bio ?? '',
     isAvailable: therapist?.isAvailable !== false,
   };
+  // Updates one field of the therapist draft.
   const set = (key, value) => setDraft({ ...form, [key]: value });
 
+  // Adds the empty choice in front of a select's options.
   const withPlaceholder = (items) => [
     { value: '', label: '—' },
     ...items.map((item) => ({ value: item.id, label: item.name })),
   ];
 
+  // Validates and saves the therapist, reporting errors inline.
   async function submit(event) {
     event.preventDefault();
     setSaving(true);
@@ -271,6 +283,7 @@ export function TherapistEditDialog({ id, centers = [], specialties = [], onClos
   );
 }
 
+// Create, edit or reschedule form of an appointment.
 export function AppointmentEditDialog({ appointment, onClose, onSaved }) {
   const { t } = useLanguage();
   const optionsState = useAdminQuery('getAdminAppointmentOptions');
@@ -288,6 +301,7 @@ export function AppointmentEditDialog({ appointment, onClose, onSaved }) {
     status: appointment?.status ?? 'pending',
     notes: '',
   };
+  // Updates one field of the appointment draft.
   const set = (key, value) => setDraft({ ...form, [key]: value });
 
   const allTherapists = options?.therapists || [];
@@ -317,11 +331,13 @@ export function AppointmentEditDialog({ appointment, onClose, onSaved }) {
       serviceId: !offered.length || offered.includes(form.serviceId) ? form.serviceId : '',
     });
   };
+  // Select options with the empty choice in front.
   const toOptions = (items) => [
     { value: '', label: '—' },
     ...items.map((item) => ({ value: item.id, label: item.name })),
   ];
 
+  // Validates and saves the appointment, reporting errors inline.
   async function submit(event) {
     event.preventDefault();
     setSaving(true);
@@ -426,6 +442,7 @@ export function AppointmentEditDialog({ appointment, onClose, onSaved }) {
   );
 }
 
+// Edit form of a center.
 export function CenterEditDialog({ id, onClose, onSaved }) {
   const { t } = useLanguage();
   const state = useAdminQuery('getAdminCenter', { id });
@@ -442,8 +459,10 @@ export function CenterEditDialog({ id, onClose, onSaved }) {
     websiteUrl: center?.websiteUrl ?? '',
     phoneNumber: center?.phone ?? '',
   };
+  // Updates one field of the center draft.
   const set = (key, value) => setDraft({ ...form, [key]: value });
 
+  // Validates and saves the center, reporting errors inline.
   async function submit(event) {
     event.preventDefault();
     setSaving(true);

@@ -13,6 +13,7 @@ import StatusBadge from '../shared/StatusBadge/StatusBadge.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { pageSizes } from './usePagination.js';
 import './CenterUI.css';
+// Page title with its description and actions.
 export function PageHeader({
   title,
   description,
@@ -26,6 +27,7 @@ export function PageHeader({
     {children && <div className="center-actions">{children}</div>}
   </header>;
 }
+// Titled card with an optional action.
 export function Panel({
   title,
   action,
@@ -41,6 +43,7 @@ export function Panel({
     {children}
   </section>;
 }
+// Router link styled as a page action.
 export function PageLink({
   to,
   children
@@ -53,11 +56,13 @@ export function PageLink({
     <FontAwesomeIcon icon={dir === 'rtl' ? faArrowLeft : faArrowRight} aria-hidden="true" />
   </Link>;
 }
+// Message shown when a list has no rows.
 export function EmptyState({
   children
 }) {
   return <p className="center-empty" role="status">{children}</p>;
 }
+// Success or error banner of a form.
 export function Feedback({
   error,
   children,
@@ -67,6 +72,7 @@ export function Feedback({
   return children ? <FeedbackMessage key={`${Boolean(error)}:${children}`} error={error} onDismiss={onDismiss} resetKey={resetKey}>{children}</FeedbackMessage> : null;
 }
 
+// The banner itself, reset when the message changes.
 function FeedbackMessage({ error, children, onDismiss, resetKey }) {
   const token = resetKey ?? children;
   const [expired, setExpired] = useState(null);
@@ -85,6 +91,7 @@ function FeedbackMessage({ error, children, onDismiss, resetKey }) {
   }, [error, token]);
   return error || expired !== token ? <p className={`center-feedback${error ? ' center-feedback--error' : ''}`} role={error ? 'alert' : 'status'}>{children}</p> : null;
 }
+// Status of a record as a coloured label.
 export function RecordStatus({
   value
 }) {
@@ -95,6 +102,7 @@ export function RecordStatus({
   // Staff/patient states are page-owned, not unsupported StatusBadge variants.
   return <span className={`center-record-status center-record-status--${value}`}>{t(`center.${value}`)}</span>;
 }
+// Record image, falling back to the given placeholder.
 export function RecordImage({
   src,
   alt,
@@ -103,6 +111,7 @@ export function RecordImage({
   const [failedSrc, setFailedSrc] = useState(null);
   return src && failedSrc !== src ? <img className={`center-record-image ${className}`} src={src} alt={alt} loading="lazy" onError={() => setFailedSrc(src)} /> : <div className={`center-record-image center-record-image--fallback ${className}`} role="img" aria-label={alt}><FontAwesomeIcon icon={faImage} aria-hidden="true" /></div>;
 }
+// Labelled select with its error line.
 export function SelectField({
   label,
   error,
@@ -114,6 +123,7 @@ export function SelectField({
     {error && <span role="alert">{error}</span>}
   </div>;
 }
+// Page buttons together with the row range they cover.
 export function Pager({
   page,
   total,
@@ -141,6 +151,7 @@ export function Pager({
     {pages > 1 && <Pagination currentPage={Math.min(page, pages)} totalPages={pages} onPageChange={onChange} />}
   </div>;
 }
+// Yes or no dialog for a destructive action.
 export function ConfirmDialog({
   title,
   description,
@@ -154,6 +165,7 @@ export function ConfirmDialog({
   } = useLanguage();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Runs the confirmed action and shows its error.
   async function confirm() {
     setBusy(true);
     setError('');
@@ -174,6 +186,7 @@ export function ConfirmDialog({
     <Feedback error>{error}</Feedback>
   </Modal>;
 }
+// Dialog that asks for one line of text.
 export function TextDialog({
   title,
   label,
@@ -188,6 +201,7 @@ export function TextDialog({
   const [value, setValue] = useState(initialValue);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Rejects an empty value, then hands the text back.
   async function submit(event) {
     event.preventDefault();
     if (!value.trim()) {

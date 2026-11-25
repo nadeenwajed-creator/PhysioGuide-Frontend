@@ -15,6 +15,7 @@ import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './ProfileMenu.css';
 
+// Account menu with the profile links and sign-out.
 function ProfileMenu({
   user = {},
   compact = false,
@@ -39,6 +40,7 @@ function ProfileMenu({
     ...labels,
   };
 
+  // Closes the menu on Escape.
   function handleKeyDown(event) {
     // Escape closes this menu without closing the Navbar search.
     if (open && event.key === 'Escape') {
@@ -49,6 +51,7 @@ function ProfileMenu({
     }
   }
 
+  // Returns focus to the trigger and opens the sign-out confirmation.
   function requestLogout() {
     setOpen(false);
 

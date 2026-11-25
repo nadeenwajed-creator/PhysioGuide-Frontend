@@ -8,6 +8,7 @@ import {
   subscribePatientDiscovery
 } from '../../services/crud/patientDiscoveryService.js';
 
+// Centers, specialties and saved centers for the discovery pages.
 export default function useDiscovery() {
   const { session: actor } = useAuth();
   const [state, setState] = useState({
@@ -18,6 +19,7 @@ export default function useDiscovery() {
   useEffect(() => {
     let live = true;
     let request = 0;
+    // Reloads the discovery data and the saved centers.
     const refresh = async () => {
       const id = ++request;
       try {

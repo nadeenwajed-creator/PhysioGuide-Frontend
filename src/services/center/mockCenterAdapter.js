@@ -9,43 +9,55 @@ import { addAppointmentAlert, appointmentAlerts } from '../patient/notificationP
 
 // Domain rules are enforced here as well as in the UI. A real server must enforce them atomically.
 export function createMockCenterAdapter(seed, { store, now = () => new Date(), reservedEmails = () => [] } = {}) {
+  // Stored state with normalised therapist services and messages.
   const normalize = value => normalizeTherapistServices(normalizeMessages(structuredClone(value)));
   let state = normalize(store?.read() || seed);
   let committed = structuredClone(state);
   const listeners = new Set();
   const objectUrls = new Set();
+  // Persists the state, then notifies the subscribers.
   const emit = () => {
     try { store?.write(state); } catch (error) { state = structuredClone(committed); throw error; }
     committed = structuredClone(state);
     listeners.forEach(listener => listener());
   };
+  // Error with the code and the field errors the UI reads.
   const fail = (code, fields = {}) => {
     const error = new Error(code);
     error.code = code;
     error.fields = fields;
     throw error;
   };
+  // Rejects actors that are not this center's account.
   const requireCenter = actor => {
     refreshState();
     if (actor?.role !== 'center' || actor.centerId !== state.center.id) fail('forbidden');
   };
+  // Rejects actors outside this center, center or therapist.
   const requireActor = actor => {
     refreshState();
     if (!['center', 'physiotherapist'].includes(actor?.role) || actor.centerId !== state.center.id) fail('forbidden');
   };
+  // One record of a collection by id, failing when it is missing.
   const find = (collection, id) => {
     const record = state[collection].find(item => item.id === id);
     if (!record) fail('notFound');
     return record;
   };
+  // Deep copy so callers cannot edit the stored state.
   const clone = value => structuredClone(value);
+  // True for a plausible email address.
   const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  // True for a phone number with 7 to 15 digits.
   const validPhone = value => /^\+?[\d\s()-]+$/.test(value) && value.replace(/\D/g, '').length >= 7 && value.replace(/\D/g, '').length <= 15;
+  // Trimmed text of a form value.
   const clean = value => String(value ?? '').trim();
+  // Bilingual value built from the English and Arabic inputs.
   const pair = (en, ar) => ({
     en: clean(en),
     ar: clean(ar)
   });
+  // Field errors of a patient or therapist form.
   function validatePerson(values, therapist = false) {
     const fields = {};
     if (!clean(values.name)) fields.name = 'required';
@@ -62,11 +74,13 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
     }
     if (Object.keys(fields).length) fail('validation', fields);
   }
+  // True for a YYYY-MM-DD date that exists.
   function validDate(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
     const date = new Date(`${value}T12:00:00Z`);
     return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
   }
+  // Field errors of an appointment form.
   function validateAppointment(values, id) {
     state.today = dateKey(now());
     const fields = {};
@@ -82,6 +96,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
     if (Number(values.time.slice(0, 2)) * 60 + Number(values.time.slice(3)) + service.duration > 1440) fail('validation', { time: 'date' });
     if (overlapsBooking({ ...values, durationMinutes: service.duration }, state.appointments, state.services, id)) fail('conflict');
   }
+  // Re-reads the stored state before every operation.
   function refreshState() {
     state = normalize(store?.read() || state);
     committed = structuredClone(state);
@@ -90,15 +105,18 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
     ...createRemainingOperations({ requireCenter, fail }),
     ...createMessagingOperations({ getState: () => state, refresh: refreshState, emit, fail, now }),
     mode: 'mock',
+    // Subscribes to workspace changes.
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
+    // Drops uncommitted changes and reloads the workspace.
     reload() {
       state = normalize(store?.read() || committed);
       committed = structuredClone(state);
       listeners.forEach(listener => listener());
     },
+    // Workspace of the center, or the narrower one of a therapist.
     async getWorkspace(actor) {
       requireActor(actor);
       state.today = dateKey(now());
@@ -137,6 +155,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
         notifications: getTherapistNotifications(state, actor.therapistId)
       });
     },
+    // Creates or updates a patient of the center.
     async savePatient(actor, values, id) {
       requireCenter(actor);
       validatePerson(values);
@@ -158,6 +177,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(record);
     },
+    // Creates or updates a therapist, keeping personal fields immutable.
     async saveTherapist(actor, values, id) {
       requireCenter(actor);
       const professional = ['specialtyId', 'specialty', 'specialtyAr', 'experience', 'availability', 'serviceIds'];
@@ -210,10 +230,12 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(record);
     },
+    // Stored weekly working hours of one therapist.
     async getTherapistSchedule(actor, therapistId) {
       requireCenter(actor);
       return clone(find('therapists', therapistId).schedule || []);
     },
+    // Saves the weekly working hours of one therapist.
     async saveTherapistSchedule(actor, therapistId, desired = []) {
       requireCenter(actor);
       const therapist = find('therapists', therapistId);
@@ -259,6 +281,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(therapist.schedule);
     },
+    // Creates or updates a service of the center.
     async saveService(actor, values, id) {
       requireCenter(actor);
       const fields = {};
@@ -291,6 +314,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(record);
     },
+    // Creates or updates an appointment of the center.
     async saveAppointment(actor, values, id) {
       requireCenter(actor);
       const previous = id ? find('appointments', id) : {
@@ -315,6 +339,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(record);
     },
+    // Books an appointment as the patient who owns it.
     async requestAppointment(actor, values) {
       refreshState();
       if (actor?.role !== 'patient' || actor.centerId !== state.center.id || actor.patientId !== values.patientId) fail('forbidden');
@@ -329,6 +354,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(record);
     },
+    // Changes the status of one appointment.
     async updateAppointmentStatus(actor, id, status) {
       requireCenter(actor);
       const appointment = find('appointments', id);
@@ -346,6 +372,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(appointment);
     },
+    // Appends a note to a patient record.
     async addPatientNote(actor, patientId, text) {
       requireCenter(actor);
       if (!clean(text)) fail('required');
@@ -356,6 +383,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       });
       emit();
     },
+    // Saves the center's reply to a review.
     async updateReview(actor, id, values) {
       requireCenter(actor);
       const review = find('reviews', id);
@@ -370,6 +398,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       }
       emit();
     },
+    // Saves the name, address and about text of the center.
     async saveCenter(actor, values) {
       requireCenter(actor);
       validatePerson({
@@ -395,6 +424,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       };
       emit();
     },
+    // Saves the logo and gallery of the center.
     async updateCenterImages(actor, values) {
       requireCenter(actor);
       if (!values || typeof values !== 'object') fail('image');
@@ -415,6 +445,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       state.center = { ...state.center, ...extras };
       emit();
     },
+    // Saves the signed-in therapist's own profile.
     async saveOwnProfile(actor, values) {
       requireActor(actor);
       if (actor?.role !== 'physiotherapist') fail('forbidden');
@@ -441,6 +472,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return clone(updated);
     },
+    // Adds one uploaded photo to the gallery.
     async addGalleryImage(actor, file) {
       requireCenter(actor);
       const url = await this.prepareImage(file);
@@ -450,6 +482,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       emit();
       return url;
     },
+    // Checks an image and turns it into a stored URL.
     async prepareImage(file) {
       if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) fail('image');
       if (store) return new Promise((resolve, reject) => {
@@ -462,6 +495,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       objectUrls.add(url);
       return url;
     },
+    // Saves the switches of a center or therapist account.
     async saveNotificationPreferences(actor, values) {
       // Therapists edit the same switches from their own settings page.
       requireActor(actor);
@@ -475,6 +509,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       };
       emit();
     },
+    // Marks one notification, or all of them, as read.
     async markNotificationsRead(actor, id) {
       refreshState();
       if (actor?.role === 'patient') {
@@ -512,6 +547,7 @@ export function createMockCenterAdapter(seed, { store, now = () => new Date(), r
       }
       emit();
     },
+    // Restores the demo center to its seeded state.
     async reset(actor) {
       requireCenter(actor);
       objectUrls.forEach(url => URL.revokeObjectURL(url));

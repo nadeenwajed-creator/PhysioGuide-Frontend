@@ -14,7 +14,9 @@ import { mockAccounts } from '../auth/mockAccounts.js';
 
 const adapters = new Map();
 const listeners = new Set();
+// Tells the subscribers that the center workspace changed.
 const emit = () => listeners.forEach(listener => listener());
+// Adapter of one center, cached per center in demo mode.
 function getAdapter(centerId) {
   const key = mockEnabled ? centerId : 'api';
   if (!adapters.has(key)) {
@@ -27,7 +29,9 @@ function getAdapter(centerId) {
   }
   return adapters.get(key);
 }
+// Subscribes to workspace changes and returns the unsubscribe function.
 export const subscribeCenter = listener => { listeners.add(listener); return () => listeners.delete(listener); };
+// Single entry point for every center and patient operation.
 export async function callCenter(method, ...args) {
   try {
     const session = mockEnabled ? await restoreSession({ force: true }) : getAuthSnapshot().session || await restoreSession();
@@ -65,7 +69,9 @@ export async function callCenter(method, ...args) {
     throw normalizeServiceError(error);
   }
 }
+// Workspace of the signed-in center.
 export const getCenterWorkspace = actor => callCenter('getWorkspace', actor);
+// Validates and shrinks an image before it is uploaded.
 export const prepareCenterImage = (file, role) => callCenter('prepareImage', file, role);
 
 if (mockEnabled && typeof window !== 'undefined') {

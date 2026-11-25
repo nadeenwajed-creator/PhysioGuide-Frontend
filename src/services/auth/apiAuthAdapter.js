@@ -217,6 +217,7 @@ export function createApiAuthAdapter(baseUrl) {
   return {
     mode: 'live',
 
+    // Registers a patient account.
     async registerPatient(request) {
       await post(
         root,
@@ -235,6 +236,7 @@ export function createApiAuthAdapter(baseUrl) {
       return { mode: 'live', status: 'registered', role: 'patient' };
     },
 
+    // Signs a patient in.
     async loginPatient(credentials) {
       const body = await post(
         root,
@@ -265,6 +267,7 @@ export function createApiAuthAdapter(baseUrl) {
       };
     },
 
+    // Signs a center in.
     async loginCenter(credentials) {
       const body = await post(
         root,
@@ -292,6 +295,7 @@ export function createApiAuthAdapter(baseUrl) {
       };
     },
 
+    // Signs an admin in.
     async loginAdmin(credentials) {
       const body = await post(
         root,

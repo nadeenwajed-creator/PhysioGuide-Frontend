@@ -7,12 +7,14 @@ import { Feedback } from '../CenterUI.jsx';
 import useCenter from '../useCenter.js';
 import { changeCenterPassword } from '../../../services/crud/centerRemainingService.js';
 
+// Form that changes the center password.
 export default function SecurityForm() {
   const { actor, tr } = useCenter();
   const [values, setValues] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  // Checks the new passwords match and saves them.
   async function submit(event) {
     event.preventDefault(); if (busy) return;
     const invalid = {};

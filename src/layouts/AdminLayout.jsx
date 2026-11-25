@@ -44,6 +44,7 @@ const adminNavigation = [
   ['settings', faGear],
 ];
 
+// Shell of the admin portal with its sidebar, search and bell.
 function AdminLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -113,6 +114,7 @@ function AdminLayout() {
 
   useEffect(() => {
     let live = true;
+    // Loads the notifications the admin bell shows.
     const load = () => {
       callAdmin('getAdminNotifications')
         .then((result) => {
@@ -167,6 +169,7 @@ function AdminLayout() {
       };
     });
 
+  // Marks one notification read and refreshes the bell.
   async function markRead(id) {
     try {
       await markNotificationsRead(session, id);

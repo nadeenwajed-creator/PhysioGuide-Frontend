@@ -24,6 +24,7 @@ import { getDashboardSummary } from '../../services/centerSummaryService.js';
 import { formatDate } from '../../utils/centerFormat.js';
 import hero from '../../../assets/images/center/dashboard-treatment-room.jpeg';
 import './Dashboard.css';
+// Center overview of the day.
 function Dashboard() {
   const navigate = useNavigate();
   const { data, name, tr, language, dir } = useCenter();

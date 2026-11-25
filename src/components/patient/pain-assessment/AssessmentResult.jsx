@@ -20,6 +20,7 @@ import { CenterRating, Favorite } from '../DiscoveryUI.jsx';
 import { RecordImage, ConfirmDialog } from '../../center/CenterUI.jsx';
 import Button from '../../shared/Button/Button.jsx';
 
+// Centers that match the care suggested by the result.
 function SuggestedCenters({ care, t }) {
   const { session: actor } = useAuth();
   const { language, dir } = useLanguage();
@@ -32,6 +33,7 @@ function SuggestedCenters({ care, t }) {
     let live = true,
       request = 0;
     const timers = new Set();
+    // Reloads the suggested centers, keeping only the latest answer.
     async function refresh() {
       // Only the latest request can update the list if refreshes overlap
       const id = ++request;
@@ -90,6 +92,7 @@ function SuggestedCenters({ care, t }) {
     allowMock: state.data.mode === 'mock'
   });
   if (!centers.length) return <p className="pain-empty" role="status">{t('centersEmpty')}</p>;
+  // Display name of a bilingual value.
   const name = value => localized(value, language);
   return <>
     {state.data.mode === 'mock' && <p className="pain-caption">{t('mockCenters')}</p>}
@@ -129,6 +132,7 @@ function SuggestedCenters({ care, t }) {
   </>;
 }
 
+// Result panels, with the advice and the suggested care.
 export default function AssessmentResult({ result, answers, onRestart, t, headingRef }) {
   const { language } = useLanguage();
   const [confirm, setConfirm] = useState(false);

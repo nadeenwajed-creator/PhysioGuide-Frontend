@@ -1,8 +1,10 @@
 // Scores reported symptoms against specialties and applies the care-service rules.
 
+// Label strings of a bilingual value or a list.
 export const labels = value => typeof value === 'string'
   ? [value]
   : value && typeof value === 'object' ? Object.values(value).filter(v => typeof v === 'string') : [];
+// Comparison form of a specialty name, without Arabic diacritics.
 export const normalizeSpecialty = value => String(value ?? '')
   .normalize('NFKC')
   .toLocaleLowerCase()
@@ -104,6 +106,7 @@ export const careServiceRules = {
   },
 };
 
+// Every label a service can be matched by.
 const serviceLabels = (service) => [
   ...labels(service?.name),
   ...labels(service?.specialty),
@@ -132,16 +135,19 @@ export function serviceMatchScore(service, specialty) {
   return texts.some((text) => specialties.has(text)) ? 1 : 0;
 }
 
+// True when a service matches the specialty at all.
 export function serviceMatches(service, specialty) {
   return serviceMatchScore(service, specialty) > 0;
 }
 
+// True when one of the center's services matches the specialty.
 export function centerMatchesSpecialty(center, specialty) {
   return !specialty || (center.services || []).some(service => serviceMatches(service, specialty))
     || !specialty.startsWith('care:')
     && (center.therapists || []).some(person => labels(person.specialty).some(label => normalizeSpecialty(label) === normalizeSpecialty(specialty)));
 }
 
+// Applies search, specialty, rating and care filters to the centers.
 export function filterCenters(centers, {
   search = '',
   specialty = '',
@@ -152,7 +158,9 @@ export function filterCenters(centers, {
   favoriteIds = [],
   language = 'en'
 } = {}) {
+  // Display name of a bilingual value.
   const name = value => typeof value === 'string' ? value : value?.[language] || value?.en || value?.ar || '';
+  // Lowest price among a center's assigned services.
   const lowest = center => {
     const assigned = new Set((center.therapists || []).filter(p => !specialty || labels(p.specialty).some(label => normalizeSpecialty(label) === normalizeSpecialty(specialty)))
       .flatMap(p => p.serviceIds || []));

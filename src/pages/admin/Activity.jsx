@@ -13,6 +13,7 @@ function AdminActivity() {
   const { t, language } = useLanguage();
   const [filters, setFilters] = useState({ page: 1, pageSize: 10 });
 
+  // Changes one filter and goes back to the first page.
   const update = (values) => setFilters((previous) => ({ ...previous, ...values }));
   const state = useAdminQuery('getAdminActivity', filters);
 

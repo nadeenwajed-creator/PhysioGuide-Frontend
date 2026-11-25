@@ -131,6 +131,7 @@ const codeAliases = {
   google_auth_unavailable: 'unavailable',
 };
 
+// Error code for a whole response, with a fallback.
 export function uiErrorCode(body, fallback) {
   const code = typeof body?.code === 'string' ? body.code : null;
   return (code && codeAliases[code]) || fallback;

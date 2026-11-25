@@ -26,8 +26,10 @@ const CLIENT_ID =
 const FLOW_RESET_CODES = new Set(['googleCredentials', 'googleTicket']);
 
 export const GOOGLE_CLIENT_ID = CLIENT_ID;
+// True when the failure means the Google flow has to restart.
 export const isFlowResetError = (code) => FLOW_RESET_CODES.has(code);
 
+// Hex string of a byte buffer, used for the PKCE verifier.
 function toHex(buffer) {
   return Array.from(new Uint8Array(buffer))
     .map((byte) => byte.toString(16).padStart(2, '0'))
@@ -64,6 +66,7 @@ export async function signInWithGoogle({ idToken, challengeId, flowVerifier }) {
   });
 }
 
+// Finishes patient registration started with Google.
 export async function registerGooglePatient({
   registrationTicket,
   flowVerifier,
@@ -77,6 +80,7 @@ export async function registerGooglePatient({
   });
 }
 
+// Finishes center registration started with Google.
 export async function registerGoogleCenter({
   registrationTicket,
   flowVerifier,

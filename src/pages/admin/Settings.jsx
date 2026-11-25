@@ -22,14 +22,17 @@ import useAdminQuery, { errorText } from './useAdminQuery.js';
 import { QueryState } from './AdminUI.jsx';
 import './Settings.css';
 
+// Dialog that changes the admin password.
 function PasswordModal({ onClose }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirm: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Updates one field of the password form.
   const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
+  // Checks the two new passwords match and saves them.
   async function submit(event) {
     event.preventDefault();
     if (form.newPassword !== form.confirm) {
@@ -120,8 +123,10 @@ function ProfileModal({ profile, onClose, onSaved }) {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Updates one field of the profile form.
   const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
+  // Validates and saves the admin profile.
   async function submit(event) {
     event.preventDefault();
     setSaving(true);
@@ -175,6 +180,7 @@ function ProfileModal({ profile, onClose, onSaved }) {
   );
 }
 
+// Admin profile, password and notification preferences.
 function AdminSettings() {
   const { t, language } = useLanguage();
   const state = useAdminQuery('getAdminSettings');
@@ -195,6 +201,7 @@ function AdminSettings() {
   // Local edits overlay the fetched values until the save round-trip completes.
   const notifs = notifications ?? data?.notifications ?? {};
 
+  // Flips one notification switch.
   const toggleNotification = (key) => {
     setNotice(null);
     setNotifications((previous) => {
@@ -203,6 +210,7 @@ function AdminSettings() {
     });
   };
 
+  // Saves the notification switches.
   async function save() {
     setSaving(true);
     setNotice(null);
@@ -259,6 +267,7 @@ function AdminSettings() {
   const signedInAt = loadSession()?.authenticatedAt ?? null;
   const lastSignIn = profile.lastSignIn ?? (signedInAt ? new Date(signedInAt).toISOString() : null);
 
+  // Last sign-in as a short label.
   const formatLastSignIn = (value) => {
     if (!value) return '—';
     const date = new Date(value);

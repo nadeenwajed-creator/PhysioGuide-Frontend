@@ -11,6 +11,7 @@ import { ServiceError } from '../api/serviceError.js';
 import { publicCenter, patientIdentity, availableSlots } from './discoveryModel.js';
 import { buildAssessmentResult } from './painAssessmentModel.js';
 
+// Ids of the demo centers a patient may use.
 export function approvedCenterIds() {
   return [...new Set([...mockAccounts, ...(mockAccountStore.read() || [])].filter(a => a.role === 'center' && a.status === 'approved' && a.centerId)
     .map(a => a.centerId))];
@@ -21,6 +22,7 @@ export async function executePatientOperation(method, actor, values, ...rest) {
   const ids = approvedCenterIds();
   const patientId = patientIdentity(actor);
   const favorites = createBrowserStore(`physioguide.mock.patient-preferences.v1:${encodeURIComponent(actor.id)}`);
+  // Actor narrowed to one center and one patient.
   const scoped = id => ({
     ...actor,
     centerId: id,
@@ -96,6 +98,7 @@ export async function executePatientOperation(method, actor, values, ...rest) {
   });
   if (method === 'getMessagingWorkspace') {
     const parts = await Promise.all(ids.filter(id => readMockCenter(id).patients.some(p => p.id === patientId)).map(id => adapter(id).getMessagingWorkspace(scoped(id))));
+    // List with duplicate ids collapsed to their first entry.
     const unique = list => [...new Map(list.map(item => [item.id, item])).values()];
     return {
       patientProfile: patientProfile(actor, ids),
@@ -157,6 +160,7 @@ export async function executePatientOperation(method, actor, values, ...rest) {
     };
   }
   throw new ServiceError('unavailable');
+  // Adds the patient to a center workspace that does not have it yet.
   function ensurePatient(w) {
     if (!w.patients.some(p => p.id === patientId)) w.patients.push({
       id: patientId,

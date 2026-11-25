@@ -2,6 +2,7 @@
 
 import './FilterSelect.css';
 
+// Filter select built from the given options.
 function FilterSelect({
   options = [],
   value,
@@ -24,6 +25,7 @@ function FilterSelect({
     .filter(Boolean)
     .join(' ');
 
+  // Reports the chosen value to the caller.
   function handleChange(event) {
     onChange?.(event.target.value);
   }

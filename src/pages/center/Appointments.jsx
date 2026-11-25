@@ -20,6 +20,7 @@ import { updateAppointmentStatus } from '../../services/crud/appointmentService.
 import { appointmentStatuses } from '../../services/center/appointmentRules.js';
 import './Appointments.css';
 
+// Appointment list with filters and status changes.
 function Appointments() {
   const { data, actor, name, tr, notify } = useCenter();
   const [params, setParams] = useSearchParams();
@@ -62,6 +63,7 @@ function Appointments() {
     setPageSize,
     start,
   } = usePagination(matches.length);
+  // Changes one filter and goes back to the first page.
   function filter(setter, value) {
     setter(value);
     setPage(1);

@@ -18,6 +18,7 @@ export default function ReviewModal({ center, state, onClose, onSaved }) {
   const [comment, setComment] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // Checks the rating and posts the review.
   async function submit(event) {
     event.preventDefault();
     if (busy) return;

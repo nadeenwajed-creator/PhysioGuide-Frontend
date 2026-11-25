@@ -79,6 +79,7 @@ function Choice({
   </label>;
 }
 
+// Pain score slider with its severity band.
 function Intensity({ value, onChange, t, dir }) {
   const band = intensityBand(value);
   // Draw an unset slider at zero while keeping it different from an answered zero
@@ -137,6 +138,7 @@ function Intensity({ value, onChange, t, dir }) {
   </div>;
 }
 
+// Rings that show how long the pain has lasted.
 function DurationRings({ value, t }) {
   return <div className="pain-duration-visual">
     <div className="pain-rings" aria-hidden="true">
@@ -172,6 +174,7 @@ function DurationRings({ value, t }) {
   </div>;
 }
 
+// Summary of the answers given so far.
 function AssessmentContext({ state, t }) {
   return <section className="pain-context" aria-labelledby="pain-context-title">
     <div className="pain-context-heading">
@@ -218,9 +221,11 @@ function AssessmentContext({ state, t }) {
   </section>;
 }
 
+// Guided pain assessment, step by step.
 export default function PainAssessment() {
   const { t: translate, dir } = useLanguage();
   const { session: actor } = useAuth();
+  // Translates a key from the assessment copy.
   const t = (key, vars) => translate(`painAssessment.${key}`, vars);
   // Keep answers and step navigation together in the assessment reducer
   const [state, dispatch] = useReducer(assessmentReducer, undefined, initialAssessment);
@@ -244,6 +249,7 @@ export default function PainAssessment() {
       behavior: 'instant'
     });
   }, [state.step, state.view]);
+  // Applies one answer action to the assessment.
   const send = (type, id) => dispatch({
     type,
     id
@@ -251,6 +257,7 @@ export default function PainAssessment() {
   const band = intensityBand(state.intensity);
   // Validate this step on Next, and all answers before showing the result
   const canContinue = state.step === 5 ? completeAssessment(state) && !submitting : validStep(state);
+  // Submits the completed assessment and opens its result.
   async function finish() {
     if (!completeAssessment(state) || submitting) return;
     setSubmitting(true);

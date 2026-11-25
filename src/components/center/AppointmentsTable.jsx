@@ -7,6 +7,7 @@ import { RecordStatus, EmptyState } from './CenterUI.jsx';
 import useCenter from './useCenter.js';
 import { formatDate } from '../../utils/centerFormat.js';
 import { appointmentActions } from '../../services/center/appointmentRules.js';
+// Appointment rows with their edit and status actions.
 function AppointmentsTable({
   appointments,
   onEdit,

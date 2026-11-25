@@ -39,6 +39,7 @@ const centerNavigation = [
 ];
 const notificationPreferences = { appointment: 'appointments', appointmentRequest: 'appointments', appointmentChange: 'appointmentChanges', review: 'reviews', patient: 'patients' };
 
+// Shell of the center and therapist portals.
 function CenterLayout({ portal = 'center' }) {
   const therapistPortal = portal === 'physiotherapist';
   const patientPortal = portal === 'patient';
@@ -64,12 +65,15 @@ function CenterLayout({ portal = 'center' }) {
   const [search, setSearch] = useState('');
   const [flash, setFlash] = useState(null);
   const [logout, setLogout] = useState(false);
+  // Translates a key from the center copy.
   const tr = (key, variables) => t(`center.${key}`, variables);
+  // Display name of a bilingual value.
   const name = value => localized(value, language);
   useEffect(() => {
     let active = true;
     let request = 0;
     hasDataRef.current = false;
+    // Reloads the workspace for the signed-in actor.
     async function refresh() {
       const current = ++request;
       try {
@@ -200,10 +204,12 @@ function CenterLayout({ portal = 'center' }) {
       };
     });
 
+  // Shows a success or error message under the header.
   function notify(message, { error = false } = {}) {
     // A repeated save starts a fresh timer even when the translated text is identical.
     setFlash(previous => ({ message, error, id: (previous?.id || 0) + 1 }));
   }
+  // Marks one notification read and refreshes the bell.
   async function markRead(id) {
     try {
       await markNotificationsRead(actor, id);

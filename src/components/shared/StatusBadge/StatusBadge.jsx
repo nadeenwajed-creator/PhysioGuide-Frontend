@@ -5,6 +5,7 @@ import { useLanguage } from '../../../context/LanguageContext.jsx';
 
 import './StatusBadge.css';
 
+// Status of a record as one coloured tag.
 function StatusBadge({
   status = 'pending',
   children,

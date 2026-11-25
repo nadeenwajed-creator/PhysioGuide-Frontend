@@ -6,7 +6,9 @@ import { MOCK_PASSWORD, MOCK_CENTER_ID, mockAccounts } from './mockAccounts.js';
 export function createMockAuthAdapter({ delay = 200, failure = null, accountStore, sessionStore, getTherapists = () => [], getCenter = () => null, activateCenter = () => {}, now = () => Date.now() } = {}) {
   let accounts = [];
   let session = null;
+  // Registered demo accounts from the store or from memory.
   const readAccounts = () => accountStore?.read() || accounts;
+  // Demo, registered and therapist accounts together.
   function allAccounts() {
     return [...mockAccounts, ...readAccounts(), ...getTherapists().map(person => ({
       id: `staff:${person.id}`, role: 'physiotherapist', therapistId: person.id,
@@ -14,10 +16,12 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
       status: person.accountStatus || 'active',
     }))];
   }
+  // Artificial delay so the demo behaves like a real request.
   async function wait() {
     if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
     if (failure) throw new AuthServiceError(failure);
   }
+  // Session identity fields of one account.
   function identity(account) {
     const { id, role, centerId, therapistId, patientId, name, email } = account;
     const profile = role === 'center' && centerId ? getCenter(centerId)
@@ -28,6 +32,7 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     }
     return { id, role, centerId, therapistId, patientId, name: profile?.name || name, email };
   }
+  // Checks credentials against the accounts of the allowed roles.
   async function login(credentials, roles) {
     await wait();
     const account = allAccounts().find(item => item.email.toLowerCase() === credentials.email.trim().toLowerCase() && roles.includes(item.role));
@@ -40,6 +45,7 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     session = marker;
     return { mode: 'mock', status: 'authenticated', role: account.role, session: identity(account) };
   }
+  // Creates a demo account, refusing an email that already exists.
   async function register(values, role) {
     await wait();
     const email = values.email.trim().toLowerCase();
@@ -63,15 +69,18 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     return { mode: 'mock', status: role === 'center' ? 'pending-review' : 'registered', role, ...(role === 'center' ? { applicationId: id } : {}) };
   }
 
+  // Rejects actors that are not admins.
   function requireAdmin(actor) {
     // Mock role checks are test behavior; the real API must authorize its own session.
     if (actor?.role !== 'admin') throw new AuthServiceError('forbidden');
   }
+  // Stored center application by id.
   function application(id) {
     const record = readAccounts().find(item => item.role === 'center' && item.id === id);
     if (!record) throw new AuthServiceError('notFound');
     return record;
   }
+  // Approves or rejects a center application.
   async function review({ actor, id, decision, reason = '' }) {
     await wait();
     requireAdmin(actor);
@@ -94,6 +103,7 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     loginAdmin: credentials => login(credentials, ['admin']),
     registerPatient: values => register(values, 'patient'),
     registerCenter: values => register(values, 'center'),
+    // Center applications, optionally filtered by status.
     async listCenterApplications({ actor, status } = {}) {
       await wait(); requireAdmin(actor);
       if (status && !['pending', 'approved', 'rejected'].includes(status)) throw new AuthServiceError('validation');
@@ -101,12 +111,14 @@ export function createMockAuthAdapter({ delay = 200, failure = null, accountStor
     },
     async getCenterApplication({ actor, id }) { await wait(); requireAdmin(actor); return structuredClone(application(id)); },
     reviewCenterApplication: review,
+    // Session stored by a previous demo sign-in.
     async restoreSession() {
       const marker = sessionStore ? sessionStore.read() : session;
       if (!marker || marker.expiresAt <= now()) return null;
       const account = allAccounts().find(item => item.id === marker.accountId && ['active', 'approved'].includes(item.status));
       return account ? identity(account) : null;
     },
+    // Clears the demo session.
     async logout() {
       sessionStore?.remove();
       session = null;

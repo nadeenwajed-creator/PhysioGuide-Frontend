@@ -19,6 +19,7 @@ const saveMethods = {
   appointment: saveCenterAppointment
 };
 
+// Create and edit form shared by the center records.
 function RecordForm({
   kind,
   record,
@@ -71,10 +72,12 @@ function RecordForm({
     const firstInvalid = Object.keys(fields)[0];
     if (!busy && firstInvalid) document.getElementById(`record-${firstInvalid}`)?.focus();
   }, [busy, fields]);
+  // Updates one field of the form values.
   const set = (key, value) => setValues(current => ({
     ...current,
     [key]: value
   }));
+  // Renders one labelled input of the form.
   const field = (key, options = {}) => <FormField
     key={key}
     id={`record-${key}`}
@@ -85,6 +88,7 @@ function RecordForm({
     disabled={busy}
     {...options}
   />;
+  // Renders one labelled select of the form.
   const select = (key, options, onChange) => <SelectField
     key={key}
     id={`record-${key}`}
@@ -117,6 +121,7 @@ function RecordForm({
     value: '',
     label: tr('select')
   }, ...specialtyOptions];
+  // Keeps the specialty label in step with the chosen specialty.
   function chooseSpecialty(value) {
     const chosen = specialtyOptions.find(option => option.value === value);
     // The demo stores the label itself, so keep both representations in sync.
@@ -124,6 +129,7 @@ function RecordForm({
     set('specialty', name(chosen?.name || value));
     set('specialtyAr', chosen?.name?.ar || name(chosen?.name || value));
   }
+  // Select choices with the empty choice in front.
   const choices = list => [{
     value: '',
     label: tr('select')
@@ -131,6 +137,7 @@ function RecordForm({
     value: item.id,
     label: name(item.name)
   }))];
+  // Validates and saves the record, reporting field errors inline.
   async function submit(event) {
     event.preventDefault();
     if (busy) return;

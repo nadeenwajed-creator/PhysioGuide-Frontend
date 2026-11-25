@@ -23,6 +23,7 @@ import usePatientAvailability from '../../components/patient/usePatientAvailabil
 import BookingModal from '../../components/patient/BookingModal.jsx';
 import '../../components/patient/PatientDiscovery.css';
 
+// Therapist profile with the booking action.
 function Details({ state, center, person }) {
   const { t, name, money } = usePatientLabels();
   const navigate = useNavigate();
@@ -205,6 +206,7 @@ function Details({ state, center, person }) {
   </>;
 }
 
+// Therapist page, with the loading and error states.
 export default function PhysiotherapistDetails() {
   const state = useDiscovery();
   const { centerId, therapistId } = useParams();

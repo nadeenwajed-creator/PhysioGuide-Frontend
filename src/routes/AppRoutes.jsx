@@ -8,6 +8,7 @@ import publicRoutes from './PublicRoutes.jsx';
 import errorRoutes from './ErrorRoutes.jsx';
 import adminRoutes from './AdminRoutes.jsx';
 
+// Route table of the public, patient, center and admin portals.
 function AppRoutes() {
   return (
     <Routes>

@@ -39,6 +39,7 @@ const menuEstimatedHeight = 180;
 // Keeps the panel off the viewport edges.
 const viewportPadding = 8;
 
+// Classes of one menu item, including its danger state.
 function itemClasses(item) {
   return [
     'pg-actions-menu__item',
@@ -48,6 +49,7 @@ function itemClasses(item) {
     .join(' ');
 }
 
+// Icon and label of one menu item.
 function ItemContent({ item }) {
   return (
     <>
@@ -102,6 +104,7 @@ function ActionsMenu({
     .filter(Boolean)
     .join(' ');
 
+  // Closes the panel and optionally returns focus to the trigger.
   function closePortal({ restoreFocus = false } = {}) {
     setPlacement(null);
 
@@ -110,6 +113,7 @@ function ActionsMenu({
     }
   }
 
+  // Closes the panel on Escape.
   function handleKeyDown(event) {
     if (open && event.key === 'Escape') {
       event.preventDefault();
@@ -119,6 +123,7 @@ function ActionsMenu({
     }
   }
 
+  // Runs the chosen item, unless it is disabled.
   function handleAction(item) {
     if (item.disabled) {
       return;
@@ -134,6 +139,7 @@ function ActionsMenu({
     item.onClick?.();
   }
 
+  // Opens the panel and places it next to the trigger.
   function togglePlacement() {
     if (placement) {
       closePortal({ restoreFocus: true });
@@ -168,11 +174,13 @@ function ActionsMenu({
       return undefined;
     }
 
+    // Closes the panel when the pointer goes down outside it.
     const onPointerDown = (event) => {
       if (menuRef.current?.contains(event.target)) return;
       if (toggleRef.current?.contains(event.target)) return;
       closePortal();
     };
+    // Closes the panel when the page scrolls or resizes.
     const onViewportChange = () => closePortal();
 
     document.addEventListener('pointerdown', onPointerDown);
@@ -195,6 +203,7 @@ function ActionsMenu({
     }
   }, [placement]);
 
+  // Moves through the items with the keyboard.
   function handleMenuKeyDown(event) {
     const nodes = Array.from(
       menuRef.current?.querySelectorAll('[role="menuitem"]:not(:disabled)') ??

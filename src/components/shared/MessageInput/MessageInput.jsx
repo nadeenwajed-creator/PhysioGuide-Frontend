@@ -15,6 +15,7 @@ const MAX_TEXT_LENGTH = 2000;
 const ALLOWED_EXTENSIONS = /\.(jpe?g|png|pdf|docx?)$/i;
 const FILE_ACCEPT = '.jpg,.jpeg,.png,.pdf,.doc,.docx';
 
+// Message box with attachments and the optional emoji picker.
 function MessageInput({ onSend, disabled = false, className = '', enableEmoji = false }) {
   const { dir, t } = useLanguage();
   const [text, setText] = useState('');
@@ -40,6 +41,7 @@ function MessageInput({ onSend, disabled = false, className = '', enableEmoji = 
     field.style.height = `${Math.min(field.scrollHeight, 144)}px`;
   }, [text]);
 
+  // Checks the chosen files and adds the ones within the limits.
   function handleFileSelection(event) {
     const selectedFiles = Array.from(event.target.files || []);
     // Allow choosing the same file again after removing it.
@@ -74,12 +76,14 @@ function MessageInput({ onSend, disabled = false, className = '', enableEmoji = 
     setError([...problems].join(' '));
   }
 
+  // Removes one pending attachment.
   function removeAttachment(attachment) {
     if (isDisabled) return;
     setAttachments((current) => current.filter((item) => item.id !== attachment.id));
     setError('');
   }
 
+  // Sends the text and the attachments.
   async function handleSubmit(event) {
     event.preventDefault();
     if (isDisabled || sendingRef.current || !canSend || typeof onSend !== 'function') {
@@ -109,6 +113,7 @@ function MessageInput({ onSend, disabled = false, className = '', enableEmoji = 
     }
   }
 
+  // Closes the emoji picker on Escape.
   function handleKeyDown(event) {
     if (event.key === 'Escape') setEmojiOpen(false);
     if (event.key !== 'Enter' || event.shiftKey) return;

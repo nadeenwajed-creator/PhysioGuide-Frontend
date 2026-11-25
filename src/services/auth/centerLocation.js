@@ -1,3 +1,4 @@
+// Error carrying the code the UI translates.
 function lookupError(code) {
   return Object.assign(new Error(code), { code });
 }
@@ -32,6 +33,7 @@ export function createGeoapifyReverseGeocoder({ apiKey, fetcher = globalThis.fet
     });
 
     try {
+      // Performs the Geoapify lookup.
       const request = async () => {
         const response = await fetcher(url.toString(), { signal: controller.signal, credentials: 'omit', cache: 'no-store' });
         if (!response.ok) {
@@ -76,6 +78,7 @@ export function createNominatimReverseGeocoder({ fetcher = globalThis.fetch, tim
       'accept-language': language === 'ar' ? 'ar' : 'en',
     });
     const controller = new AbortController();
+    // Aborts the lookup when the caller cancels or the timer fires.
     const cancel = () => controller.abort();
     signal?.addEventListener('abort', cancel, { once: true });
     const timer = setTimeout(cancel, timeoutMs);
@@ -104,7 +107,9 @@ export function createNominatimReverseGeocoder({ fetcher = globalThis.fetch, tim
   };
 }
 
+// Locates the device and turns the position into an address.
 export function createCenterLocationService({ reverseGeocode = null } = {}) {
+  // Current device coordinates as a promise.
   function getCoordinates(geolocation = globalThis.navigator?.geolocation) {
     return new Promise((resolve, reject) => {
       if (!geolocation) {
@@ -119,6 +124,7 @@ export function createCenterLocationService({ reverseGeocode = null } = {}) {
     });
   }
 
+  // Address for coordinates, or null when no geocoder is configured.
   async function getAddress(coordinates, options = {}) {
     if (!reverseGeocode) return null;
     const address = await reverseGeocode(coordinates, options);

@@ -4,6 +4,7 @@ import { registerHooks } from 'node:module';
 
 // Vite resolves these static assets in the browser; Node only needs their URLs.
 const assets = registerHooks({
+  // Loads image and text assets as empty modules for the test run.
   load(url, context, nextLoad) {
     if (/\.(webp|png|jpe?g|svg|txt)(\?.*)?$/.test(url)) {
       return { format: 'module', source: `export default ${JSON.stringify(url)}`, shortCircuit: true };

@@ -32,6 +32,7 @@ function resolveAssets(value) {
   return value;
 }
 
+// Wraps a mapper so its result also goes through resolveAssets.
 const resolved = (mapper) => (body, ...rest) => resolveAssets(mapper(body, ...rest));
 
 // A therapist's status is the account's IsActive flag, so the list filter has
@@ -61,6 +62,7 @@ export function cityFromAddress(address) {
 
 // --- auth ------------------------------------------------------------------
 
+// Stores the session that a role-specific login response returns.
 function signIn(body, credentials) {
   const session = map.toSession(body, credentials);
   saveSession({
@@ -611,6 +613,7 @@ async function hydrateMessages(client, conversations) {
   return loaded;
 }
 
+// Ids of the notifications still unread for a role.
 async function unreadNotificationIds(client, role) {
   const path =
     role === 'patient'
@@ -1100,6 +1103,7 @@ export const centerOperations = {
       // endpoint requires the opposite ("HH:mm" exactly) — so times are widened
       // here on the wire, and toScheduleWindow slices them back for the UI.
       const time = (value) => (/^\d{2}:\d{2}$/.test(String(value)) ? `${value}:00` : value);
+      // Request body for one weekly schedule window.
       const payload = (window) => ({
         dayOfWeek: window.day,
         startTime: time(window.start),
