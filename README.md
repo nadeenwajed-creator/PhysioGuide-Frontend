@@ -47,9 +47,3 @@ Install the dependencies and start the frontend locally:
 npm install
 npm run dev
 ```
-
-## Documentation
-
-- [Project Structure](docs/PROJECT_STRUCTURE.md) — Frontend folders, routing, and services.
-- [Authentication](docs/AUTHENTICATION.md) — Mock login, test accounts, and user roles.
-- [Backend Integration](docs/BACKEND_READINESS.md) — Current functionality and backend requirements.
