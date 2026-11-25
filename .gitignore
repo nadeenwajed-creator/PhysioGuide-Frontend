@@ -31,3 +31,4 @@ src/tests/*
 .freebuff
 .cloud-attachments
 docs
+api-contract.md
