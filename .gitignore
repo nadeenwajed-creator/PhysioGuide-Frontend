@@ -32,3 +32,4 @@ src/tests/*
 .cloud-attachments
 docs
 api-contract.md
+scripts
