@@ -1,5 +1,3 @@
-// Admin dashboard: KPIs, pending approvals and the recent activity feed.
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -262,105 +260,51 @@ function AdminDashboard() {
             </div>
           </Panel>
         </div>
-
-        <div className="admin-dashboard__grid">
-          <Panel
-            title={t("admin.dashboard.recentActivity")}
-            action={
-              <Link to="/admin/activity" className="admin-panel__link-button">
-                {t("center.viewAll")}
-              </Link>
-            }
-            className="admin-panel"
-          >
-            <ul className="admin-activity">
-              {(data?.activity ?? []).map((a) => {
-                const target = activityPath(a.kind, a.relatedId);
-                const body = (
-                  <>
-                    <span className="admin-activity__text">
-                      {localized(a.text, language)}
-                    </span>
-                    {a.subject ? (
-                      <span className="admin-activity__subject">{a.subject}</span>
-                    ) : null}
-                    <span className="admin-activity__time">
-                      {a.detail ? `${a.detail} · ` : ''}
-                      {activityTime(a.at)}
-                    </span>
-                  </>
-                );
-                return (
-                  <li key={a.id} className="admin-activity__item">
-                    {target ? (
-                      <Link to={target} className="admin-activity__item-link">
-                        {body}
-                      </Link>
-                    ) : (
-                      <div>{body}</div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-            {(data?.activity ?? []).length === 0 && (
-              <p className="admin-panel__empty">
-                {t("admin.dashboard.noActivity")}
-              </p>
-            )}
-          </Panel>
-          <Panel
-            title={t("admin.dashboard.pendingApprovals")}
-            className="admin-panel"
-          >
-            <div className="admin-approvals">
-              <div className="admin-approvals__count">
-                <strong>{number.format(data?.pending?.total ?? 0)}</strong>
-                <span>
-                  {t("admin.dashboard.itemsNeedAttention", {
-                    count: number.format(data?.pending?.total ?? 0),
-                  })}
-                </span>
-              </div>
-              <div className="admin-approvals__breakdown">
-                <div>
-                  <span>
-                    <Link
-                      to="/admin/centers"
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      {t("admin.dashboard.centers")}
-                    </Link>
+        <Panel
+          title={t("admin.dashboard.recentActivity")}
+          action={
+            <Link to="/admin/activity" className="admin-panel__link-button">
+              {t("center.viewAll")}
+            </Link>
+          }
+          className="admin-panel"
+        >
+          <ul className="admin-activity">
+            {(data?.activity ?? []).map((a) => {
+              const target = activityPath(a.kind, a.relatedId);
+              const body = (
+                <>
+                  <span className="admin-activity__text">
+                    {localized(a.text, language)}
                   </span>
-                  <strong>{number.format(data?.pending?.centers ?? 0)}</strong>
-                </div>
-                <div>
-                  <span>
-                    <Link
-                      to="/admin/physiotherapists"
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      {t("admin.dashboard.therapists")}
-                    </Link>
+                  {a.subject ? (
+                    <span className="admin-activity__subject">{a.subject}</span>
+                  ) : null}
+                  <span className="admin-activity__time">
+                    {a.detail ? `${a.detail} · ` : ''}
+                    {activityTime(a.at)}
                   </span>
-                  <strong>
-                    {number.format(data?.pending?.therapists ?? 0)}
-                  </strong>
-                </div>
-                <div>
-                  <Link
-                    to="/admin/reviews"
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    {t("admin.dashboard.reportedReviews")}
-                  </Link>
-                  <strong>{number.format(data?.pending?.reviews ?? 0)}</strong>
-                </div>
-              </div>
-              <div className="admin-approvals__actions"></div>
-            </div>
-          </Panel>
-        </div>
+                </>
+              );
+              return (
+                <li key={a.id} className="admin-activity__item">
+                  {target ? (
+                    <Link to={target} className="admin-activity__item-link">
+                      {body}
+                    </Link>
+                  ) : (
+                    <div>{body}</div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {(data?.activity ?? []).length === 0 && (
+            <p className="admin-panel__empty">
+              {t("admin.dashboard.noActivity")}
+            </p>
+          )}
+        </Panel>
       </QueryState>
     </div>
   );
