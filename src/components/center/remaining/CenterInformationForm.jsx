@@ -106,7 +106,9 @@ export default function CenterInformationForm() {
         coordinates={coordinates} confirmed={confirmed} disabled={busy} onBusyChange={setLocationBusy} invalid={fields.coordinates}
         onChange={selection => {
           setCoordinates(selection.coordinates); setConfirmed(false); setLocationTouched(true); setFeedback(null);
-          if (selection.address) setValues(v => ({ ...v, [selection.language === 'ar' ? 'addressAr' : 'address']: selection.address }));
+          // Device location carries both translations, so both fields are set.
+          if (selection.addresses) setValues(v => ({ ...v, address: selection.addresses.en || v.address, addressAr: selection.addresses.ar || v.addressAr }));
+          else if (selection.address) setValues(v => ({ ...v, [selection.language === 'ar' ? 'addressAr' : 'address']: selection.address }));
         }} onConfirm={value => { setConfirmed(value); setLocationTouched(true); }} />
     </fieldset>
     <fieldset className="remaining-fieldset"><legend>{tr('workingHours')}</legend><div className="center-form-grid">{['weekStart', 'weekEnd', 'fridayStart', 'fridayEnd'].map(key => <FormField key={key} type="time" label={tr(key)} value={values.hours[key]} disabled={disabled} onChange={value => set('hours', { ...values.hours, [key]: value })} />)}</div></fieldset>

@@ -14,6 +14,17 @@ export default function ClinicLocationEditor({ address, coordinates, confirmed, 
   useEffect(() => () => { request.current++; }, []);
   const pending = disabled || busy;
   function loading(value) { setBusy(value); onBusyChange?.(value); }
+  // Names one point in both languages so the English and Arabic address
+  // fields can be filled together.
+  async function bilingualAddress(point, fallback = null) {
+    const [english, arabic] = await Promise.allSettled([
+      lookupCenterAddress(point, { language: 'en' }),
+      lookupCenterAddress(point, { language: 'ar' }),
+    ]);
+    const en = (english.status === 'fulfilled' ? english.value : null) || fallback;
+    const ar = (arabic.status === 'fulfilled' ? arabic.value : null) || fallback;
+    return en || ar ? { en, ar } : null;
+  }
   async function selectPoint(point, locate = false) {
     const token = ++request.current;
     loading(true); setMessage(''); setResults([]);
@@ -22,10 +33,27 @@ export default function ClinicLocationEditor({ address, coordinates, confirmed, 
       if (token !== request.current) return;
       onChange({ coordinates: selected });
       try {
+        // "Use my location" fills both the English and the Arabic address.
+        if (locate) {
+          const addresses = await bilingualAddress(selected);
+          if (token === request.current && addresses) onChange({ coordinates: selected, addresses });
+          return;
+        }
         const resolved = await lookupCenterAddress(selected, { language });
         if (token === request.current && resolved) onChange({ coordinates: selected, address: resolved, language });
       } catch { /* A failed address lookup must not discard the selected pin. */ }
     } catch (error) { if (token === request.current) setMessage(`center.remaining.location.${error.code || 'failed'}`); }
+    finally { if (token === request.current) loading(false); }
+  }
+  // Selecting a search result fills both address fields from its coordinates.
+  async function selectSearchResult(result) {
+    const token = ++request.current;
+    loading(true); setResults([]); setMessage('');
+    try {
+      onChange({ coordinates: result.coordinates });
+      const addresses = await bilingualAddress(result.coordinates, result.address);
+      if (token === request.current && addresses) onChange({ coordinates: result.coordinates, addresses });
+    } catch { /* A failed address lookup must not discard the selected pin. */ }
     finally { if (token === request.current) loading(false); }
   }
   async function search() {
@@ -46,9 +74,7 @@ export default function ClinicLocationEditor({ address, coordinates, confirmed, 
     </div>
     {busy && <p role="status">{t('center.loading')}</p>}
     {message && <p role="status">{t(message)}</p>}
-    {results.length > 0 && <div className="clinic-location-editor__results">{results.map((result, index) => <Button key={index} variant="outline" disabled={pending} onClick={() => {
-      onChange({ ...result, language }); setResults([]); setMessage('');
-    }}>{result.address}</Button>)}</div>}
+    {results.length > 0 && <div className="clinic-location-editor__results">{results.map((result, index) => <Button key={index} variant="outline" disabled={pending} onClick={() => selectSearchResult(result)}>{result.address}</Button>)}</div>}
     <ClinicMap coordinates={coordinates} disabled={pending} onChange={point => selectPoint(point)} />
     <label className="clinic-location-editor__confirm"><input type="checkbox" checked={confirmed} disabled={pending || !validCoordinates(coordinates)} aria-invalid={!!invalid} onChange={event => onConfirm(event.target.checked)} /><span>{t('center.remaining.confirmClinic')}</span></label>
     {invalid && <p className="clinic-location-editor__error" role="alert">{t('center.error.confirmLocation')}</p>}

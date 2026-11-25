@@ -149,11 +149,6 @@ export default function AssessmentResult({ result, answers, onRestart, t, headin
       </span>
       <p>{t('done')}</p>
       <h1 id="pain-result-title" tabIndex={-1} ref={headingRef}>{t('suggested')}</h1>
-      <h2>
-        {title || t(`care.${explore}`)}
-      </h2>
-      <p className="pain-result-help">{care?.explanation || t('careHelp')}</p>
-      {care?.followUp && <p className="pain-result-followup">{care.followUp}</p>}
     </section>
     <section className="pain-result-centers" aria-labelledby="pain-centers-title">
       <h2 id="pain-centers-title">{t('centers')} <Link

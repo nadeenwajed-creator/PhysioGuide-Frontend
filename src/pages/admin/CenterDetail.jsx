@@ -69,8 +69,9 @@ function AdminCenterDetail() {
   ];
 
   // Throwing keeps the confirmation dialog open so it can show the failure.
-  async function applyStatus() {
-    await callAdmin('setAdminCenterStatus', { id, status: pendingStatus });
+  // The backend requires a reason when the new status is "rejected".
+  async function applyStatus(reason) {
+    await callAdmin('setAdminCenterStatus', { id, status: pendingStatus, reason });
     state.reload();
   }
 
@@ -237,6 +238,7 @@ function AdminCenterDetail() {
           title={t(confirmCopy[pendingStatus].title)}
           description={t(confirmCopy[pendingStatus].text)}
           danger={pendingStatus !== 'approved'}
+          reasonLabel={pendingStatus === 'rejected' ? t('admin.view.rejectionReason') : undefined}
           onClose={() => setPendingStatus(null)}
           onConfirm={applyStatus}
         />

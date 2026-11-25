@@ -151,13 +151,15 @@ export function Pager({
     {pages > 1 && <Pagination currentPage={Math.min(page, pages)} totalPages={pages} onPageChange={onChange} />}
   </div>;
 }
-// Yes or no dialog for a destructive action.
+// Yes or no dialog for a destructive action, with an optional reason field
+// when the backend requires one (e.g. rejecting a center).
 export function ConfirmDialog({
   title,
   description,
   onClose,
   onConfirm,
-  danger = false
+  danger = false,
+  reasonLabel
 }) {
   const {
     t,
@@ -165,12 +167,18 @@ export function ConfirmDialog({
   } = useLanguage();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [reason, setReason] = useState('');
   // Runs the confirmed action and shows its error.
   async function confirm() {
+    // The backend refuses a rejection without a reason, so catch it here first.
+    if (reasonLabel && !reason.trim()) {
+      setError(t('center.error.required'));
+      return;
+    }
     setBusy(true);
     setError('');
     try {
-      await onConfirm();
+      await onConfirm(reasonLabel ? reason.trim() : undefined);
       onClose();
     } catch (failure) {
       setError(t(`center.error.${failure.code || 'network'}`));
@@ -183,6 +191,7 @@ export function ConfirmDialog({
       <Button variant={danger ? 'danger' : 'primary'} loading={busy} onClick={confirm}>{t('center.confirm')}</Button>
     </>}>
     <p>{description}</p>
+    {reasonLabel && <FormField label={reasonLabel} as="textarea" required value={reason} onChange={setReason} disabled={busy} />}
     <Feedback error>{error}</Feedback>
   </Modal>;
 }
